@@ -405,22 +405,22 @@ Create the remote repository and replace the README placeholder with the real cl
 
 ### Tasks
 
-- [ ] Detect the authenticated GitHub account with `gh`.
-- [ ] Confirm repository name; default to `newsroom-agent-kit` unless unavailable or the user chose another name.
-- [ ] If public/private visibility has not been decided, ask the user at this phase boundary before remote creation. Recommend `public` for frictionless cross-machine installation, but do not assume consent to publish.
-- [ ] Create the repository using `gh repo create`.
-- [ ] Ensure the GitHub repository description is agent-agnostic and centered on `.agents` / portable Agent Skills, not OpenCode or Cline.
-- [ ] If repository topics are added, prefer standard/domain terms (`agent-skills`, `agents`, `community-management`, `content-workflow`, etc.); do not make vendor names the primary identity.
-- [ ] Add the new GitHub remote to this previously local-only repository.
-- [ ] Replace the README repository URL placeholder with the actual HTTPS GitHub URL.
-- [ ] Ensure the README copy/paste prompt contains the actual repository URL.
-- [ ] Commit the final URL/README update.
-- [ ] Push the complete history.
-- [ ] Verify the default branch and remote state.
-- [ ] Verify the README renders correctly on GitHub.
-- [ ] Verify the repository does not contain secrets or machine-specific backups.
-- [ ] Record the final repository URL in docs.
-- [ ] Verify `git status` is clean and local HEAD matches the remote branch.
+- [x] Detect the authenticated GitHub account with `gh`.
+- [x] Confirm repository name; default to `newsroom-agent-kit` unless unavailable or the user chose another name.
+- [x] If public/private visibility has not been decided, ask the user at this phase boundary before remote creation. Recommend `public` for frictionless cross-machine installation, but do not assume consent to publish.
+- [x] Create the repository using `gh repo create`.
+- [x] Ensure the GitHub repository description is agent-agnostic and centered on `.agents` / portable Agent Skills, not OpenCode or Cline.
+- [x] If repository topics are added, prefer standard/domain terms (`agent-skills`, `agents`, `community-management`, `content-workflow`, etc.); do not make vendor names the primary identity.
+- [x] Add the new GitHub remote to this previously local-only repository.
+- [x] Replace the README repository URL placeholder with the actual HTTPS GitHub URL.
+- [x] Ensure the README copy/paste prompt contains the actual repository URL.
+- [x] Commit the final URL/README update.
+- [x] Push the complete history.
+- [x] Verify the default branch and remote state.
+- [x] Verify the README renders correctly on GitHub.
+- [x] Verify the repository does not contain secrets or machine-specific backups.
+- [x] Record the final repository URL in docs.
+- [x] Verify `git status` is clean and local HEAD matches the remote branch.
 
 ### Exit criteria
 
