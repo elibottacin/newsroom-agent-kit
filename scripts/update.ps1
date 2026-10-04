@@ -43,6 +43,7 @@ $manifest = Get-KitManifest
 $t = Get-KitTargetPaths -TargetRoot $TargetRoot
 
 $entries = @($manifest.core) + @($manifest.optional) + @($manifest.vendor)
+$script:FetchFailed = New-Object System.Collections.ArrayList
 
 Write-KitLog 'Upstream review' 'INFO'
 Write-KitLog "  cache: $(Format-KitPath $t.FetchCache)"
@@ -69,7 +70,7 @@ foreach ($e in $entries) {
     $repo = $e.source.repo
     if (-not $byRepo.ContainsKey($repo)) {
         $byRepo[$repo] = [pscustomobject]@{
-            repo = $repo; ref = $e.source.ref; license = $e.source.license
+            repo = $repo; ref = $e.source.ref; license = $e.source.license; repoEntry = $e
             fetch = New-Object System.Collections.ArrayList
             vendor = New-Object System.Collections.ArrayList
         }
@@ -102,15 +103,27 @@ if ($Fetch) {
         & git -C $dest fetch --quiet --depth 1 origin $r.ref 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) {
             Write-KitLog "    FAILED to fetch ref $($r.ref). Check the ref still exists upstream." 'ERROR'
+            [void]$script:FetchFailed.Add($r.repo)
             continue
         }
         & git -C $dest checkout --quiet FETCH_HEAD 2>&1 | Out-Null
         if ($LASTEXITCODE -ne 0) {
             Write-KitLog "    FAILED to check out $($r.ref.Substring(0,7))." 'ERROR'
+            [void]$script:FetchFailed.Add($r.repo)
             continue
         }
-        $n = @(Get-ChildItem -LiteralPath $dest -Recurse -Filter 'SKILL.md' -File).Count
-        Write-KitLog "    fetched, $n SKILL.md files on disk" 'OK'
+        # Do not trust $LASTEXITCODE alone. It survives from the previous loop iteration,
+        # so a failure here can be reported as success. Check the worktree actually exists.
+        $n = 0
+        if (Test-Path -LiteralPath $dest) {
+            $n = @(Get-ChildItem -LiteralPath $dest -Recurse -Filter 'SKILL.md' -File).Count
+        }
+        if ($n -eq 0) {
+            Write-KitLog "    FAILED: checkout produced no worktree at $(Format-KitPath $dest)" 'ERROR'
+            [void]$script:FetchFailed.Add($r.repo)
+        } else {
+            Write-KitLog "    fetched, $n SKILL.md files on disk" 'OK'
+        }
     }
     Write-KitLog ''
 }
@@ -177,5 +190,10 @@ Write-KitLog '                        update PROVENANCE.md, confirm no third-par
 Write-KitLog '                        reintroduced, then run install.ps1 -Force.'
 Write-KitLog '                        Never copy an upstream copy over a vendored one.'
 Write-KitLog ''
+if ($script:FetchFailed.Count -gt 0) {
+    Write-KitLog ('Some repositories could not be fetched: ' + ($script:FetchFailed -join ', ')) 'ERROR'
+    Write-KitLog 'install.ps1 will report those skills as missing. Retry, or check network access.' 'ERROR'
+    exit 1
+}
 Write-KitLog 'Nothing was changed.' 'OK'
 exit 0

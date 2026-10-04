@@ -1,11 +1,16 @@
 # Environment discovery — Phase 1
 
+This file is a **record of one bootstrap machine**, kept as evidence for the compatibility
+decisions in `docs/architecture.md`. Paths use `%USERPROFILE%` and similar tokens rather than
+one person's absolute paths, so it reads correctly elsewhere. Expect it to differ from your
+own machine; `scripts\verify.ps1` reports the actual state on yours.
+
 Read-only discovery of the bootstrap machine. No global agent configuration was created,
 modified, moved, or deleted while producing this document.
 
 - Discovery date: 2026-10-04
-- Machine: `DESKTOP-R80Q450`
-- Project workspace: `C:\Users\Elisa\Proyectos\newsroom-agent-kit`
+- Machine: `<hostname>`
+- Project workspace: `%REPO_ROOT%`
 
 Everything below is either **observed on this machine** or **quoted from a cited source**.
 Anything inferred is labelled as inference.
@@ -62,38 +67,38 @@ This is decisive for the one proven compatibility exception (section 4).
 ## 2. Canonical root
 
 ```text
-%USERPROFILE%          = C:\Users\Elisa
-canonical root         = C:\Users\Elisa\.agents
+%USERPROFILE%          = %USERPROFILE%
+canonical root         = %USERPROFILE%\.agents
 canonical root exists? = NO
 ```
 
-`C:\Users\Elisa\.agents` does **not** exist yet. There is therefore **no pre-existing global
+`%USERPROFILE%\.agents` does **not** exist yet. There is therefore **no pre-existing global
 skill library and no pre-existing global `AGENTS.md`** to merge with or back up.
 
 ### Other agent-owned locations checked (all absent)
 
 ```text
-C:\Users\Elisa\.agents                              absent
-C:\Users\Elisa\.claude                              absent
-C:\Users\Elisa\.codex                               absent
-C:\Users\Elisa\.gemini                              absent
-C:\Users\Elisa\.cursor                              absent
-C:\Users\Elisa\AGENTS.md                           absent
-C:\Users\Elisa\.config\opencode\AGENTS.md          absent
-C:\Users\Elisa\.config\opencode\opencode.json      absent
-C:\Users\Elisa\.config\opencode\skills             absent
-C:\Users\Elisa\.config\opencode\plugin             absent
-C:\Users\Elisa\.config\opencode\agent              absent
-C:\Users\Elisa\.cline\skills                       absent
-C:\Users\Elisa\.cline\rules                        absent
-C:\Users\Elisa\Cline                               absent
-C:\Users\Elisa\Documents\Cline                     absent
+%USERPROFILE%\.agents                              absent
+%USERPROFILE%\.claude                              absent
+%USERPROFILE%\.codex                               absent
+%USERPROFILE%\.gemini                              absent
+%USERPROFILE%\.cursor                              absent
+%USERPROFILE%\AGENTS.md                           absent
+%USERPROFILE%\.config\opencode\AGENTS.md          absent
+%USERPROFILE%\.config\opencode\opencode.json      absent
+%USERPROFILE%\.config\opencode\skills             absent
+%USERPROFILE%\.config\opencode\plugin             absent
+%USERPROFILE%\.config\opencode\agent              absent
+%USERPROFILE%\.cline\skills                       absent
+%USERPROFILE%\.cline\rules                        absent
+%USERPROFILE%\Cline                               absent
+%USERPROFILE%\Documents\Cline                     absent
 ```
 
 **Conflict risk for the canonical install is currently zero.** The installer must still refuse
 unsafe overwrite, because a later run or another tool could create these paths.
 
-Note: OpenCode walks *up* from the workspace collecting `AGENTS.md`. `C:\Users\Elisa\AGENTS.md` is
+Note: OpenCode walks *up* from the workspace collecting `AGENTS.md`. `%USERPROFILE%\AGENTS.md` is
 absent, so no stray home-level instruction file will shadow anything.
 
 ---
@@ -142,16 +147,16 @@ Machine `PATH` contains only the WindowsApps user entry; Git is on the machine `
 Reported paths (`opencode debug paths`):
 
 ```text
-home    C:\Users\Elisa
-data    C:\Users\Elisa\.local\share\opencode
-cache   C:\Users\Elisa\.cache\opencode
-config  C:\Users\Elisa\.config\opencode
-state   C:\Users\Elisa\.local\state\opencode
-tmp     C:\Users\Elisa\AppData\Local\Temp\opencode
+home    %USERPROFILE%
+data    %USERPROFILE%\.local\share\opencode
+cache   %USERPROFILE%\.cache\opencode
+config  %USERPROFILE%\.config\opencode
+state   %USERPROFILE%\.local\state\opencode
+tmp     %USERPROFILE%\AppData\Local\Temp\opencode
 ```
 
 Reported configuration source (`opencode debug config`): exactly one —
-`C:\Users\Elisa\.config\opencode` (no `opencode.json` present).
+`%USERPROFILE%\.config\opencode` (no `opencode.json` present).
 
 **Global skills — native.** Official documentation, *Agent Skills*, last updated 2026-10-03,
 lists among the searched locations:
@@ -187,7 +192,7 @@ No OpenCode skill adapter is needed.
 compatibility artifact, and only for the global instruction file:
 
 ```text
-NTFS hard link: C:\Users\Elisa\.config\opencode\AGENTS.md  ->  C:\Users\Elisa\.agents\AGENTS.md
+NTFS hard link: %USERPROFILE%\.config\opencode\AGENTS.md  ->  %USERPROFILE%\.agents\AGENTS.md
 ```
 
 - A hard link is chosen because it is the only single-file link mechanism that works on this
@@ -265,7 +270,7 @@ test behavior, not documentation.
 Cline also resolves a global *agent plugin* search path at:
 
 ```text
-C:\Users\Elisa\.agents\plugins
+%USERPROFILE%\.agents\plugins
 ```
 
 The kit must not create or populate that directory. It stays reserved for Cline's agent-plugin

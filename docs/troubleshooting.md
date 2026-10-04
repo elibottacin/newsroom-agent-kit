@@ -244,7 +244,7 @@ Windows ships a `python.exe` alias stub in `WindowsApps` that takes priority in 
 shell. The real interpreter, once installed, is:
 
 ```text
-C:\Users\Elisa\AppData\Local\Programs\Python\Python313\python.exe
+%USERPROFILE%\AppData\Local\Programs\Python\Python313\python.exe
 ```
 
 Its installer prepends that directory to the user `PATH` ahead of the stub, so **open a new session**

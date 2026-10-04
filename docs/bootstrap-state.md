@@ -1,10 +1,13 @@
 # Repository bootstrap state
 
+A record of the bootstrap machine at the start of the project. Absolute user paths are
+written as `%USERPROFILE%` tokens for portability.
+
 Recorded at the end of Phase 0, before any machine-level agent configuration was touched.
 
 ## Workspace
 
-- Project path: `C:\Users\Elisa\Proyectos\newsroom-agent-kit`
+- Project path: `%REPO_ROOT%`
 - Target OS: Windows
 - Canonical global root to be used later: `%USERPROFILE%\.agents` (resolved in Phase 1)
 - The path is dedicated to this project; it contained only bootstrap files at Phase 0.

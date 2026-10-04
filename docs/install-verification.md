@@ -1,10 +1,14 @@
 # Install verification — Phase 4
 
+This file is a **record of one bootstrap machine's install**, kept as evidence. Paths use
+`%USERPROFILE%` tokens so they read correctly elsewhere. Your machine may differ; run
+`scripts\verify.ps1` to see its real state.
+
 What was actually observed when the setup was installed on this machine, as opposed to what was
 predicted. Everything here was measured after the install.
 
 - Date: 2026-10-04
-- Machine: `DESKTOP-R80Q450`, Windows 11 Home Single Language `10.0.26200`
+- Machine: `<hostname>`, Windows 11 Home Single Language `10.0.26200`
 - Canonical root: `%USERPROFILE%\.agents` — created by this phase
 - Raw verifier output: `diagnostics/verify-phase4.txt` (git-ignored, contains no secrets and no
   absolute user paths)
@@ -41,7 +45,7 @@ New skills are available in addition to those previously listed:
   <skill><id>accessibility-compliance</id> ... 40 entries ...
 
 New instructions apply from:
-Instructions from: C:\Users\Elisa\.config\opencode\AGENTS.md
+Instructions from: %USERPROFILE%\.config\opencode\AGENTS.md
 ```
 
 Two conclusions, both behavioural rather than inferred:
@@ -178,7 +182,7 @@ alias stub, so in any new session `python` resolves to the real interpreter rath
 store stub. Verified directly:
 
 ```text
-C:\Users\Elisa\AppData\Local\Programs\Python\Python313\python.exe  ->  Python 3.13.15
+%USERPROFILE%\AppData\Local\Programs\Python\Python313\python.exe  ->  Python 3.13.15
 ```
 
 Neither runtime is needed by the installed setup: all 40 skills are markdown, `verify.ps1` confirms

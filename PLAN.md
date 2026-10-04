@@ -354,24 +354,24 @@ Turn the working setup into something another coding agent can install on anothe
 
 ### Tasks
 
-- [ ] Remove machine-specific state from tracked files.
-- [ ] Confirm no secrets, tokens, cookies, personal file contents, or backups are tracked.
-- [ ] Ensure upstream source attribution and licenses are handled correctly.
-- [ ] Decide whether third-party skills are vendored, fetched, or pinned by manifest based on license/security/maintainability.
-- [ ] Make installer bootstrap missing non-sensitive prerequisites where appropriate.
-- [ ] Document minimum prerequisites in `README.md`.
-- [ ] Make the README/project identity explicitly agent-agnostic: a `.agents` / Agent Skills setup for any compatible coding agent.
-- [ ] Do not title or describe the project as being "for OpenCode", "for Cline", or "for OpenCode and Cline".
-- [ ] Add a concise compatibility section saying **tested with OpenCode and Cline**, while distinguishing native shared-standard support from any tool-specific exception.
-- [ ] Add an installation prompt to `README.md` that another user can paste into a coding agent.
-- [ ] The installation prompt must instruct the agent to clone the repository URL, inspect `README.md`/installation instructions, install to `%USERPROFILE%\.agents`, preserve existing config, create required compatibility adapters, run verification, and report results.
-- [ ] Use a temporary placeholder for the final repository URL until GitHub publication.
-- [ ] Add manual install instructions as a fallback.
-- [ ] Add update and uninstall instructions.
-- [ ] Add architecture and security notes concise enough for a non-developer operator.
-- [ ] Test the bootstrap flow from a clean temporary directory as far as practical.
-- [ ] Commit portability work and checkbox updates.
-- [ ] Verify `git status` is clean.
+- [x] Remove machine-specific state from tracked files.
+- [x] Confirm no secrets, tokens, cookies, personal file contents, or backups are tracked.
+- [x] Ensure upstream source attribution and licenses are handled correctly.
+- [x] Decide whether third-party skills are vendored, fetched, or pinned by manifest based on license/security/maintainability.
+- [x] Make installer bootstrap missing non-sensitive prerequisites where appropriate.
+- [x] Document minimum prerequisites in `README.md`.
+- [x] Make the README/project identity explicitly agent-agnostic: a `.agents` / Agent Skills setup for any compatible coding agent.
+- [x] Do not title or describe the project as being "for OpenCode", "for Cline", or "for OpenCode and Cline".
+- [x] Add a concise compatibility section saying **tested with OpenCode and Cline**, while distinguishing native shared-standard support from any tool-specific exception.
+- [x] Add an installation prompt to `README.md` that another user can paste into a coding agent.
+- [x] The installation prompt must instruct the agent to clone the repository URL, inspect `README.md`/installation instructions, install to `%USERPROFILE%\.agents`, preserve existing config, create required compatibility adapters, run verification, and report results.
+- [x] Use a temporary placeholder for the final repository URL until GitHub publication.
+- [x] Add manual install instructions as a fallback.
+- [x] Add update and uninstall instructions.
+- [x] Add architecture and security notes concise enough for a non-developer operator.
+- [x] Test the bootstrap flow from a clean temporary directory as far as practical.
+- [x] Commit portability work and checkbox updates.
+- [x] Verify `git status` is clean.
 
 ### Exit criteria
 
