@@ -440,20 +440,20 @@ Confirm the project satisfies its original objective and document future mainten
 
 ### Tasks
 
-- [ ] Run the complete verification suite.
-- [ ] Verify all core skills in the manifest resolve to expected sources.
-- [ ] Verify global setup remains canonical under `%USERPROFILE%\.agents`.
-- [ ] Verify OpenCode and Cline both consume canonical `.agents` skills natively.
-- [ ] Verify any remaining tool-specific compatibility mechanism exists only where native `.agents` support is actually missing.
-- [ ] Verify README install/update/uninstall instructions match reality.
-- [ ] Review optional MCP/plugin integrations and ensure none are presented as required.
-- [ ] Document how to add another coding agent without duplicating canonical skills.
-- [ ] Document how to add/remove a skill safely.
-- [ ] Document the skill-update review process.
-- [ ] Ensure the final plan state accurately reflects completed work.
-- [ ] Commit final verification/documentation.
-- [ ] Push final commit.
-- [ ] Verify local and remote working trees are clean/in sync.
+- [x] Run the complete verification suite.
+- [x] Verify all core skills in the manifest resolve to expected sources.
+- [x] Verify global setup remains canonical under `%USERPROFILE%\.agents`.
+- [x] Verify OpenCode and Cline both consume canonical `.agents` skills natively.
+- [x] Verify any remaining tool-specific compatibility mechanism exists only where native `.agents` support is actually missing.
+- [x] Verify README install/update/uninstall instructions match reality.
+- [x] Review optional MCP/plugin integrations and ensure none are presented as required.
+- [x] Document how to add another coding agent without duplicating canonical skills.
+- [x] Document how to add/remove a skill safely.
+- [x] Document the skill-update review process.
+- [x] Ensure the final plan state accurately reflects completed work.
+- [x] Commit final verification/documentation.
+- [x] Push final commit.
+- [x] Verify local and remote working trees are clean/in sync.
 
 ### Definition of Done
 

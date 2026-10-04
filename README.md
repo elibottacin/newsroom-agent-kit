@@ -91,6 +91,15 @@ short; detail belongs in skills.
 | Administrator rights | **Not needed.** Symbolic links fail without elevation; this kit uses hard links, which do not need it. |
 | Node.js / Python | **Not needed.** The installed set contains zero executable files. |
 
+
+Python and Node.js can be installed on demand if you want them for your own tooling:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites
+```
+
+The skill set does not need either. winget may raise a UAC prompt; if you decline it, nothing breaks.
+
 Because the default execution policy is `Restricted`, **every command needs `-ExecutionPolicy Bypass`**.
 Without it Windows refuses to run the script. This is the single most common reason the installer
 appears to do nothing.
@@ -186,6 +195,22 @@ fork, because that is exactly what reintroduces the third-party product referenc
 - One selected skill, `og-image`, comes from a repository with **no licence file**. It is fetched at
   install time rather than redistributed here, but review `manifest/skills.json` before installing.
 
+## Maintenance status
+
+This repository is published as a **working snapshot for one person's use, not as a maintained shared
+project.**
+
+- The 27 vendored forks are **frozen**. When their upstream moves, they will not be updated here. They
+  keep working — they are self-contained markdown — but they gain no upstream improvements.
+- The 13 pinned skills do not self-update either. The pin guarantees you get the reviewed artifact; it
+  also means upstream fixes arrive only if someone bumps it.
+- Issues and pull requests are welcome, but **no response, review or merge is promised**, and nothing
+  is scheduled for review.
+
+Run `update.ps1 -CheckRemote` to see how far behind upstream you are. If you fork this, budget for the
+27 hand-merged forks or drop the ones you do not use — see
+[`docs/maintaining.md`](docs/maintaining.md), which covers retiring a skill, adding one, and adding
+another coding agent.
 ## Documentation
 
 | File | What it answers |

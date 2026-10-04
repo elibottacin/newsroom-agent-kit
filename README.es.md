@@ -90,6 +90,13 @@ deliberadamente corto; el detalle va en las skills.
 | Git | Solo para clonar este repositorio y traer las skills fijadas por commit |
 | Permisos de administrador | **No hacen falta.** Los enlaces simbólicos fallan sin elevación; este kit usa hard links, que no la necesitan. |
 | Node.js / Python | **No hacen falta.** El conjunto instalado no tiene archivos ejecutables. |
+Python y Node.js se pueden instalar bajo demanda si los querés para tus propias herramientas:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites
+```
+
+El conjunto de skills no necesita ninguno. winget puede mostrar un aviso de UAC; si lo rechazás, nada se rompe.
 
 Como la política de ejecución por defecto es `Restricted`, **todos los comandos necesitan
 `-ExecutionPolicy Bypass`**. Sin eso Windows se niega a ejecutar el script. Es el motivo más común de
@@ -180,6 +187,23 @@ exactamente lo que reintroduce las referencias al producto de terceros que el fo
   el momento de instalar en vez de redistribuirse acá, pero revisá `manifest/skills.json` antes de
   instalar.
 
+## Estado de mantenimiento
+
+Este repositorio se publica como una **instantánea funcional para el uso de una persona, no como un
+proyecto compartido con mantenimiento.**
+
+- Los 27 forks vendorizados están **congelados**. Cuando su upstream se mueva, no se van a actualizar
+  acá. Siguen funcionando — son markdown autocontenido — pero no ganan mejoras de upstream.
+- Las 13 skills fijadas por commit tampoco se actualizan solas. El pin garantiza que obtenés el
+  artefacto revisado; también significa que las correcciones de upstream llegan solo si alguien lo
+  actualiza.
+- Los issues y pull requests son bienvenidos, pero **no se promete respuesta, revisión ni merge**, y no
+  hay nada agendado para revisar.
+
+Corré `update.ps1 -CheckRemote` para ver cuán atrás está upstream. Si hacés un fork de esto, presupuestá
+los 27 forks que hay que mergear a mano o sacá los que no uses — mirá
+[`docs/maintaining.md`](docs/maintaining.md), que cubre cómo dar de baja una skill, cómo agregar una, y
+cómo sumar otro agente de programación.
 ## Documentación
 
 | Archivo | Qué responde |
