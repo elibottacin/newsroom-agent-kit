@@ -7,7 +7,7 @@ compartida de `.agents`. Instala un conjunto curado de skills de redacción peri
 management, redes, edición y diseño web en `%USERPROFILE%\.agents`, de modo que **cualquier agente de
 programación que soporte la convención compartida los detecta** — no una herramienta en particular.
 
-**Probado con OpenCode y Cline.** Son objetivos de validación, no el punto del proyecto.
+**Probado con OpenCode, Cline y Freebuff.** Son objetivos de validación, no el punto del proyecto.
 
 ---
 
@@ -37,7 +37,7 @@ globales. Son dos propiedades distintas, y solo la segunda decide si hace falta 
 |---|---|
 | Formato Agent Skills (`SKILL.md`) | Amplio: OpenCode, Cline, Cursor, GitHub Copilot, VS Code, Claude Code, Codex, Gemini CLI, Warp, Zed, Kiro, Roo Code, Factory, Amp, Goose y otros |
 | Skills globales desde `%USERPROFILE%\.agents\skills` | OpenCode, Cline, Zed, Warp y varios otros lo leen de forma nativa |
-| Instrucciones globales desde `%USERPROFILE%\.agents\AGENTS.md` | Cline lo lee de forma nativa |
+| Instrucciones globales desde `%USERPROFILE%\.agents\AGENTS.md` | Cline y Freebuff lo leen de forma nativa |
 
 **Existe una única excepción, y está acotada a un solo archivo.** OpenCode lee las instrucciones
 globales únicamente desde `%USERPROFILE%\.config\opencode\AGENTS.md`. Este kit resuelve eso con un
@@ -45,7 +45,11 @@ globales únicamente desde `%USERPROFILE%\.config\opencode\AGENTS.md`. Este kit 
 un solo archivo con dos nombres y una sola fuente de verdad. No es una copia, y se elimina
 automáticamente el día que OpenCode soporte la ruta canónica de forma nativa.
 
-Las skills **no** necesitan ningún puente en ninguno de los dos agentes probados.
+Las skills **no** necesitan ningún puente en ninguno de los tres agentes confirmados acá.
+
+Un tercer agente, **Freebuff Desktop 0.0.158**, también se verificó leyendo tanto las skills como las
+instrucciones globales directamente desde la ubicación canónica, sin ninguna configuración. Ese es
+justo el punto de la arquitectura: no depende de ningún vendor en particular.
 
 `docs/architecture.md` tiene la matriz completa, incluido qué agentes necesitarían un link de
 vendor documentado si agregás uno.

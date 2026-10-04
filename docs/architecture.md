@@ -97,7 +97,14 @@ determines whether this kit needs a compatibility step.
 | GitHub Copilot | yes | `~/.copilot/skills/` | documented vendor link |
 | Claude Code | yes | `~/.claude/skills/` | documented vendor link |
 | Codex, Cursor, Kiro, Roo Code, Factory, Amp, OpenHands, Goose, Mistral Vibe, Junie, TRAE | yes | vendor-specific | documented vendor link |
-| Freebuff Desktop 0.0.158 (installed here) | **unverified** | **unverified** | unknown — verify before claiming support |
+| Freebuff Desktop 0.0.158 (installed here) | yes | `~/.agents/skills/` and `~/.agents/AGENTS.md` | none |
+
+Freebuff was verified by the user on 2026-10-04, after the Phase 4 install: both the 40 skills and the
+global instructions were picked up from the canonical location, with no configuration. That was
+observed on the first attempt and needed nothing beyond the canonical install.
+
+That makes **three** agents confirmed reading this setup natively from `%USERPROFILE%\.agents`, which
+is the useful signal: the architecture does not depend on any one vendor.
 
 Global-path data for agents other than the two tested implementations is taken from the `skills`
 CLI's supported-agent table, not from each agent's own documentation. Treat it as indicative and

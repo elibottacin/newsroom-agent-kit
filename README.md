@@ -7,7 +7,7 @@ A portable, global **Agent Skills** setup for Windows, built on the shared
 social, editorial and web-design skills into `%USERPROFILE%\.agents`, so **any coding
 agent that supports the shared convention picks them up** — not one specific tool.
 
-**Tested with OpenCode and Cline.** They are validation targets, not the point.
+**Tested with OpenCode, Cline and Freebuff.** They are validation targets, not the point.
 
 ---
 
@@ -37,7 +37,7 @@ different properties, and only the second one decides whether an installation ne
 |---|---|
 | Agent Skills format (`SKILL.md`) | Broad: OpenCode, Cline, Cursor, GitHub Copilot, VS Code, Claude Code, Codex, Gemini CLI, Warp, Zed, Kiro, Roo Code, Factory, Amp, Goose and others |
 | Global skills from `%USERPROFILE%\.agents\skills` | OpenCode, Cline, Zed, Warp and several others read this natively |
-| Global instructions from `%USERPROFILE%\.agents\AGENTS.md` | Cline reads this natively |
+| Global instructions from `%USERPROFILE%\.agents\AGENTS.md` | Cline and Freebuff read this natively |
 
 **One exception exists, and it is scoped to a single file.** OpenCode reads global instructions only
 from `%USERPROFILE%\.config\opencode\AGENTS.md`. This kit bridges that with a single **NTFS hard
@@ -45,7 +45,11 @@ link** to the canonical `%USERPROFILE%\.agents\AGENTS.md`, so there is one file 
 one source of truth. It is not a copy, and it is removed automatically the day OpenCode supports the
 canonical path natively.
 
-Skills need **no** bridge in either tested agent.
+Skills need **no** bridge in any of the three agents confirmed here.
+
+A third agent, **Freebuff Desktop 0.0.158**, was also verified reading both the skills and the global
+instructions straight from the canonical location, with no configuration at all. That is the point of
+the architecture: it does not depend on any one vendor.
 
 `docs/architecture.md` holds the full matrix, including which agents would need a documented vendor
 link if you add one.
