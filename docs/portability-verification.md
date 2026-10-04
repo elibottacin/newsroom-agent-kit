@@ -11,7 +11,7 @@ What was checked to decide this repository is safe to publish and install on ano
 | Check | Result |
 |---|---|
 | Tracked files | 232 |
-| Absolute user paths (`C:\Users\...`) | **0** |
+| Absolute user paths of the form `<drive>\Users\<name>\...` | **0** |
 | Machine hostname | **0** |
 | Passwords, tokens, API keys, PATs | **0** |
 | Machine-specific backups or diagnostic dumps | **0** tracked; `diagnostics/` is git-ignored |
