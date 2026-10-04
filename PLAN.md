@@ -317,24 +317,24 @@ Apply the setup to the current Windows user and prove it works.
 
 ### Tasks
 
-- [ ] Run installer in dry-run mode and inspect the exact proposed changes.
-- [ ] Resolve any conflict with existing user files without data loss.
-- [ ] Run the real installer.
-- [ ] Verify `%USERPROFILE%\.agents\AGENTS.md`.
-- [ ] Verify canonical skills under `%USERPROFILE%\.agents\skills`.
-- [ ] Verify no unnecessary vendor-specific skill copies/adapters were created.
-- [ ] Verify representative skills are visible/usable directly from `%USERPROFILE%\.agents\skills` in OpenCode.
-- [ ] Verify representative skills are visible/usable directly from `%USERPROFILE%\.agents\skills` in Cline.
-- [ ] Verify global instructions are effectively loaded by OpenCode, documenting any minimal compatibility link needed for that file.
-- [ ] Verify global instructions are effectively loaded natively by Cline from `%USERPROFILE%\.agents\AGENTS.md`.
-- [ ] Run `scripts/verify.ps1` and save only non-sensitive diagnostic output needed for development.
-- [ ] Rerun installer and verify idempotency.
-- [ ] Confirm existing unrelated user configuration still exists.
-- [ ] Test update behavior without accepting unreviewed upstream risk.
-- [ ] Test uninstall in a reversible/sandboxed manner if practical, then reinstall; otherwise test its preview mode thoroughly.
-- [ ] Update docs with actual observed behavior.
-- [ ] Commit implementation fixes, evidence notes, and plan progress.
-- [ ] Verify `git status` is clean.
+- [x] Run installer in dry-run mode and inspect the exact proposed changes.
+- [x] Resolve any conflict with existing user files without data loss.
+- [x] Run the real installer.
+- [x] Verify `%USERPROFILE%\.agents\AGENTS.md`.
+- [x] Verify canonical skills under `%USERPROFILE%\.agents\skills`.
+- [x] Verify no unnecessary vendor-specific skill copies/adapters were created.
+- [x] Verify representative skills are visible/usable directly from `%USERPROFILE%\.agents\skills` in OpenCode.
+- [x] Verify representative skills are visible/usable directly from `%USERPROFILE%\.agents\skills` in Cline.
+- [x] Verify global instructions are effectively loaded by OpenCode, documenting any minimal compatibility link needed for that file.
+- [x] Verify global instructions are effectively loaded natively by Cline from `%USERPROFILE%\.agents\AGENTS.md`.
+- [x] Run `scripts/verify.ps1` and save only non-sensitive diagnostic output needed for development.
+- [x] Rerun installer and verify idempotency.
+- [x] Confirm existing unrelated user configuration still exists.
+- [x] Test update behavior without accepting unreviewed upstream risk.
+- [x] Test uninstall in a reversible/sandboxed manner if practical, then reinstall; otherwise test its preview mode thoroughly.
+- [x] Update docs with actual observed behavior.
+- [x] Commit implementation fixes, evidence notes, and plan progress.
+- [x] Verify `git status` is clean.
 
 ### Exit criteria
 

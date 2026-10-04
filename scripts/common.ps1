@@ -281,7 +281,27 @@ function Get-KitSkillSource {
         }
         return [pscustomobject]@{ Path = $vendored; Mode = 'vendor'; Found = $false }
     }
-    $ref7 = $Entry.source.ref.Substring(0, 7)
-    $cached = Join-Path (Join-Path $Targets.FetchCache ($Entry.source.repo + '@' + $ref7)) $Entry.source.subdir
+    $cached = Join-Path (Get-KitCacheDir -Entry $Entry -Targets $Targets) $Entry.source.subdir
     return [pscustomobject]@{ Path = $cached; Mode = 'fetch'; Found = (Test-Path -LiteralPath $cached) }
+}
+function Get-KitCacheDir {
+    <#
+        The single place that decides where a pinned upstream commit lives on disk.
+
+        Layout: <FetchCache>/<owner>/<repo>@<short-ref>
+
+        The repository field is "owner/repo", and Windows treats "/" as a separator, so this
+        is deliberately two levels deep. install.ps1, update.ps1 and verify.ps1 must all
+        agree on this, which is why they call this function rather than building the path
+        themselves.
+    #>
+    param([Parameter(Mandatory)]$Entry, [Parameter(Mandatory)]$Targets)
+
+    if (-not $Entry.source) { return $null }
+    $ref = $Entry.source.ref
+    if ($ref.Length -gt 7) { $ref = $ref.Substring(0, 7) }
+    $leaf = ($Entry.source.repo + '@' + $ref)
+    # normalise "/" to "\" so the result is unambiguous on Windows
+    $leaf = $leaf.Replace('/', [System.IO.Path]::DirectorySeparatorChar)
+    return (Join-Path $Targets.FetchCache $leaf)
 }

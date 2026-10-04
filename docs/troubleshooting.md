@@ -221,6 +221,38 @@ informational. Nothing is updated until you change the pin.
 
 ---
 
+### Prerequisites: Python installed, Node.js not
+
+`install.ps1 -InstallPrerequisites` installs `Python.Python.3.13` and `OpenJS.NodeJS.LTS` through
+winget. On this machine:
+
+- **Python 3.13.15 installed successfully**, along with the Python Launcher.
+- **Node.js was not installed.** winget returned exit code `1602`
+  (`ERROR_INSTALL_USEREXIT`), meaning the installer was cancelled — normally a declined or timed-out
+  UAC prompt.
+
+Neither runtime is needed. All 40 installed skills are markdown and `verify.ps1` confirms zero
+executable files. To finish the Node.js install, accept the UAC prompt when it appears, or run:
+
+```powershell
+winget install --id OpenJS.NodeJS.LTS -e
+```
+
+### `python` opens the Microsoft Store instead of running
+
+Windows ships a `python.exe` alias stub in `WindowsApps` that takes priority in an already-open
+shell. The real interpreter, once installed, is:
+
+```text
+C:\Users\Elisa\AppData\Local\Programs\Python\Python313\python.exe
+```
+
+Its installer prepends that directory to the user `PATH` ahead of the stub, so **open a new session**
+and `python --version` resolves correctly. To check immediately without restarting:
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\Python\Python313\python.exe" --version
+```
 ## Environment reference
 
 From `docs/environment.md`, these are the machine facts that shape the tooling:

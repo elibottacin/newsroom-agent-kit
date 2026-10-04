@@ -230,6 +230,8 @@ Phase 1 found neither runtime present. The user asked for both to be installed. 
 -InstallPrerequisites` installs `Python.Python.3.13` and `OpenJS.NodeJS.LTS` through `winget`, off by
 default and never run automatically.
 
+Outcome on 2026-10-04: Python 3.13.15 installed; Node.js **not** installed, because winget returned exit code 1602 (the UAC prompt was declined). Either runtime is optional.
+
 This enlarges the supply-chain surface of the machine. Two points bound the risk:
 
 - The core remains Node-free. All 40 installed skills are markdown. Neither OpenCode's CLI nor

@@ -88,7 +88,7 @@ if ($Fetch) {
     foreach ($r in $byRepo.Values) {
         if ($r.fetch.Count -eq 0) { continue }
         $url = 'https://github.com/' + $r.repo + '.git'
-        $dest = Join-Path $t.FetchCache ($r.repo + '@' + $r.ref.Substring(0, 7))
+        $dest = Get-KitCacheDir -Entry $r.repoEntry -Targets $t
         Write-KitLog "  $($r.repo) @ $($r.ref.Substring(0,7))"
         if (Test-Path -LiteralPath (Join-Path $dest '.git')) {
             Write-KitLog '    already cached'
@@ -120,7 +120,10 @@ if ($Fetch) {
 if ($CheckRemote) {
     Write-KitLog 'Comparing pinned commits with upstream default branch' 'INFO'
     foreach ($r in $byRepo.Values) {
-        $remote = (& git ls-remote 'https://github.com/' + $r.repo + '.git' HEAD 2>$null)
+        # Build the URL in a variable. Written inline, PowerShell passes '+' as a literal
+        # argument to git instead of concatenating, and ls-remote then fails silently.
+        $url = 'https://github.com/' + $r.repo + '.git'
+        $remote = & git ls-remote $url HEAD 2>$null
         if (-not $remote) {
             Write-KitLog "  $($r.repo): could not query" 'WARN'
             continue
@@ -158,7 +161,7 @@ foreach ($e in $entries) {
             $note += 'vendored copy MISSING'
         }
     } else {
-        $cache = Join-Path $t.FetchCache ($e.source.repo + '@' + $e.source.ref)
+        $cache = Get-KitCacheDir -Entry $e -Targets $t
         $note += $(if (Test-Path -LiteralPath $cache) { 'cached' } else { 'not cached, run with -Fetch' })
     }
 

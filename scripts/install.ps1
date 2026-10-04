@@ -46,6 +46,7 @@ $script:Applied = New-Object System.Collections.ArrayList
 $script:Skipped = New-Object System.Collections.ArrayList
 $script:Conflicts = New-Object System.Collections.ArrayList
 $script:Backups = New-Object System.Collections.ArrayList
+$script:PrereqFailed = New-Object System.Collections.ArrayList
 $script:Stamp = Get-KitStamp
 
 function Add-Plan {
@@ -104,10 +105,33 @@ if ($InstallPrerequisites) {
                 Write-KitLog "would run: winget install --id $pkg -e --accept-package-agreements --accept-source-agreements" 'DRYRUN'
                 continue
             }
+            # winget exit codes that matter here:
+            #   0                installed
+            #   -1978335189 / 0x8A15002B  no applicable package found
+            #   -1978335212 / 0x8A150014  a newer version is already installed
+            #   1602              the installer was cancelled, usually a declined UAC prompt
             & winget install --id $pkg -e --accept-package-agreements --accept-source-agreements 2>&1 |
                 ForEach-Object { Write-KitLog "  $_" }
+            $code = $LASTEXITCODE
+            if ($code -eq 0) {
+                Write-KitLog "  $pkg installed" 'OK'
+            } elseif ($code -eq 1602) {
+                Write-KitLog "  $pkg NOT installed: exit 1602, the installer was cancelled." 'ERROR'
+                Write-KitLog '  This usually means a UAC prompt was declined or timed out. The kit does not need it.' 'WARN'
+                [void]$script:PrereqFailed.Add($pkg)
+            } elseif ($code -eq -1978335212 -or $code -eq -1978335189) {
+                Write-KitLog "  $pkg already installed or not applicable (exit $code)" 'OK'
+            } else {
+                Write-KitLog "  $pkg NOT installed: winget exit $code" 'ERROR'
+                [void]$script:PrereqFailed.Add($pkg)
+            }
         }
-        Write-KitLog 'Prerequisites installed. New tools appear in a new session only.' 'OK'
+        if ($script:PrereqFailed.Count -eq 0) {
+            Write-KitLog 'All requested prerequisites are present. New tools appear in a new session only.' 'OK'
+        } else {
+            Write-KitLog "Prerequisites incomplete: $($script:PrereqFailed -join ', ')" 'WARN'
+            Write-KitLog 'This does not affect the installed setup. The skills are markdown and need neither runtime.' 'WARN'
+        }
     }
 }
 
@@ -239,8 +263,21 @@ Write-KitLog 'OpenCode global-instruction compatibility' 'INFO'
 $linkPath = Join-Path $t.OpenCodeCfg 'AGENTS.md'
 if (-not (Test-Path -LiteralPath $t.OpenCodeCfg)) {
     Write-KitLog '~/.config/opencode does not exist. OpenCode is not configured on this machine; nothing to bridge.' 'INFO'
+} elseif (-not (Test-Path -LiteralPath $t.AgentsFile) -and $script:Planned.Count -eq 0) {
+    Write-KitLog 'Canonical ~/.agents/AGENTS.md is absent and will not be created by this run, so no bridge is needed.' 'WARN'
 } elseif (-not (Test-Path -LiteralPath $t.AgentsFile)) {
-    Write-KitLog 'Canonical ~/.agents/AGENTS.md is absent, so no link is needed yet.' 'WARN'
+    # The canonical file is planned above and will exist by the time this runs. Report the
+    # bridge in the dry run too, otherwise the preview under-reports by exactly one change.
+    Add-Plan 'create-link' '~/.config/opencode/AGENTS.md' 'hard link to canonical file'
+    if ($DryRun) {
+        Write-KitLog 'would create a hard link ~/.config/opencode/AGENTS.md -> ~/.agents/AGENTS.md (after the canonical file is written)' 'DRYRUN'
+    } else {
+        Invoke-Plan {
+            New-Item -ItemType HardLink -Path $linkPath -Target $t.AgentsFile | Out-Null
+        }.GetNewClosure()
+        Write-KitLog 'hard link created (single source of truth, reversible)' 'OK'
+        [void]$script:Applied.Add('hardlink')
+    }
 } else {
     $item = $null
     if (Test-Path -LiteralPath $linkPath) { $item = Get-Item -LiteralPath $linkPath -Force }
