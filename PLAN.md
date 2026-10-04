@@ -83,8 +83,8 @@ Discover the actual machine state without modifying global agent configuration.
 - [x] Prefer direct native `.agents` discovery over any link or adapter.
 - [x] Document all findings in `docs/environment.md`.
 - [x] Update `docs/architecture.md` with confirmed rather than assumed paths.
-- [ ] Commit discovery documentation and plan checkbox updates.
-- [ ] Verify `git status` is clean.
+- [x] Commit discovery documentation and plan checkbox updates.
+- [x] Verify `git status` is clean.
 
 ### Exit criteria
 
