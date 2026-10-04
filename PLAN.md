@@ -39,15 +39,15 @@ Establish a safe local project repository before making any machine-level change
 
 ### Tasks
 
-- [ ] Read `AGENTS.md`, this `PLAN.md`, `README.md`, and `docs/seed-discovery.md`.
-- [ ] Confirm the current workspace path and that it is intended for this project.
-- [ ] Check whether the workspace is already a Git repository.
-- [ ] If it is not a Git repository, run `git init`.
-- [ ] Confirm that there is **no Git remote** at this stage.
-- [ ] Add a minimal `.gitignore` covering transient logs, temp directories, local backups, caches, secrets, and machine-specific generated state.
-- [ ] Record the starting repository state.
-- [ ] Create an initial baseline commit containing the bootstrap files.
-- [ ] Verify `git status` is clean.
+- [x] Read `AGENTS.md`, this `PLAN.md`, `README.md`, and `docs/seed-discovery.md`.
+- [x] Confirm the current workspace path and that it is intended for this project.
+- [x] Check whether the workspace is already a Git repository.
+- [x] If it is not a Git repository, run `git init`.
+- [x] Confirm that there is **no Git remote** at this stage.
+- [x] Add a minimal `.gitignore` covering transient logs, temp directories, local backups, caches, secrets, and machine-specific generated state.
+- [x] Record the starting repository state in `docs/bootstrap-state.md`.
+- [x] Create an initial baseline commit containing the bootstrap files.
+- [x] Verify `git status` is clean.
 
 ### Exit criteria
 

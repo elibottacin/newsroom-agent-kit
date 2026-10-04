@@ -4,7 +4,10 @@ Bootstrap project for a portable, global, **agent-agnostic** AI-agent skill setu
 
 ## Status
 
-This repository starts as a local bootstrap workspace. Follow `PLAN.md` one phase at a time.
+Local-only bootstrap workspace. Follow `PLAN.md` one phase at a time.
+
+- Phase 0 (bootstrap and Git tracking) is complete; see `docs/bootstrap-state.md` for the recorded starting state.
+- The repository intentionally has **no remote** until the publication phase in `PLAN.md`.
 
 The final system will use:
 
