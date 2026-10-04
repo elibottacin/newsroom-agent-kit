@@ -40,6 +40,11 @@ state/
 # Throwaway upstream clones used for source review during discovery/research
 .research/
 
+# Local state written by agent desktop apps into the working directory
+.freebuff/
+.cline/
+.opencode/
+
 # Editor / OS noise
 .vscode/
 !.vscode/extensions.json
