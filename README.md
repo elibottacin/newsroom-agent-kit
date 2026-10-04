@@ -22,7 +22,17 @@ The project is **not an OpenCode or Cline-specific setup**.
 
 It targets the shared `.agents` / Agent Skills ecosystem and should work with any compatible coding agent. The initial implementation is **tested with OpenCode and Cline** because those are available on the bootstrap machine.
 
-Current seed evidence indicates both agents can consume global skills directly from `~/.agents/skills`. Cline also consumes `~/.agents/AGENTS.md`; OpenCode's global instruction behavior must be revalidated during the plan and may require a minimal compatibility link for that single file.
+Phase 1 confirmed behavior against the installed versions (see `docs/environment.md`):
+
+| Capability | OpenCode Desktop 2.0.22 | Cline Desktop 0.0.43 |
+|---|---|---|
+| Global `~/.agents/skills` | native | native |
+| Global `~/.agents/AGENTS.md` | **not read** — needs one hard link from `~/.config/opencode/AGENTS.md` | native |
+
+So the setup needs **no skill adapters** for either agent. Exactly one compatibility artifact is
+proven necessary, for the global instruction file only; it is a reversible NTFS hard link from
+OpenCode's documented global instruction path to the canonical file, and it will be removed as
+soon as OpenCode supports the canonical location natively.
 
 ## Operating instructions
 

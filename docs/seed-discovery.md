@@ -4,6 +4,18 @@ This file records leads gathered before the bootstrap agent starts. It is **not*
 
 Revalidate everything against current upstream documentation before installation.
 
+> **Status update after Phase 1.** The agent/platform assumptions below were revalidated against the
+> versions actually installed on this machine. Confirmed facts now live in `docs/environment.md`.
+> Summary of what changed:
+>
+> - OpenCode is installed as **OpenCode Desktop 2.0.22**; its global skills path `~/.agents/skills` is confirmed native.
+> - OpenCode's global instruction path gap is **confirmed and proven**, not merely suspected: v2 reads global instructions only from `~/.config/opencode/AGENTS.md`, has no `CLAUDE.md` fallback, and does not resolve the `instructions` array. A single reversible NTFS hard link is the chosen mechanism.
+> - Cline is installed as **Cline Desktop 0.0.43**, not the VS Code extension, so the cited `apps/vscode/...` source is not what runs here. The shipped runtime was inspected directly and does resolve both `~/.agents/skills` and `~/.agents/AGENTS.md`.
+> - Cline's public skills documentation lags behind its own runtime on the global `~/.agents/skills` location.
+> - Symbolic links are **not** usable on this machine (no elevation, Developer Mode off); hard links are. This determined the compatibility mechanism choice.
+>
+> The skill-candidate research below is still unvalidated and remains Phase 2 work.
+
 ## Portable Agent Skills foundation
 
 ### Agent Skills format

@@ -70,19 +70,19 @@ Discover the actual machine state without modifying global agent configuration.
 
 ### Tasks
 
-- [ ] Record Windows edition/build and PowerShell version.
-- [ ] Resolve `%USERPROFILE%` and the intended canonical root `%USERPROFILE%\.agents`.
-- [ ] Detect Git, Node.js, npm/npx, OpenCode, Cline, and GitHub CLI (`gh`) availability and versions.
-- [ ] Confirm OpenCode's current native support for `%USERPROFILE%\.agents\skills` and determine whether its global `AGENTS.md` still requires a separate documented path.
-- [ ] Confirm Cline's current native support for `%USERPROFILE%\.agents\skills` and `%USERPROFILE%\.agents\AGENTS.md`.
-- [ ] Locate any vendor-specific config paths only where needed for optional capabilities or a proven compatibility exception.
-- [ ] Inspect `%USERPROFILE%\.agents` if it already exists.
-- [ ] Inspect existing global agent rules/skills for conflicts or user-created content.
-- [ ] Do not modify, delete, relocate, or normalize existing global config during discovery.
-- [ ] Determine whether NTFS hardlinks/symlinks are viable only for any **proven instruction-file compatibility exception**; do not plan links for skills that are natively discovered from `.agents`.
-- [ ] Prefer direct native `.agents` discovery over any link or adapter.
-- [ ] Document all findings in `docs/environment.md`.
-- [ ] Update `docs/architecture.md` with confirmed rather than assumed paths.
+- [x] Record Windows edition/build and PowerShell version.
+- [x] Resolve `%USERPROFILE%` and the intended canonical root `%USERPROFILE%\.agents`.
+- [x] Detect Git, Node.js, npm/npx, OpenCode, Cline, and GitHub CLI (`gh`) availability and versions.
+- [x] Confirm OpenCode's current native support for `%USERPROFILE%\.agents\skills` and determine whether its global `AGENTS.md` still requires a separate documented path.
+- [x] Confirm Cline's current native support for `%USERPROFILE%\.agents\skills` and `%USERPROFILE%\.agents\AGENTS.md`.
+- [x] Locate any vendor-specific config paths only where needed for optional capabilities or a proven compatibility exception.
+- [x] Inspect `%USERPROFILE%\.agents` if it already exists.
+- [x] Inspect existing global agent rules/skills for conflicts or user-created content.
+- [x] Do not modify, delete, relocate, or normalize existing global config during discovery.
+- [x] Determine whether NTFS hardlinks/symlinks are viable only for any **proven instruction-file compatibility exception**; do not plan links for skills that are natively discovered from `.agents`.
+- [x] Prefer direct native `.agents` discovery over any link or adapter.
+- [x] Document all findings in `docs/environment.md`.
+- [x] Update `docs/architecture.md` with confirmed rather than assumed paths.
 - [ ] Commit discovery documentation and plan checkbox updates.
 - [ ] Verify `git status` is clean.
 
