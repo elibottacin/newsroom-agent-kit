@@ -1,546 +1,134 @@
 {
-  "$comment": "Curated Agent Skills manifest for the newsroom-agent-kit. Phase 2 discovery output. Nothing here is installed yet; Phase 3 builds the installer and Phase 4 applies it. Canonical destination is %USERPROFILE%\\.agents\\skills. Status values: core (installed by default), optional (offered, not installed by default), reject (not selected), needs-review (blocked on an unresolved issue).",
-  "schemaVersion": 1,
+  "$comment": "Curated Agent Skills manifest for the newsroom-agent-kit. Default install = the 'core' and 'vendor' sections (37 skills). The 'optional' and 'needsReview' sections are documented but not installed. Canonical destination is %USERPROFILE%\\.agents\\skills. Nothing here is installed yet; Phase 4 applies it.",
+  "schemaVersion": 2,
   "generated": "2026-10-04",
+  "userContext": {
+    "role": "community manager and content producer for a media outlet",
+    "platforms": ["instagram", "facebook", "facebook-groups", "x", "threads", "bluesky", "tiktok", "youtube", "youtube-shorts", "whatsapp", "telegram", "newsletter"],
+    "notUsed": ["linkedin"],
+    "note": "The platform list comes from the user. It is why the eight platform skills in the 'vendor' section were selected and why no LinkedIn skill was taken."
+  },
   "canonicalRoot": "%USERPROFILE%\\.agents",
   "canonicalSkillsDir": "%USERPROFILE%\\.agents\\skills",
   "installPolicy": {
-    "strategy": "fetch-and-stage",
-    "rationale": "Skills are fetched from pinned upstream commits at install time and materialized into the canonical .agents skills directory. Upstream install scripts are never executed to obtain a skill.",
+    "defaultInstallSections": ["core", "vendor"],
+    "strategy": "vendor-fork plus pinned-fetch",
+    "vendorSkills": "A fork maintained in this repository under vendor/skills/<name>. Upstream text was rewritten to remove third-party product assumptions (SEC-07). Each vendored skill carries a PROVENANCE.md. Never overwrite a vendored copy with an upstream copy.",
+    "fetchSkills": "Copied verbatim from the commit pinned in source.ref. The installer never executes an upstream install script.",
     "vendorSkillCopies": false,
     "executesUpstreamInstallScripts": false,
     "externalAccountsRequired": false,
-    "paidServicesRequired": false
+    "paidServicesRequired": false,
+    "containsExecutableFiles": false
   },
   "selectionCriteria": [
-    "Permissive license with an explicit LICENSE file at the pinned ref, or an explicit license field in SKILL.md frontmatter.",
-    "Instruction-only: no scripts, hooks, binaries, or MCP tool requirements are needed for the core to function.",
-    "No API key, account, or paid service needed for the core behavior.",
-    "Portable Agent Skills layout (SKILL.md + optional references/), no vendor-locked paths.",
-    "Distinct job; no two core skills compete for the same trigger.",
-    "Fits an editorial / media-outlet workflow rather than SaaS growth or generic marketing.",
+    "Permissive license with an explicit LICENSE file at the pinned ref, or an explicit license field in SKILL.md frontmatter. One documented exception: og-image, accepted by the user on 2026-10-04.",
+    "Instruction-only for the core: no scripts, hooks, binaries or MCP tool requirements.",
+    "No API key, account or paid service needed for core behavior.",
+    "Portable Agent Skills layout, no vendor-locked paths.",
+    "Distinct job; no two default-install skills compete for the same trigger.",
+    "Fits an editorial / media-outlet workflow rather than SaaS growth.",
     "Actively maintained upstream."
   ],
+
   "core": [
-    {
-      "name": "newsroom-style",
-      "status": "core",
-      "domain": "editorial",
-      "purpose": "Enforce AP Style and newsroom conventions when writing news, editing drafts, writing headlines, or tightening copy.",
-      "source": {
-        "repo": "jamditis/claude-skills-journalism",
-        "license": "MIT",
-        "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d",
-        "refDate": "2026-10-03",
-        "subdir": "journalism-core/skills/newsroom-style",
-        "url": "https://github.com/jamditis/claude-skills-journalism"
-      },
-      "files": 2,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "overlapsWith": ["ai-writing-detox"]
-    },
-    {
-      "name": "source-verification",
-      "status": "core",
-      "domain": "editorial",
-      "purpose": "Verify sources, claims, images, video, documents, interviews and synthetic media using SIFT with a durable evidence trail.",
-      "source": {
-        "repo": "jamditis/claude-skills-journalism",
-        "license": "MIT",
-        "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d",
-        "refDate": "2026-10-03",
-        "subdir": "journalism-core/skills/source-verification",
-        "url": "https://github.com/jamditis/claude-skills-journalism"
-      },
-      "files": 11,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Nine reference files loaded on demand; keeps the always-on cost near zero."
-    },
-    {
-      "name": "fact-check-workflow",
-      "status": "core",
-      "domain": "editorial",
-      "purpose": "Structured pre-publication fact-checking workflow: claim rating and verification gates.",
-      "source": {
-        "repo": "jamditis/claude-skills-journalism",
-        "license": "MIT",
-        "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d",
-        "refDate": "2026-10-03",
-        "subdir": "journalism-core/skills/fact-check-workflow",
-        "url": "https://github.com/jamditis/claude-skills-journalism"
-      },
-      "files": 2,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Substituted for the seed candidate notque/vexjoy-agent -> fact-check, which does not exist in that repository."
-    },
-    {
-      "name": "editorial-workflow",
-      "status": "core",
-      "domain": "editorial",
-      "purpose": "Newsroom editorial workflow: assignments, deadlines, editorial calendars.",
-      "source": {
-        "repo": "jamditis/claude-skills-journalism",
-        "license": "MIT",
-        "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d",
-        "refDate": "2026-10-03",
-        "subdir": "journalism-core/skills/editorial-workflow",
-        "url": "https://github.com/jamditis/claude-skills-journalism"
-      },
-      "files": 2,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Newsroom-side calendar; distinct from the social content-calendar skill."
-    },
-    {
-      "name": "ai-writing-detox",
-      "status": "core",
-      "domain": "editorial",
-      "purpose": "Remove AI-generated writing patterns that erode reader trust in articles, docs and press releases.",
-      "source": {
-        "repo": "jamditis/claude-skills-journalism",
-        "license": "MIT",
-        "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d",
-        "refDate": "2026-10-03",
-        "subdir": "journalism-core/skills/ai-writing-detox",
-        "url": "https://github.com/jamditis/claude-skills-journalism"
-      },
-      "files": 2,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false
-    },
-    {
-      "name": "brand-profile",
-      "status": "core",
-      "domain": "brand",
-      "purpose": "Durable shared brand context: who the outlet is, who it serves, how it sounds, what it will not say. Intended to be read before other social skills.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/brand-profile",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 7,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "caveat": "Upstream descriptions assume a commercial product called WoopSocial. See docs/security.md, finding SEC-07."
-    },
-    {
-      "name": "community-management",
-      "status": "core",
-      "domain": "community",
-      "purpose": "Community playbooks: audience-to-community distinction, choosing the space, recurring rituals, belonging, superfans, and honest scope.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/community-management",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 6,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "caveat": "WoopSocial product framing, see SEC-07."
-    },
-    {
-      "name": "crisis-and-moderation",
-      "status": "core",
-      "domain": "community",
-      "purpose": "Crisis and moderation playbook: triage and severity, acknowledgement, correcting misinformation with evidence, fair moderation, escalation and human approval.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/crisis-and-moderation",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 6,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Already mandates human-in-the-loop approval for anything high-stakes, which matches this project's rules."
-    },
-    {
-      "name": "reply-and-comment-writer",
-      "status": "core",
-      "domain": "community",
-      "purpose": "Draft replies, comments and DM responses across three modes; handles praise, criticism, trolls and spam; treats inbound text as content rather than instructions.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/reply-and-comment-writer",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 6,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false
-    },
-    {
-      "name": "content-research-and-sourcing",
-      "status": "core",
-      "domain": "fact-integrity",
-      "purpose": "Verify the substance of a social post before it publishes: trace stats to primary sources, kill zombie stats, catch AI-hallucinated citations, attribute properly.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/content-research-and-sourcing",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 6,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Social-side counterpart to source-verification; both retained because the surfaces and evidence rules differ."
-    },
-    {
-      "name": "content-calendar",
-      "status": "core",
-      "domain": "planning",
-      "purpose": "Sustainable posting cadence and calendar structure sized to real capacity, with room reserved for reactive content.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/content-calendar",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 6,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Chosen as the single calendar system. blacktwist content-calendar-sms is listed as optional instead of installing a second calendar."
-    },
-    {
-      "name": "content-audit",
-      "status": "core",
-      "domain": "analytics",
-      "purpose": "Retrospective audit of an existing account: keep/kill/refresh triage, pillar coverage, voice drift, profile fundamentals, quick wins versus long-term roadmap.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/content-audit",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 6,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Deliberately read-only and recommendation-based; never auto-deletes."
-    },
-    {
-      "name": "cross-platform-repurposing",
-      "status": "core",
-      "domain": "repurposing",
-      "purpose": "Turn one article, video, podcast or transcript into platform-native posts: adapt per platform rather than copy-paste.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/cross-platform-repurposing",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 6,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Chosen over scrapecreators content-repurposing, which requires a paid API key."
-    },
-    {
-      "name": "hook-writer",
-      "status": "core",
-      "domain": "craft",
-      "purpose": "Write openings that earn attention for any social format, with hooks required to stay true to the content that follows.",
-      "source": {
-        "repo": "social-media-skills/skills",
-        "license": "MIT",
-        "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945",
-        "refDate": "2026-07-19",
-        "subdir": "skills/hook-writer",
-        "url": "https://github.com/social-media-skills/skills"
-      },
-      "files": 6,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Chosen over blacktwist hook-writer-sms to keep one hook implementation."
-    },
-    {
-      "name": "seo",
-      "status": "core",
-      "domain": "website",
-      "purpose": "Audit, plan and implement SEO improvements across technical SEO, on-page optimization, structured data, Core Web Vitals and content strategy.",
-      "source": {
-        "repo": "affaan-m/ecc",
-        "license": "MIT",
-        "ref": "ef648e01899ba3e8dc6371642deaaf64b4477775",
-        "refDate": "2026-10-01",
-        "subdir": "skills/seo",
-        "url": "https://github.com/affaan-m/ecc"
-      },
-      "files": 1,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Only the single skills/seo directory is taken from a 4241-file repository. Reviewed against iannuttall/seo and coreyhaines31 seo-audit; see docs/discovery.md."
-    },
-    {
-      "name": "impeccable",
-      "status": "core",
-      "domain": "design",
-      "purpose": "Production-grade frontend design: design, redesign, critique, audit, polish, typography, layout, color, motion, accessibility, responsive behavior and design systems, with deterministic anti-pattern detection.",
-      "source": {
-        "repo": "pbakaus/impeccable",
-        "license": "Apache-2.0",
-        "ref": "6e802bd0ed99f53180e2359fddab6da8d97970d9",
-        "refDate": "2026-10-04",
-        "subdir": ".agents/skills/impeccable",
-        "url": "https://github.com/pbakaus/impeccable"
-      },
-      "files": 62,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "installScope": "instruction-layer-only",
-      "notes": "SKILL.md is only ~1.6k words with 41 on-demand reference files. The optional CLI/hook layer is NOT installed: it would download a binary on first run. See docs/security.md SEC-05."
-    },
-    {
-      "name": "web-design-guidelines",
-      "status": "core",
-      "domain": "design",
-      "purpose": "Lightweight review pass for UI code against Web Interface Guidelines, including accessibility and UX checks.",
-      "source": {
-        "repo": "PracticalSwan/agent-skills",
-        "license": "MIT",
-        "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451",
-        "refDate": "2026-09-14",
-        "subdir": "web-design-guidelines",
-        "url": "https://github.com/PracticalSwan/agent-skills"
-      },
-      "files": 2,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Preferred over vercel-labs/agent-skills web-design-guidelines, which has no LICENSE file. Only one review skill is installed."
-    },
-    {
-      "name": "accessibility-compliance",
-      "status": "core",
-      "domain": "accessibility",
-      "purpose": "Web accessibility patterns for news and academic sites: WCAG audits, alt text, accessible data visualization and assistive technology.",
-      "source": {
-        "repo": "jamditis/claude-skills-journalism",
-        "license": "MIT",
-        "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d",
-        "refDate": "2026-10-03",
-        "subdir": "dev-toolkit/skills/accessibility-compliance",
-        "url": "https://github.com/jamditis/claude-skills-journalism"
-      },
-      "files": 2,
-      "codeFiles": 0,
-      "requiresNetwork": false,
-      "requiresAccount": false,
-      "notes": "Chosen over accesslint/skills accessibility-audit, which requires MCP tool calls to an external service and has no LICENSE file. The upstream SKILL.md mentions npm/node only as example tooling for auditors, not as a requirement."
-    }
+    { "name": "newsroom-style", "domain": "editorial", "purpose": "AP Style and newsroom conventions when writing news, editing drafts, writing headlines or tightening copy.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "refDate": "2026-10-03", "subdir": "journalism-core/skills/newsroom-style", "url": "https://github.com/jamditis/claude-skills-journalism" } },
+    { "name": "source-verification", "domain": "editorial", "purpose": "Verify sources, claims, images, video, documents, interviews and synthetic media with SIFT and an evidence trail.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "refDate": "2026-10-03", "subdir": "journalism-core/skills/source-verification", "url": "https://github.com/jamditis/claude-skills-journalism" } },
+    { "name": "fact-check-workflow", "domain": "editorial", "purpose": "Structured pre-publication fact-checking: claim rating and verification gates.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "refDate": "2026-10-03", "subdir": "journalism-core/skills/fact-check-workflow", "url": "https://github.com/jamditis/claude-skills-journalism" } },
+    { "name": "editorial-workflow", "domain": "editorial", "purpose": "Newsroom assignments, deadlines and editorial calendars.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "refDate": "2026-10-03", "subdir": "journalism-core/skills/editorial-workflow", "url": "https://github.com/jamditis/claude-skills-journalism" } },
+    { "name": "ai-writing-detox", "domain": "editorial", "purpose": "Remove AI writing patterns that erode reader trust in articles, docs and press releases.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "refDate": "2026-10-03", "subdir": "journalism-core/skills/ai-writing-detox", "url": "https://github.com/jamditis/claude-skills-journalism" } },
+    { "name": "accessibility-compliance", "domain": "accessibility", "purpose": "WCAG patterns for news and academic sites: audits, alt text, accessible data visualization, assistive technology.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "refDate": "2026-10-03", "subdir": "dev-toolkit/skills/accessibility-compliance", "url": "https://github.com/jamditis/claude-skills-journalism" } },
+    { "name": "seo", "domain": "website", "purpose": "Technical SEO, on-page optimization, structured data, Core Web Vitals and content strategy.", "source": { "repo": "affaan-m/ecc", "license": "MIT", "ref": "ef648e01899ba3e8dc6371642deaaf64b4477775", "refDate": "2026-10-01", "subdir": "skills/seo", "url": "https://github.com/affaan-m/ecc" }, "notes": "Only this single-file directory is taken from a 4241-file repository." },
+    { "name": "web-design-guidelines", "domain": "design", "purpose": "Lightweight review pass for UI code against Web Interface Guidelines, including accessibility and UX.", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "refDate": "2026-09-14", "subdir": "web-design-guidelines", "url": "https://github.com/PracticalSwan/agent-skills" }, "notes": "Preferred over the unlicensed vercel-labs original (SEC-03)." },
+    { "name": "caption-writer-sms", "domain": "craft", "purpose": "Platform-specific captions for visual-first platforms: Facebook, Instagram, TikTok, Pinterest, YouTube.", "source": { "repo": "blacktwist/social-media-skills", "license": "MIT", "ref": "4f85b07069983b3b0b9bbe6519fed7017edcce81", "refDate": "2026-05-01", "subdir": "skills/caption-writer-sms", "url": "https://github.com/blacktwist/social-media-skills" } },
+    { "name": "thread-writer-sms", "domain": "craft", "purpose": "Thread craft for text-first platforms: LinkedIn, X, Threads, Bluesky.", "source": { "repo": "blacktwist/social-media-skills", "license": "MIT", "ref": "4f85b07069983b3b0b9bbe6519fed7017edcce81", "refDate": "2026-05-01", "subdir": "skills/thread-writer-sms", "url": "https://github.com/blacktwist/social-media-skills" } },
+    { "name": "carousel-writer-sms", "domain": "craft", "purpose": "Slide-by-slide carousel craft for visual-first platforms.", "source": { "repo": "blacktwist/social-media-skills", "license": "MIT", "ref": "4f85b07069983b3b0b9bbe6519fed7017edcce81", "refDate": "2026-05-01", "subdir": "skills/carousel-writer-sms", "url": "https://github.com/blacktwist/social-media-skills" } },
+    { "name": "og-image", "domain": "design", "purpose": "Social preview images (Open Graph) at 1200x630 built from the site's existing design system, plus the meta tags.", "source": { "repo": "stevysmith/og-image-skill", "license": "NO-LICENSE-FILE", "ref": "7314a1e754cd6754674d54c310b5b171bd4d816d", "refDate": "2026-01-27", "subdir": "plugins/og-image/skills/og-image", "url": "https://github.com/stevysmith/og-image-skill" }, "licenseRisk": "ACCEPTED-BY-USER-2026-10-04", "licenseRiskNote": "The upstream repository has no LICENSE file, so default copyright applies and there is no grant of redistribution rights. The user was shown this and explicitly accepted the risk on 2026-10-04. Re-evaluate if upstream ever adds a license. Producing the images needs a headless browser." },
+    { "name": "hallmark", "domain": "design", "purpose": "Anti-AI-slop design for greenfield pages, audits, redesigns, and design extraction from URLs or screenshots.", "source": { "repo": "Nutlope/hallmark", "license": "MIT", "ref": "13ac0ec7e148655948100b6396439e481361d690", "refDate": "2026-08-06", "subdir": "skills/hallmark", "url": "https://github.com/Nutlope/hallmark" }, "notes": "Promoted from optional to default at the user's request. No executable code. Upstream says it is powered by Together AI, but a full-text search found no API key, endpoint or network requirement: branding only. SKILL.md is ~9.8k words, so it is heavy when activated." }
   ],
+
+  "vendor": [
+    { "name": "impeccable", "domain": "design", "purpose": "Production-grade frontend design: design, redesign, critique, audit, polish, typography, layout, color, motion, accessibility, responsive behavior, design systems.", "vendorPath": "vendor/skills/impeccable", "source": { "repo": "pbakaus/impeccable", "license": "Apache-2.0", "ref": "6e802bd0ed99f53180e2359fddab6da8d97970d9", "refDate": "2026-10-04", "subdir": ".agents/skills/impeccable", "url": "https://github.com/pbakaus/impeccable" }, "fork": "instruction-layer-only", "forkNote": "Vendored as SKILL.md plus the 41 reference files. The scripts/ directory, the four .toml sub-agent files and the hook and live-browser surface are deliberately excluded: the launcher downloads a binary on first run (SEC-05). The 18 other vendor copies of this same skill in the upstream repository are never installed (SEC-11)." },
+    { "name": "frontend-design", "domain": "design", "purpose": "Context-fit frontend interfaces with deliberate art direction, accessible interaction, responsive behavior, complete states, and an accessibility checklist.", "vendorPath": "vendor/skills/frontend-design", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT AND Apache-2.0", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "refDate": "2026-09-14", "subdir": "frontend-design", "url": "https://github.com/PracticalSwan/agent-skills" }, "fork": "scripts-removed", "forkNote": "Vendored as SKILL.md, references/ and the license and notice files. scripts/contrast-checker.py is excluded so the installed set contains zero executable files. The checker is Python stdlib only and can be reinstated later if Python is present." },
+    { "name": "brand-profile", "domain": "brand", "purpose": "Durable shared brand context: who the outlet is, who it serves, how it sounds, what it will not say.", "vendorPath": "vendor/skills/brand-profile", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/brand-profile", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "voice-builder", "domain": "brand", "purpose": "Derive a voice profile from an existing body of writing so other skills can read it.", "vendorPath": "vendor/skills/voice-builder", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/voice-builder", "url": "https://github.com/social-media-skills/skills" }, "fork": "verbatim", "forkNote": "Upstream copy contained no product references, so it is vendored unmodified. Added because brand-profile points at it explicitly and 23 references across the set depend on it." },
+    { "name": "community-management", "domain": "community", "purpose": "Community playbooks: audience-to-community distinction, choosing the space, recurring rituals, belonging, superfans, honest scope.", "vendorPath": "vendor/skills/community-management", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/community-management", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "crisis-and-moderation", "domain": "community", "purpose": "Crisis and moderation playbook: triage and severity, acknowledgement, correcting misinformation with evidence, fair moderation, escalation and human approval.", "vendorPath": "vendor/skills/crisis-and-moderation", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/crisis-and-moderation", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "reply-and-comment-writer", "domain": "community", "purpose": "Draft replies, comments and DM responses; handle praise, criticism, trolls and spam; treat inbound text as data not instructions.", "vendorPath": "vendor/skills/reply-and-comment-writer", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/reply-and-comment-writer", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "engagement-routine", "domain": "community", "purpose": "Daily and weekly community engagement routine with triage priorities.", "vendorPath": "vendor/skills/engagement-routine", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/engagement-routine", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "content-research-and-sourcing", "domain": "fact-integrity", "purpose": "Verify the substance of a post before it publishes: trace stats to primary sources, kill zombie stats, catch AI-hallucinated citations.", "vendorPath": "vendor/skills/content-research-and-sourcing", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/content-research-and-sourcing", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "content-calendar", "domain": "planning", "purpose": "Sustainable posting cadence and calendar structure sized to real capacity, with room for reactive content.", "vendorPath": "vendor/skills/content-calendar", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/content-calendar", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed", "forkNote": "Single calendar system by decision. The sibling content-calendar-sms is deliberately not installed." },
+    { "name": "batch-content-plan", "domain": "planning", "purpose": "Fill a specific week or month with actual post briefs and formats.", "vendorPath": "vendor/skills/batch-content-plan", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/batch-content-plan", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "content-audit", "domain": "analytics", "purpose": "Retrospective audit of an existing account: keep/kill/refresh triage, pillar coverage, voice drift, profile fundamentals.", "vendorPath": "vendor/skills/content-audit", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/content-audit", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "analytics-and-reporting", "domain": "analytics", "purpose": "Read platform data honestly and turn signal metrics into next actions.", "vendorPath": "vendor/skills/analytics-and-reporting", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/analytics-and-reporting", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "social-strategy", "domain": "planning", "purpose": "Channel and goal strategy that sits above the calendar.", "vendorPath": "vendor/skills/social-strategy", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/social-strategy", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "content-pillars", "domain": "planning", "purpose": "Define the pillar taxonomy the calendar and audit skills read.", "vendorPath": "vendor/skills/content-pillars", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/content-pillars", "url": "https://github.com/social-media-skills/skills" }, "fork": "verbatim" },
+    { "name": "cross-platform-repurposing", "domain": "repurposing", "purpose": "Turn one article, video, podcast or transcript into platform-native posts: adapt, never copy-paste.", "vendorPath": "vendor/skills/cross-platform-repurposing", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/cross-platform-repurposing", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "hook-writer", "domain": "craft", "purpose": "Write openings that earn attention for any social format, true to the content that follows.", "vendorPath": "vendor/skills/hook-writer", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/hook-writer", "url": "https://github.com/social-media-skills/skills" }, "fork": "verbatim" },
+    { "name": "design-and-templates", "domain": "design", "purpose": "Reusable on-brand template system and brand kit so non-designers can produce consistent social graphics.", "vendorPath": "vendor/skills/design-and-templates", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/design-and-templates", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "instagram-reels-publishing", "domain": "channel", "purpose": "Instagram and Reels: the FRAME framework, cover specs and publish handoff.", "vendorPath": "vendor/skills/instagram-reels-publishing", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/instagram-reels-publishing", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "reels-script", "domain": "channel", "purpose": "Reels scripts: hooks, retention beats and shot/audio notes.", "vendorPath": "vendor/skills/reels-script", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/reels-script", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "facebook-strategy", "domain": "channel", "purpose": "Facebook Page surfaces, formats and recipes.", "vendorPath": "vendor/skills/facebook-strategy", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/facebook-strategy", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "facebook-groups", "domain": "channel", "purpose": "Running a Facebook group as a community: the TRIBE framework, setup, growth and monetization.", "vendorPath": "vendor/skills/facebook-groups", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/facebook-groups", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "x-growth", "domain": "channel", "purpose": "X/Twitter post and reply recipes and platform-specific guidance.", "vendorPath": "vendor/skills/x-growth", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/x-growth", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "threads-post", "domain": "channel", "purpose": "Threads posts and replies: the reply framework and publish handoff.", "vendorPath": "vendor/skills/threads-post", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/threads-post", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "tiktok-script", "domain": "channel", "purpose": "TikTok scripts and mechanics, including the AI-disclosure requirement.", "vendorPath": "vendor/skills/tiktok-script", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/tiktok-script", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "youtube-shorts", "domain": "channel", "purpose": "YouTube Shorts production funnel, native scheduling and metadata.", "vendorPath": "vendor/skills/youtube-shorts", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/youtube-shorts", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" },
+    { "name": "email-and-newsletter", "domain": "channel", "purpose": "Newsletter editions, the inbox framework, and repurposing an issue into social.", "vendorPath": "vendor/skills/email-and-newsletter", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/email-and-newsletter", "url": "https://github.com/social-media-skills/skills" }, "fork": "product-references-removed" }
+  ],
+
   "optional": [
-    {
-      "name": "hallmark",
-      "status": "optional",
-      "domain": "design",
-      "reason": "Strong anti-AI-slop design skill with a large editorial-flavoured component library and zero executable code. Held back because its SKILL.md is ~9.8k words and overlaps the core impeccable skill.",
-      "source": { "repo": "Nutlope/hallmark", "license": "MIT", "ref": "13ac0ec7e148655948100b6396439e481361d690", "refDate": "2026-08-06", "subdir": "skills/hallmark", "url": "https://github.com/Nutlope/hallmark" },
-      "files": 107,
-      "codeFiles": 0,
-      "externalServiceNote": "Upstream states it is 'Powered by Together AI'. Inspection found no API key, endpoint or network requirement anywhere in the skill; the reference is branding only. Re-verify on update."
-    },
-    {
-      "name": "frontend-design",
-      "status": "optional",
-      "domain": "design",
-      "reason": "Credible alternative primary design skill with an explicit accessibility checklist. Not installed because impeccable already covers the primary role. Bundles a stdlib-only Python contrast checker, so it needs a Python interpreter that this machine does not currently have.",
-      "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT AND Apache-2.0", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "refDate": "2026-09-14", "subdir": "frontend-design", "url": "https://github.com/PracticalSwan/agent-skills" },
-      "files": 9,
-      "codeFiles": 1
-    },
-    {
-      "name": "humanizer",
-      "status": "optional",
-      "domain": "craft",
-      "reason": "Good prose humanizer, but overlaps the core ai-writing-detox skill.",
-      "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "refDate": "2026-09-14", "subdir": "humanizer", "url": "https://github.com/PracticalSwan/agent-skills" }
-    },
-    {
-      "name": "caption-writer-sms",
-      "status": "optional",
-      "domain": "craft",
-      "reason": "Concrete per-platform caption craft for Facebook, Instagram, TikTok, Pinterest and YouTube. Optional depth behind the core hook skill.",
-      "source": { "repo": "blacktwist/social-media-skills", "license": "MIT", "ref": "4f85b07069983b3b0b9bbe6519fed7017edcce81", "refDate": "2026-05-01", "subdir": "skills/caption-writer-sms", "url": "https://github.com/blacktwist/social-media-skills" }
-    },
-    {
-      "name": "thread-writer-sms",
-      "status": "optional",
-      "domain": "craft",
-      "reason": "Thread craft for text-first platforms. Zero code, zero services.",
-      "source": { "repo": "blacktwist/social-media-skills", "license": "MIT", "ref": "4f85b07069983b3b0b9bbe6519fed7017edcce81", "refDate": "2026-05-01", "subdir": "skills/thread-writer-sms", "url": "https://github.com/blacktwist/social-media-skills" }
-    },
-    {
-      "name": "carousel-writer-sms",
-      "status": "optional",
-      "domain": "craft",
-      "reason": "Carousel slide-by-slide craft. Zero code, zero services.",
-      "source": { "repo": "blacktwist/social-media-skills", "license": "MIT", "ref": "4f85b07069983b3b0b9bbe6519fed7017edcce81", "refDate": "2026-05-01", "subdir": "skills/carousel-writer-sms", "url": "https://github.com/blacktwist/social-media-skills" }
-    },
-    {
-      "name": "content-calendar-sms",
-      "status": "optional",
-      "domain": "planning",
-      "reason": "Deliberately NOT installed: a second calendar system would compete with the core content-calendar skill for the same trigger.",
-      "source": { "repo": "blacktwist/social-media-skills", "license": "MIT", "ref": "4f85b07069983b3b0b9bbe6519fed7017edcce81", "refDate": "2026-05-01", "subdir": "skills/content-calendar-sms", "url": "https://github.com/blacktwist/social-media-skills" }
-    },
-    {
-      "name": "social-strategy",
-      "status": "optional",
-      "domain": "planning",
-      "reason": "Strategy layer above the core content-calendar skill. Useful if the user wants channel and goal planning rather than cadence only.",
-      "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/social-strategy", "url": "https://github.com/social-media-skills/skills" }
-    },
-    {
-      "name": "content-pillars",
-      "status": "optional",
-      "domain": "planning",
-      "reason": "Defines the pillar taxonomy the calendar and audit skills read. Optional because it is only needed when pillars are being established.",
-      "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/content-pillars", "url": "https://github.com/social-media-skills/skills" }
-    },
-    {
-      "name": "analytics-and-reporting",
-      "status": "optional",
-      "domain": "analytics",
-      "reason": "Signal-versus-vanity metric reading and reporting. Overlaps content-audit, so kept optional.",
-      "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/analytics-and-reporting", "url": "https://github.com/social-media-skills/skills" }
-    },
-    {
-      "name": "writing-style-and-tone",
-      "status": "optional",
-      "domain": "craft",
-      "reason": "Style and tone edit passes for social copy. Overlaps the core ai-writing-detox skill.",
-      "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/writing-style-and-tone", "url": "https://github.com/social-media-skills/skills" }
-    },
-    {
-      "name": "design-and-templates",
-      "status": "optional",
-      "domain": "design",
-      "reason": "Reusable on-brand template systems and brand kits for repeatable social creative. Good fit for a media brand kit; not needed for the core.",
-      "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "refDate": "2026-07-19", "subdir": "skills/design-and-templates", "url": "https://github.com/social-media-skills/skills" }
-    },
-    {
-      "name": "story-pitch",
-      "status": "optional",
-      "domain": "editorial",
-      "reason": "Story pitches and query letters. Useful only if the user pitches externally.",
-      "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "refDate": "2026-10-03", "subdir": "journalism-core/skills/story-pitch", "url": "https://github.com/jamditis/claude-skills-journalism" }
-    },
-    {
-      "name": "social-media-intelligence",
-      "status": "optional",
-      "domain": "research",
-      "reason": "Narrative tracking, viral spread analysis and account vetting. Large file and adjacent to OSINT work the user may not want in a default global skill set.",
-      "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "refDate": "2026-10-03", "subdir": "journalism-core/skills/social-media-intelligence", "url": "https://github.com/jamditis/claude-skills-journalism" }
-    },
-    {
-      "name": "web-testing",
-      "status": "optional",
-      "domain": "qa",
-      "reason": "Browser-driven QA of live pages, responsive layouts and publishing output. Cross-agent value, but needs a browser runtime, so it is not core.",
-      "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "refDate": "2026-09-14", "subdir": "web-testing", "url": "https://github.com/PracticalSwan/agent-skills" }
-    },
-    {
-      "name": "web-quality-audit",
-      "status": "optional",
-      "domain": "qa",
-      "reason": "Broader live-site quality audit; complements web-testing but overlaps accessibility-compliance and web-design-guidelines.",
-      "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "refDate": "2026-09-14", "subdir": "web-quality-audit", "url": "https://github.com/PracticalSwan/agent-skills" }
-    }
+    { "name": "web-testing", "reason": "Browser-driven QA of live pages and published output. Cross-agent value but needs a browser runtime, so not default.", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "subdir": "web-testing", "url": "https://github.com/PracticalSwan/agent-skills" } },
+    { "name": "web-quality-audit", "reason": "Broader live-site quality audit. Overlaps accessibility-compliance and web-design-guidelines.", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "subdir": "web-quality-audit", "url": "https://github.com/PracticalSwan/agent-skills" } },
+    { "name": "goals-and-kpis", "reason": "Sets targets, which analytics-and-reporting deliberately leaves out. Reachable from 11 vendored skills.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/goals-and-kpis", "url": "https://github.com/social-media-skills/skills" } },
+    { "name": "scheduling-and-queue", "reason": "The single most-referenced uninstalled sibling (30 references). Covers scheduling and the confirmation contract. Deliberately not in the default set to limit trigger clutter; add it if scheduling becomes painful.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/scheduling-and-queue", "url": "https://github.com/social-media-skills/skills" } },
+    { "name": "content-recycling", "reason": "Reusing proven performers. Overlaps cross-platform-repurposing.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/content-recycling", "url": "https://github.com/social-media-skills/skills" } },
+    { "name": "profile-optimization", "reason": "Profile fundamentals. Reachable from 10 vendored skills.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/profile-optimization", "url": "https://github.com/social-media-skills/skills" } },
+    { "name": "story-pitch", "reason": "Story pitches and query letters. Only useful for external pitching.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "subdir": "journalism-core/skills/story-pitch", "url": "https://github.com/jamditis/claude-skills-journalism" } },
+    { "name": "social-media-intelligence", "reason": "Narrative tracking and account vetting. Large, and adjacent to OSINT the user may not want globally.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "subdir": "journalism-core/skills/social-media-intelligence", "url": "https://github.com/jamditis/claude-skills-journalism" } },
+    { "name": "writing-style-and-tone", "reason": "Social style edit passes. Overlaps ai-writing-detox.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/writing-style-and-tone", "url": "https://github.com/social-media-skills/skills" } },
+    { "name": "humanizer", "reason": "Prose humanizer. Overlaps ai-writing-detox.", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "subdir": "humanizer", "url": "https://github.com/PracticalSwan/agent-skills" } },
+    { "name": "page-monitoring", "reason": "Genuinely relevant to a newsroom, but requires a paid change-detection API and pip.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "subdir": "research-toolkit/skills/page-monitoring", "url": "https://github.com/jamditis/claude-skills-journalism" } }
   ],
+
   "needsReview": [
-    {
-      "name": "og-image",
-      "status": "needs-review",
-      "domain": "design",
-      "reason": "Technically a good fit for a media site (Open Graph and social preview assets at 1200x630), but stevysmith/og-image-skill has no LICENSE file at the pinned ref, so there is no grant of redistribution rights. Also requires a headless browser to actually produce images.",
-      "source": { "repo": "stevysmith/og-image-skill", "license": "NONE-FOUND", "ref": "7314a1e754cd6754674d54c310b5b171bd4d816d", "refDate": "2026-01-27", "subdir": "plugins/og-image/skills/og-image", "url": "https://github.com/stevysmith/og-image-skill" },
-      "blockedBy": ["missing-license"]
-    },
-    {
-      "name": "accessibility-audit",
-      "status": "needs-review",
-      "domain": "accessibility",
-      "reason": "Requires the AccessLint MCP server through allowed-tools mcp__plugin_accesslint_accesslint__list_rules and explain_rule. External service dependency plus no LICENSE file.",
-      "source": { "repo": "accesslint/skills", "license": "NONE-FOUND", "ref": "2e9d7336678302d0bc08848e92542560295b34d3", "refDate": "2026-08-24", "subdir": "plugins/accesslint/skills/accessibility-audit", "url": "https://github.com/accesslint/skills" },
-      "blockedBy": ["missing-license", "requires-mcp-service"]
-    }
+    { "name": "accessibility-audit", "reason": "Requires AccessLint MCP tools in allowed-tools, so it is inert without an external service. The repository also has no LICENSE file. Superseded for now by accessibility-compliance.", "source": { "repo": "accesslint/skills", "license": "NO-LICENSE-FILE", "ref": "2e9d7336678302d0bc08848e92542560295b34d3", "subdir": "plugins/accesslint/skills/accessibility-audit", "url": "https://github.com/accesslint/skills" }, "blockedBy": ["missing-license", "requires-mcp-service"] }
   ],
+
   "rejected": [
-    { "candidate": "npx skills (vercel-labs/skills CLI)", "reason": "Would install OpenCode skills to ~/.config/opencode/skills instead of the canonical ~/.agents/skills, creating a vendor-specific tree and drift between agents. Its default install method is symlinks, which fail on this machine without elevation or Developer Mode. It also ships usage telemetry and can invoke gh credentials. Use this repository's own PowerShell installer instead.", "evidence": "docs/discovery.md section 4" },
-    { "candidate": "vercel-labs/agent-skills -> writing-guidelines", "reason": "No LICENSE file and package.json is private with no license field. The 1.2 KB skill is also a thin pointer that fetches an external handbook at runtime.", "evidence": "docs/security.md SEC-03" },
-    { "candidate": "vercel-labs/agent-skills -> web-design-guidelines", "reason": "Same licensing blocker. PracticalSwan/agent-skills provides a properly licensed, self-contained equivalent.", "evidence": "docs/security.md SEC-03" },
-    { "candidate": "affaan-m/ecc (whole repository)", "reason": "Mega-bundle: 4241 files, 1006 code files, 1027 SKILL.md files, hooks, MCP configs, Docker and scaffolding. Only the single skills/seo directory is taken.", "evidence": "docs/discovery.md section 6" },
-    { "candidate": "PracticalSwan/agent-skills (whole repository)", "reason": "Mega-bundle of 248 skills, mostly cloud, AI-training and vendor-integration oriented. Two individual skills are extracted instead.", "evidence": "docs/discovery.md section 7" },
-    { "candidate": "notque/vexjoy-agent (whole repository)", "reason": "62 skills, 724 code files, plus hooks, plugins and services; broad agent-framework scope rather than newsroom scope. Also, the seed list was wrong: this repository contains neither fact-check nor content-calendar.", "evidence": "docs/discovery.md section 5" },
-    { "candidate": "coreyhaines31/marketingskills (whole repository)", "reason": "50 skills aimed at SaaS and product marketing. Its social skill is named 'social', not 'social-content' as the seed claimed, and its triggers overlap the selected social skills.", "evidence": "docs/discovery.md section 6" },
-    { "candidate": "scrapecreators/social-media-research-skills -> content-repurposing", "reason": "Frontmatter declares metadata.openclaw.requires.env SCRAPECREATORS_API_KEY, i.e. a paid third-party API. The core repurposing job is covered by cross-platform-repurposing with no dependency.", "evidence": "docs/security.md SEC-06" },
-    { "candidate": "iannuttall/seo", "reason": "Routes to a local SEO CLI and MCP server and needs an npm toolchain; 1148 code files for one instruction skill. affaan-m/ecc skills/seo covers the same ground as a single instruction file.", "evidence": "docs/discovery.md section 8" },
-    { "candidate": "jamditis/claude-skills-journalism -> page-monitoring", "reason": "Contains six API_KEY references and a pip install instruction; it needs an external change-detection service. Useful to the user but not core and not no-account-required.", "evidence": "docs/security.md SEC-08" },
-    { "candidate": "cline/plugins (whole catalog)", "reason": "Every plugin is an executable index.ts running inside Cline, including browser-automation plugins with credential handling. Cline-specific capability, not portable core.", "evidence": "docs/security.md SEC-09" },
-    { "candidate": "accesslint/skills (whole repository)", "reason": "Every skill declares AccessLint MCP tools in allowed-tools; no LICENSE file.", "evidence": "docs/security.md SEC-04" }
+    { "candidate": "npx skills (vercel-labs/skills CLI)", "reason": "Installs OpenCode skills to ~/.config/opencode/skills, breaking the canonical layout. Default symlink install fails on this machine. Ships telemetry. Requires absent Node.", "evidence": "docs/discovery.md section 2, docs/security.md SEC-10" },
+    { "candidate": "vercel-labs/agent-skills -> writing-guidelines, web-design-guidelines", "reason": "No LICENSE file; package.json private with no license field. Both are thin pointers that fetch an external handbook at runtime.", "evidence": "docs/security.md SEC-03" },
+    { "candidate": "affaan-m/ecc (whole repository)", "reason": "Mega-bundle: 4241 files, 1006 code files, 1027 SKILL.md, plus hooks, MCP configs and Docker. Only skills/seo is taken.", "evidence": "docs/security.md SEC-02" },
+    { "candidate": "PracticalSwan/agent-skills (whole repository)", "reason": "248 skills, mostly cloud and AI-training oriented. Two directories extracted.", "evidence": "docs/security.md SEC-02" },
+    { "candidate": "notque/vexjoy-agent (whole repository)", "reason": "62 skills, 724 code files, hooks, plugins, services. Also the seed was wrong: it has neither fact-check nor content-calendar.", "evidence": "docs/discovery.md section 3.2" },
+    { "candidate": "coreyhaines31/marketingskills (whole repository)", "reason": "SaaS and product-marketing frame. Its social skill is named 'social', not 'social-content', and triggers overlap the selected social skills.", "evidence": "docs/discovery.md section 4.3" },
+    { "candidate": "scrapecreators/social-media-research-skills", "reason": "Frontmatter requires SCRAPECREATORS_API_KEY, a paid API.", "evidence": "docs/security.md SEC-06" },
+    { "candidate": "iannuttall/seo", "reason": "Routes to an SEO CLI and MCP server; 1148 code files for one instruction skill.", "evidence": "docs/discovery.md section 5" },
+    { "candidate": "accesslint/skills (whole repository)", "reason": "Every skill requires the AccessLint MCP server; no LICENSE file.", "evidence": "docs/security.md SEC-04" },
+    { "candidate": "cline/plugins (whole catalog)", "reason": "Every plugin is executable TypeScript inside Cline; jev-browser manages external credentials.", "evidence": "docs/security.md SEC-09" },
+    { "candidate": "social-media-skills content-calendar-sms, hook-writer-sms", "reason": "Deliberate redundancy control: one calendar and one hook implementation only.", "evidence": "docs/discovery.md section 12" }
   ],
+
+  "knownGaps": [
+    "CMS and editorial publishing workflows: deliberately out of scope. The user confirmed they are not needed. No WordPress-specific or generic CMS skill was selected.",
+    "Translation and localization: deliberately out of scope per the user. No portable candidate was found in the sources reviewed.",
+    "WhatsApp and Telegram: the user uses them, but no portable, license-clean skill was found. email-and-newsletter covers the owned-channel case. Revisit if this becomes painful.",
+    "About 45 sibling skills referenced by the vendored set are not installed. The global AGENTS.md instructs the agent to treat those references as unavailable and to do the work itself rather than inventing content."
+  ],
+
   "coverage": {
-    "note": "Capability areas from PLAN.md mapped to the selected core. Areas with no core skill are called out so the gap is explicit rather than silent.",
-    "map": {
-      "newsroom_editorial_writing_and_style": ["newsroom-style", "ai-writing-detox"],
-      "source_verification_and_fact_checking": ["source-verification", "fact-check-workflow", "content-research-and-sourcing"],
-      "editorial_planning": ["editorial-workflow"],
-      "community_management_replies_moderation_escalation": ["community-management", "reply-and-comment-writer", "crisis-and-moderation"],
-      "social_strategy_and_cadence": ["brand-profile", "content-calendar"],
-      "content_audit_and_analytics": ["content-audit"],
-      "content_repurposing": ["cross-platform-repurposing"],
-      "headline_hook_caption_craft": ["hook-writer"],
-      "website_seo_and_discoverability": ["seo"],
-      "frontend_and_web_design": ["impeccable"],
-      "design_review_and_standards": ["web-design-guidelines"],
-      "accessibility_wcag": ["accessibility-compliance"],
-      "visual_social_template_systems": ["optional:design-and-templates"],
-      "open_graph_and_social_preview_assets": ["needs-review:og-image"],
-      "browser_web_qa": ["optional:web-testing", "optional:web-quality-audit"],
-      "cms_and_editorial_publishing": [],
-      "translation_and_localization": [],
-      "video_and_audio_production": []
-    },
-    "knownGaps": [
-      "CMS and editorial publishing workflows: no candidate met the portability bar. A WordPress-specific skill would be site-specific, and a generic CMS skill would be too vague to trigger reliably. Revisit if the user names the CMS.",
-      "Translation and localization: no strong portable candidate was found in the sources reviewed. Not selected rather than selected poorly.",
-      "Video, audio and podcast production: several candidates exist in PracticalSwan/agent-skills and jamditis/claude-skills-journalism (video-toolkit), but they are outside the stated scope of this kit and would add significant context."
-    ]
+    "editorial_integrity": ["newsroom-style", "source-verification", "fact-check-workflow", "ai-writing-detox", "content-research-and-sourcing"],
+    "editorial_planning": ["editorial-workflow"],
+    "community_management": ["community-management", "engagement-routine", "reply-and-comment-writer", "crisis-and-moderation"],
+    "brand_and_voice": ["brand-profile", "voice-builder", "design-and-templates"],
+    "social_planning": ["social-strategy", "content-pillars", "content-calendar", "batch-content-plan"],
+    "social_craft": ["hook-writer", "caption-writer-sms", "thread-writer-sms", "carousel-writer-sms", "ai-writing-detox"],
+    "analytics_and_audit": ["content-audit", "analytics-and-reporting"],
+    "repurposing": ["cross-platform-repurposing"],
+    "channels": ["instagram-reels-publishing", "reels-script", "facebook-strategy", "facebook-groups", "x-growth", "threads-post", "tiktok-script", "youtube-shorts", "email-and-newsletter"],
+    "website_and_seo": ["seo"],
+    "design": ["impeccable", "hallmark", "frontend-design", "web-design-guidelines"],
+    "accessibility": ["accessibility-compliance"],
+    "social_preview_assets": ["og-image"]
   }
 }

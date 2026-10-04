@@ -120,6 +120,37 @@ It should contain:
 
 The installer materializes/synchronizes the selected version into `%USERPROFILE%\.agents`.
 
+## Two distribution modes
+
+The default install is 40 skills delivered in two different ways, recorded per skill in
+`manifest/skills.json`.
+
+**Pinned fetch.** The skill is copied verbatim from the commit pinned in `source.ref`. The pin is
+the reviewed artifact, so behaviour cannot change silently. Files are cached locally under
+`~/.agents/cache/upstream/<repo>@<short-ref>` and staged by the installer. No upstream script is
+ever executed.
+
+**Vendored fork.** The skill lives in `vendor/skills/<name>` in this repository as a modified copy,
+each with a `PROVENANCE.md` recording the upstream repository, the exact commit, the licence, and
+precisely what changed.
+
+Forks exist because some upstream skills are written around one vendor's product, and leaving those
+claims in place makes an agent conclude that capabilities the newsroom actually has do not exist.
+Twenty-seven skills are forked; see `docs/security.md` SEC-07. A fork must never be replaced by a
+fresh upstream copy, because that is exactly what reintroduces the problem. Upstream changes are
+merged by hand.
+
+Two skills are vendored purely to keep the installed set free of executable files:
+`impeccable` ships only its instruction layer, and `frontend-design` ships without its Python
+contrast checker.
+
+## Testing without touching user state
+
+Every script accepts `-TargetRoot` and `-OpenCodeConfigDir`. That redirects the entire toolchain
+into a throwaway directory, so the full install, verify, idempotency and uninstall cycle can be
+exercised before anything is written to `%USERPROFILE%\.agents`. Phase 3 used this to validate all
+of it. `update.ps1` accepts `-TargetRoot` for the same reason.
+
 ## Compatibility-exception rules
 
 - Prefer native `.agents` support.

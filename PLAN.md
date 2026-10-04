@@ -273,29 +273,29 @@ newsroom-agent-kit/
 
 ### Tasks
 
-- [ ] Define the canonical layout under `%USERPROFILE%\.agents`.
-- [ ] Create the curated global `global/AGENTS.md` for the community-manager/newsroom workflow.
-- [ ] Keep global instructions high-signal; move detailed workflows into skills instead of inflating global context.
-- [ ] Implement a machine-readable skill manifest with pinned or otherwise reproducible upstream references.
-- [ ] Implement `scripts/install.ps1`.
-- [ ] Installer must support a dry-run/preview mode.
-- [ ] Installer must be idempotent.
-- [ ] Installer must detect existing files and refuse unsafe overwrite.
-- [ ] Installer must back up only the files it needs to change and keep those backups outside Git-tracked content.
-- [ ] Installer must install/sync canonical skills into `%USERPROFILE%\.agents\skills`.
-- [ ] Do **not** create OpenCode or Cline skill adapters if their installed versions natively scan `%USERPROFILE%\.agents\skills`.
-- [ ] Do **not** duplicate skills into `.cline`, `.opencode`, `.claude`, `.codex`, or other vendor directories merely for convenience.
-- [ ] Implement a tool-specific compatibility mechanism only for a capability that is proven missing from native `.agents` support.
-- [ ] If OpenCode still requires `~/.config/opencode/AGENTS.md` for global instructions, prefer a minimal reversible link to canonical `%USERPROFILE%\.agents\AGENTS.md` rather than an independently maintained copy.
-- [ ] Cline should consume `%USERPROFILE%\.agents\AGENTS.md` and `%USERPROFILE%\.agents\skills` natively when the installed version confirms support.
-- [ ] Do not destroy pre-existing unrelated agent skills, rules, config, or instructions.
-- [ ] Implement `scripts/verify.ps1`.
-- [ ] Implement `scripts/update.ps1` with upstream-change review rather than blind execution of newly introduced third-party scripts.
-- [ ] Implement safe `scripts/uninstall.ps1` that removes only artifacts owned by this kit and restores backed-up state when appropriate.
-- [ ] Add logging that does not leak secrets.
-- [ ] Add clear errors and remediation guidance.
-- [ ] Add `docs/troubleshooting.md`.
-- [ ] Add automated/static checks for malformed `SKILL.md` metadata where practical.
+- [x] Define the canonical layout under `%USERPROFILE%\.agents`.
+- [x] Create the curated global `global/AGENTS.md` for the community-manager/newsroom workflow.
+- [x] Keep global instructions high-signal; move detailed workflows into skills instead of inflating global context.
+- [x] Implement a machine-readable skill manifest with pinned or otherwise reproducible upstream references.
+- [x] Implement `scripts/install.ps1`.
+- [x] Installer must support a dry-run/preview mode.
+- [x] Installer must be idempotent.
+- [x] Installer must detect existing files and refuse unsafe overwrite.
+- [x] Installer must back up only the files it needs to change and keep those backups outside Git-tracked content.
+- [x] Installer must install/sync canonical skills into `%USERPROFILE%\.agents\skills`.
+- [x] Do **not** create OpenCode or Cline skill adapters if their installed versions natively scan `%USERPROFILE%\.agents\skills`.
+- [x] Do **not** duplicate skills into `.cline`, `.opencode`, `.claude`, `.codex`, or other vendor directories merely for convenience.
+- [x] Implement a tool-specific compatibility mechanism only for a capability that is proven missing from native `.agents` support.
+- [x] If OpenCode still requires `~/.config/opencode/AGENTS.md` for global instructions, prefer a minimal reversible link to canonical `%USERPROFILE%\.agents\AGENTS.md` rather than an independently maintained copy.
+- [x] Cline should consume `%USERPROFILE%\.agents\AGENTS.md` and `%USERPROFILE%\.agents\skills` natively when the installed version confirms support.
+- [x] Do not destroy pre-existing unrelated agent skills, rules, config, or instructions.
+- [x] Implement `scripts/verify.ps1`.
+- [x] Implement `scripts/update.ps1` with upstream-change review rather than blind execution of newly introduced third-party scripts.
+- [x] Implement safe `scripts/uninstall.ps1` that removes only artifacts owned by this kit and restores backed-up state when appropriate.
+- [x] Add logging that does not leak secrets.
+- [x] Add clear errors and remediation guidance.
+- [x] Add `docs/troubleshooting.md`.
+- [x] Add automated/static checks for malformed `SKILL.md` metadata where practical.
 - [ ] Commit implementation and checklist progress.
 - [ ] Verify `git status` is clean.
 

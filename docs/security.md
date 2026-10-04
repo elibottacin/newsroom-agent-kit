@@ -174,8 +174,84 @@ product-surface claim inside a skill as inapplicable, to ask which platforms and
 exist in the user's newsroom, and never to assert that a capability is unavailable on the basis of a
 skill's product framing.
 
-**Open question raised at the phase checkpoint:** whether to accept nine core skills from this
-repository, accept a smaller subset, or drop it. See `docs/discovery.md` section 13.
+**RESOLVED in Phase 3 — by forking, not by instruction alone.** The user chose a sanitised fork over
+either accepting the risk or dropping the repository. Measured scope before starting: **287 affected
+lines across 45 files in 21 skills**, with **119 semantically distinct clauses** — every mention was
+uniquely worded, so no regex or mechanical substitution could do this safely. The eight platform
+skills added afterwards contributed a further 162 mentions.
+
+What was built:
+
+- 27 skills are now vendored forks in `vendor/skills/<name>`, each with a `PROVENANCE.md`.
+- All **287 affected lines** were rewritten by hand at paragraph level. Final sweep: **0
+  occurrences** of the product name, case-insensitive, across 209 files.
+- Upstream `evals/` fixtures were deleted. They are test harnesses for the vendor's own repo, not
+  runtime content, and 65 of the affected lines lived in them.
+- 44 references to sibling skills that this kit installs under a different name
+  (`caption-writer` → `caption-writer-sms`, and likewise for thread and carousel) were repointed.
+- Dead pointers to files that do not exist upstream (`tools/integrations/veo.md`) were removed rather
+  than left dangling.
+- **No placeholder product name was invented.** A sweep for `ACME`, `ProductX`, `[TOOL]` and similar
+  returns nothing.
+
+Verification of the fork: 209 files, strict UTF-8 decode with zero failures, zero BOMs, zero
+executable files, every `name` equal to its directory, zero dangling relative `.md` links.
+
+Defect found and fixed during this work: the rewrites pushed four `description` fields past the
+specification's 1024-character limit (`batch-content-plan` reached 1109). They were trimmed to
+1003 or less, and `install.ps1` now rejects any skill that exceeds the limit, so this cannot recur
+silently.
+
+### SEC-16 — Fork maintenance burden
+
+**Severity: medium. Accepted deliberately.**
+
+27 of the 40 installed skills are forks this repository now owns. Consequences:
+
+- Upstream fixes and improvements do not arrive automatically. `update.ps1` reports drift and
+  explicitly refuses to merge; changes are hand-applied to `vendor/skills/<name>`.
+- Each merge risks reintroducing the product references. `verify.ps1` fails the installation if a
+  product name reappears, so the failure mode is loud rather than silent.
+- MIT permits modification provided the copyright and permission notices are retained. Both are
+  preserved: the licence text is in `THIRD_PARTY_NOTICES.md` and in every `PROVENANCE.md`, and each
+  fork records its upstream repository, commit and attribution.
+- `verify.ps1` also reports how many uninstalled sibling skills the installed set references. That
+  count is currently **44**. The global `AGENTS.md` instructs the agent to treat those as
+  unavailable rather than to invent their contents.
+
+This is a real ongoing cost. It was chosen over the alternatives because the affected skills cover
+community management, moderation and reply drafting, which are the user's core job.
+
+### SEC-17 — Python and Node.js are now installed
+
+**Severity: medium. Accepted at the user's request.**
+
+Phase 1 found neither runtime present. The user asked for both to be installed. `install.ps1
+-InstallPrerequisites` installs `Python.Python.3.13` and `OpenJS.NodeJS.LTS` through `winget`, off by
+default and never run automatically.
+
+This enlarges the supply-chain surface of the machine. Two points bound the risk:
+
+- The core remains Node-free. All 40 installed skills are markdown. Neither OpenCode's CLI nor
+  Cline's sidecar needs system Node.
+- The only Python dependency in the reviewed set was `frontend-design`'s stdlib-only contrast
+  checker, which was **excluded** from the vendored copy so the installed set stays
+  executable-free. `impeccable` needs no runtime at all; its launcher is a self-contained binary,
+  and it is also excluded.
+
+If the prerequisites turn out to be unnecessary, removing them does not affect the installed setup.
+
+### SEC-18 — og-image redistributes content with no licence grant
+
+**Severity: high, accepted by the user.**
+
+`og-image` from `stevysmith/og-image-skill` has no LICENSE file at the pinned commit. Default
+copyright applies, so there is no grant of redistribution rights. This was put to the user explicitly
+and **accepted on 2026-10-04**. It is the only such entry in the default install.
+
+Recorded in `manifest/skills.json` as `licenseRisk: ACCEPTED-BY-USER-2026-10-04` and in
+`THIRD_PARTY_NOTICES.md`. Removal is a one-line manifest change if this ever becomes a problem for
+publication.
 
 ### SEC-08 — Network- and service-dependent journalism skills
 
@@ -333,31 +409,37 @@ manifest change.
 
 ---
 
-## Residual risks after Phase 2
+## Residual risks after Phase 3
 
-1. **Vendor-framing risk (SEC-07) remains open** pending a user decision. Mitigated in Phase 3 by an
-   explicit instruction in the global `AGENTS.md`, but the underlying text is unmodified upstream.
-2. **`og-image` is blocked only by a missing license.** If upstream adds one, it becomes a good
-   media-site fit and should be reconsidered.
-3. **Upstream drift.** Every core skill is pinned to a commit, so behavior cannot change silently.
-   But pinning also means upstream security fixes will not arrive automatically; Phase 3's
-   `update.ps1` must review diffs rather than pull blindly.
-4. **Local-clone inspection limitation.** Upstream repositories were read as shallow clones at
-   pinned commits. CI workflows, release branches and historical commits were not audited. For
-   instruction-only skills with permissive licenses this is proportionate, but it is not equivalent
-   to a full supply-chain audit.
-5. **Documentation-versus-runtime divergence.** Cline's public skills documentation contradicts its
-   own runtime on the global `~/.agents/skills` path. Phase 4 verification must therefore test
-   observable behavior, not documentation.
-6. **Runtime prerequisites remain partly unknown.** No Python interpreter is confirmed, so
-   `frontend-design`'s stdlib contrast checker would need one. Node.js is absent and the core
-   deliberately avoids it.
-7. **The hardlink compatibility link has not been created yet.** Phase 1 proved it is technically
-   viable (hard links work unelevated; symbolic links do not), but Phase 4 must prove OpenCode
-   actually loads instructions through it, and must confirm that replacing the canonical file via
-   write-temp-then-move does not orphan the link.
-
-## Rules carried into Phase 3
+1. **Vendor-framing risk (SEC-07) is resolved by forking.** 27 skills are sanitised forks with
+   provenance records, and `verify.ps1` fails the installation if a product name reappears. The
+   residual cost is the maintenance burden recorded in SEC-16.
+2. **`og-image` ships with no licence grant, accepted by the user** (SEC-18). Reconsider if upstream
+   ever adds a licence.
+3. **Upstream drift.** Every skill is pinned to a commit, so behaviour cannot change silently. But
+   pinning also means upstream security fixes will not arrive automatically, and 27 forks need
+   hand-merging. `update.ps1` reports drift and deliberately refuses to merge.
+4. **44 uninstalled sibling skills are referenced** by the installed set. An agent that reads a
+   handoff pointing at, say, `scheduling-and-queue` will not find it. The global `AGENTS.md` tells
+   it to say so plainly and do the work itself rather than invent content, and `verify.ps1` reports
+   the count so the drift stays visible.
+5. **Shallow-clone inspection, not a full supply-chain audit.** Upstream repositories were read as
+   shallow clones at pinned commits. CI workflows, release branches and history were not audited.
+   Proportionate for instruction-only, permissively licensed skills, but worth stating plainly.
+6. **Behavioural validation is still pending.** Phase 3 proved path resolution, frontmatter
+   validity, idempotency, non-destructive refusal and uninstall, all inside a sandbox. It has *not*
+   yet proved that OpenCode and Cline actually load these skills, or that OpenCode loads the global
+   instructions through the hard link. That is Phase 4.
+7. **Documentation-versus-runtime divergence persists.** Cline's public skills documentation
+   contradicts its own runtime on the global `~/.agents/skills` path, so Phase 4 must verify
+   observable behaviour rather than documentation.
+8. **Python and Node.js are installed at the user's request** (SEC-17), enlarging the machine's
+   supply-chain surface even though the core needs neither.
+9. **The hard link is technically proven but not behaviourally proven.** Phase 1 proved hard links
+   work unelevated and symbolic links do not. Phase 3 proved the installer creates, verifies,
+   repairs and removes the link, including the orphaned case. Phase 4 must still prove OpenCode
+   loads instructions through it.
+## Rules carried into Phase 4
 
 1. Install only manifest-declared subdirectories, at manifest-pinned commits.
 2. Re-verify the license file exists at the pinned ref before staging; abort on mismatch.
