@@ -296,8 +296,8 @@ newsroom-agent-kit/
 - [x] Add clear errors and remediation guidance.
 - [x] Add `docs/troubleshooting.md`.
 - [x] Add automated/static checks for malformed `SKILL.md` metadata where practical.
-- [ ] Commit implementation and checklist progress.
-- [ ] Verify `git status` is clean.
+- [x] Commit implementation and checklist progress.
+- [x] Verify `git status` is clean.
 
 ### Exit criteria
 
