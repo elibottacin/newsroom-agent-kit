@@ -15,6 +15,32 @@ Revalidate everything against current upstream documentation before installation
 > - Symbolic links are **not** usable on this machine (no elevation, Developer Mode off); hard links are. This determined the compatibility mechanism choice.
 >
 > The skill-candidate research below is still unvalidated and remains Phase 2 work.
+>
+> **Status update after Phase 2.** Phase 2 research is complete. Confirmed outcomes, with evidence
+> in `docs/discovery.md`, decisions in `docs/security.md`, and the machine-readable selection in
+> `manifest/skills.json`:
+>
+> - **Corrected seed errors.** `notque/vexjoy-agent` contains neither `fact-check` nor
+>   `content-calendar`. `coreyhaines31/marketingskills` has `social`, not `social-content`. Both
+>   repositories were rejected as bundles.
+> - **Rejected three mega-bundles** on size and executable surface: `affaan-m/ecc` (1027 skills),
+>   `PracticalSwan/agent-skills` (248), `notque/vexjoy-agent` (62 with hooks, plugins, services).
+>   Two single subdirectories were extracted from them.
+> - **Rejected `npx skills` as the installer.** It targets `~/.config/opencode/skills` for OpenCode,
+>   which breaks the canonical architecture; its default symlink method fails on this machine; it
+>   ships telemetry; and it requires absent Node.js.
+> - **Resolved both flagged boundaries.** Hallmark has **no** functional Together AI dependency
+>   (branding line only, zero API references across 107 files). Impeccable's CLI needs **no** Node,
+>   but **downloads a binary on first run**, so the default install is instruction-layer only.
+> - **Licensing changed three outcomes.** `vercel-labs/agent-skills` and `accesslint/skills` have no
+>   LICENSE file and were rejected; `og-image` is blocked as `needs-review`.
+> - **Accessibility resolved without any service.** `accessibility-compliance` (MIT, zero code)
+>   replaces the MCP-gated `accessibility-audit`.
+> - **Design settled on two skills, not four:** `impeccable` as primary plus `web-design-guidelines`
+>   as a lightweight review pass. `hallmark` and `frontend-design` are optional.
+> - Final core: **18 instruction-only skills**, no executable files, no accounts, no API keys.
+>
+> Nothing has been installed. Phase 3 builds the installer; Phase 4 applies it.
 
 ## Portable Agent Skills foundation
 

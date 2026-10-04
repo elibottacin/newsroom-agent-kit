@@ -37,6 +37,9 @@ state/
 .env.local
 *.local.json
 
+# Throwaway upstream clones used for source review during discovery/research
+.research/
+
 # Editor / OS noise
 .vscode/
 !.vscode/extensions.json

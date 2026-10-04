@@ -134,98 +134,98 @@ These are research leads, not pre-approved installs.
 
 #### Cross-agent foundation
 
-- [ ] Revalidate the Agent Skills `SKILL.md` format and current portable directory conventions.
-- [ ] Revalidate OpenCode global `.agents/skills` discovery.
-- [ ] Revalidate Cline global `.agents/skills` discovery and global `.agents/AGENTS.md` behavior from current runtime/docs.
-- [ ] Revalidate OpenCode global instruction discovery and identify the smallest compatibility mechanism only if it still does not consume `~/.agents/AGENTS.md` directly.
-- [ ] Identify additional coding agents that natively support the shared Agent Skills / `.agents` convention, solely to document compatibility—not to add vendor-specific installation branches.
-- [ ] Evaluate whether a third-party skills manager adds value or whether this repo should manage canonical installs itself.
-- [ ] Explicitly evaluate the tradeoff between the `npx skills` CLI and a custom PowerShell installer. Do not let a tool silently violate the canonical `%USERPROFILE%\.agents` architecture.
+- [x] Revalidate the Agent Skills `SKILL.md` format and current portable directory conventions.
+- [x] Revalidate OpenCode global `.agents/skills` discovery.
+- [x] Revalidate Cline global `.agents/skills` discovery and global `.agents/AGENTS.md` behavior from current runtime/docs.
+- [x] Revalidate OpenCode global instruction discovery and identify the smallest compatibility mechanism only if it still does not consume `~/.agents/AGENTS.md` directly.
+- [x] Identify additional coding agents that natively support the shared Agent Skills / `.agents` convention, solely to document compatibility—not to add vendor-specific installation branches.
+- [x] Evaluate whether a third-party skills manager adds value or whether this repo should manage canonical installs itself.
+- [x] Explicitly evaluate the tradeoff between the `npx skills` CLI and a custom PowerShell installer. Do not let a tool silently violate the canonical `%USERPROFILE%\.agents` architecture.
 
 #### Newsroom/editorial and factual integrity
 
-- [ ] Evaluate `jamditis/claude-skills-journalism` → `newsroom-style`.
-- [ ] Evaluate `jamditis/claude-skills-journalism` → `source-verification`.
-- [ ] Evaluate `notque/vexjoy-agent` → `fact-check`.
-- [ ] Evaluate `notque/vexjoy-agent` → `news-collection`.
-- [ ] Decide whether newsroom-style plus source-verification are sufficient or whether fact-check/news-collection add distinct value.
+- [x] Evaluate `jamditis/claude-skills-journalism` → `newsroom-style`.
+- [x] Evaluate `jamditis/claude-skills-journalism` → `source-verification`.
+- [x] Evaluate `notque/vexjoy-agent` → `fact-check`.
+- [x] Evaluate `notque/vexjoy-agent` → `news-collection`.
+- [x] Decide whether newsroom-style plus source-verification are sufficient or whether fact-check/news-collection add distinct value.
 
 #### Social/community/content
 
-- [ ] Evaluate `social-media-skills/skills` → `brand-profile`.
-- [ ] Evaluate `social-media-skills/skills` channel-specific skills that are actually relevant to the user's platforms.
-- [ ] Evaluate `coreyhaines31/marketingskills` → `social-content`.
-- [ ] Evaluate `coreyhaines31/marketingskills` → `copywriting`.
-- [ ] Evaluate `blacktwist/social-media-skills` → `content-calendar-sms`.
-- [ ] Evaluate `notque/vexjoy-agent` → `content-calendar`.
-- [ ] Evaluate `scrapecreators/social-media-research-skills` → `content-repurposing`.
-- [ ] Evaluate `social-media-skills/skills` → `content-audit`.
-- [ ] Evaluate `social-media-skills/skills` → `design-and-templates`.
-- [ ] Avoid installing two calendar systems unless there is a clear operational reason.
-- [ ] Avoid installing multiple repurposing/brand-context systems unless they have clearly distinct jobs.
-- [ ] Evaluate whether a dedicated `brand-voice` skill adds value beyond `brand-profile`.
+- [x] Evaluate `social-media-skills/skills` → `brand-profile`.
+- [x] Evaluate `social-media-skills/skills` channel-specific skills that are actually relevant to the user's platforms.
+- [x] Evaluate `coreyhaines31/marketingskills` → `social-content`.
+- [x] Evaluate `coreyhaines31/marketingskills` → `copywriting`.
+- [x] Evaluate `blacktwist/social-media-skills` → `content-calendar-sms`.
+- [x] Evaluate `notque/vexjoy-agent` → `content-calendar`.
+- [x] Evaluate `scrapecreators/social-media-research-skills` → `content-repurposing`.
+- [x] Evaluate `social-media-skills/skills` → `content-audit`.
+- [x] Evaluate `social-media-skills/skills` → `design-and-templates`.
+- [x] Avoid installing two calendar systems unless there is a clear operational reason.
+- [x] Avoid installing multiple repurposing/brand-context systems unless they have clearly distinct jobs.
+- [x] Evaluate whether a dedicated `brand-voice` skill adds value beyond `brand-profile`.
 
 #### Website/content/SEO
 
-- [ ] Evaluate `vercel-labs/agent-skills` → `writing-guidelines`.
-- [ ] Evaluate a single SEO skill. Compare at least:
+- [x] Evaluate `vercel-labs/agent-skills` → `writing-guidelines`.
+- [x] Evaluate a single SEO skill. Compare at least:
   - `affaan-m/ecc` → `seo`;
   - `iannuttall/seo` → `seo`;
   - one other strong current candidate if research finds a better fit.
-- [ ] Prefer a skill appropriate to an editorial/media website rather than SaaS-only marketing.
+- [x] Prefer a skill appropriate to an editorial/media website rather than SaaS-only marketing.
 
 #### Design and web design
 
-- [ ] Evaluate `pbakaus/impeccable` → `impeccable` as a first-class candidate for production-grade UI design, critique, audit, polish, typography, layout, accessibility, responsive behavior, design-system context, and deterministic anti-pattern detection.
-- [ ] Inspect Impeccable's optional CLI/hook layer separately from the portable skill itself. Record Node/runtime requirements and do not require hooks for the agent-agnostic core unless they provide clear value.
-- [ ] Evaluate `Nutlope/hallmark` → `hallmark` as a first-class candidate for anti-AI-slop design, structural variety, redesign/audit workflows, design extraction from screenshots/URLs, and portable design-system output.
-- [ ] Inspect Hallmark's Together AI dependency/capability boundary and determine which features work as a plain portable skill versus which require external services. External-service-dependent features must not silently enter the no-account-required core.
-- [ ] Evaluate `PracticalSwan/agent-skills` → `frontend-design`.
-- [ ] Evaluate `vercel-labs/agent-skills` → `web-design-guidelines`.
-- [ ] Compare **Impeccable vs Hallmark vs frontend-design vs web-design-guidelines** for overlap, portability, context cost, executable dependencies, external-service requirements, design quality, audit capabilities, accessibility, and fit for editorial/media websites.
-- [ ] Prefer the smallest complementary combination. Do not install all four if one or two cover the workflow better.
-- [ ] Consider a structure such as one primary design-generation/refinement skill plus one lightweight standards/review skill if evidence supports it.
-- [ ] Evaluate whether a dedicated design-system skill is useful or redundant after the comparison above.
-- [ ] Evaluate `accesslint/skills` → `accessibility-audit` or a lower-dependency WCAG alternative; install only if its execution/dependency model passes review.
-- [ ] Evaluate an Open Graph/social-preview image skill such as `stevysmith/og-image-skill` → `og-image` if it fits media-site workflows.
-- [ ] Prefer accessible, responsive, production-quality web design guidance over purely stylistic prompting.
+- [x] Evaluate `pbakaus/impeccable` → `impeccable` as a first-class candidate for production-grade UI design, critique, audit, polish, typography, layout, accessibility, responsive behavior, design-system context, and deterministic anti-pattern detection.
+- [x] Inspect Impeccable's optional CLI/hook layer separately from the portable skill itself. Record Node/runtime requirements and do not require hooks for the agent-agnostic core unless they provide clear value.
+- [x] Evaluate `Nutlope/hallmark` → `hallmark` as a first-class candidate for anti-AI-slop design, structural variety, redesign/audit workflows, design extraction from screenshots/URLs, and portable design-system output.
+- [x] Inspect Hallmark's Together AI dependency/capability boundary and determine which features work as a plain portable skill versus which require external services. External-service-dependent features must not silently enter the no-account-required core.
+- [x] Evaluate `PracticalSwan/agent-skills` → `frontend-design`.
+- [x] Evaluate `vercel-labs/agent-skills` → `web-design-guidelines`.
+- [x] Compare **Impeccable vs Hallmark vs frontend-design vs web-design-guidelines** for overlap, portability, context cost, executable dependencies, external-service requirements, design quality, audit capabilities, accessibility, and fit for editorial/media websites.
+- [x] Prefer the smallest complementary combination. Do not install all four if one or two cover the workflow better.
+- [x] Consider a structure such as one primary design-generation/refinement skill plus one lightweight standards/review skill if evidence supports it.
+- [x] Evaluate whether a dedicated design-system skill is useful or redundant after the comparison above.
+- [x] Evaluate `accesslint/skills` → `accessibility-audit` or a lower-dependency WCAG alternative; install only if its execution/dependency model passes review.
+- [x] Evaluate an Open Graph/social-preview image skill such as `stevysmith/og-image-skill` → `og-image` if it fits media-site workflows.
+- [x] Prefer accessible, responsive, production-quality web design guidance over purely stylistic prompting.
 
 #### Additional discovery areas
 
 The seed list is intentionally incomplete. Search for strong current candidates in these capability areas and add them to the comparison when they provide distinct value:
 
-- [ ] Content repurposing: article/video/transcript → platform-native social derivatives.
-- [ ] Content audit and analytics/reporting: identify winning/weak content and feed planning decisions.
-- [ ] Community management: comment/reply moderation, response drafting, escalation rules, sentiment/issue triage, and community playbooks.
-- [ ] Headline/hook/caption craftsmanship suitable for a news/media brand rather than only SaaS marketing.
-- [ ] Visual/social template systems, brand kits, and repeatable asset production.
-- [ ] Image/creative asset workflows, including Open Graph/social preview assets where appropriate.
-- [ ] Web accessibility/WCAG review for public-facing media pages.
-- [ ] Editorial web publishing/CMS workflows, including WordPress or another CMS only when broadly useful and not overly site-specific.
-- [ ] Browser/web QA skills useful for checking live pages, responsive layouts, metadata, previews, and publishing output.
-- [ ] Research/news monitoring and source-grounded content workflows that do not encourage fabrication or unattributed reuse.
-- [ ] Translation/localization and adaptation workflows if a high-quality portable candidate exists.
-- [ ] Reject generic mega-skill bundles when a smaller, auditable specialist set covers the same needs.
+- [x] Content repurposing: article/video/transcript → platform-native social derivatives.
+- [x] Content audit and analytics/reporting: identify winning/weak content and feed planning decisions.
+- [x] Community management: comment/reply moderation, response drafting, escalation rules, sentiment/issue triage, and community playbooks.
+- [x] Headline/hook/caption craftsmanship suitable for a news/media brand rather than only SaaS marketing.
+- [x] Visual/social template systems, brand kits, and repeatable asset production.
+- [x] Image/creative asset workflows, including Open Graph/social preview assets where appropriate.
+- [x] Web accessibility/WCAG review for public-facing media pages.
+- [x] Editorial web publishing/CMS workflows, including WordPress or another CMS only when broadly useful and not overly site-specific.
+- [x] Browser/web QA skills useful for checking live pages, responsive layouts, metadata, previews, and publishing output.
+- [x] Research/news monitoring and source-grounded content workflows that do not encourage fabrication or unattributed reuse.
+- [x] Translation/localization and adaptation workflows if a high-quality portable candidate exists.
+- [x] Reject generic mega-skill bundles when a smaller, auditable specialist set covers the same needs.
 
 #### Optional MCP/plugins
 
 These must remain optional unless the user explicitly wants them.
 
-- [ ] Evaluate the official Figma MCP server for design-context/design-to-code workflows and verify whether the installed OpenCode/Cline surfaces can currently use it.
-- [ ] Evaluate the official Canva MCP server for media/design production and determine whether it is useful for this user's workflow.
-- [ ] Inspect the official Cline plugin catalog for useful capabilities such as browser automation or image generation, but mark Cline-only capabilities as agent-specific rather than part of the portable core.
-- [ ] Search for cross-agent browser/web preview or accessibility tooling that improves website-content/design work without unnecessary cloud dependencies.
-- [ ] Do not authenticate or connect any external account during discovery.
+- [x] Evaluate the official Figma MCP server for design-context/design-to-code workflows and verify whether the installed OpenCode/Cline surfaces can currently use it.
+- [x] Evaluate the official Canva MCP server for media/design production and determine whether it is useful for this user's workflow.
+- [x] Inspect the official Cline plugin catalog for useful capabilities such as browser automation or image generation, but mark Cline-only capabilities as agent-specific rather than part of the portable core.
+- [x] Search for cross-agent browser/web preview or accessibility tooling that improves website-content/design work without unnecessary cloud dependencies.
+- [x] Do not authenticate or connect any external account during discovery.
 
 ### Selection deliverables
 
-- [ ] Create `docs/discovery.md` with evidence and decisions.
-- [ ] Create `docs/security.md` with supply-chain and capability risk notes.
-- [ ] Create `manifest/skills.json` containing the curated skill set with source metadata and intended install status.
-- [ ] Create `manifest/integrations.json` for optional MCP/plugins.
-- [ ] Keep the default core reasonably small; avoid context/trigger clutter.
-- [ ] Commit discovery, manifests, and plan progress.
-- [ ] Verify `git status` is clean.
+- [x] Create `docs/discovery.md` with evidence and decisions.
+- [x] Create `docs/security.md` with supply-chain and capability risk notes.
+- [x] Create `manifest/skills.json` containing the curated skill set with source metadata and intended install status.
+- [x] Create `manifest/integrations.json` for optional MCP/plugins.
+- [x] Keep the default core reasonably small; avoid context/trigger clutter.
+- [x] Commit discovery, manifests, and plan progress.
+- [x] Verify `git status` is clean.
 
 ### Exit criteria
 

@@ -1,0 +1,189 @@
+{
+  "$comment": "Optional integrations for the newsroom-agent-kit. Phase 2 discovery output. NONE of these are installed, connected, or authenticated by this project. Every entry requires explicit user approval and, in most cases, an external account. The portable skill core is fully useful without any of them.",
+  "schemaVersion": 1,
+  "generated": "2026-10-04",
+  "policy": {
+    "defaultState": "not-installed",
+    "connectDuringDiscovery": false,
+    "requiresExplicitUserApproval": true,
+    "mayRequirePaidPlan": true,
+    "mayRequireAccount": true,
+    "rationale": "MCP servers and executable plugins are capability layers, not part of the portable skill core. Connecting an external account is never done implicitly."
+  },
+  "integrations": [
+    {
+      "id": "figma-mcp",
+      "name": "Figma MCP server (official, remote)",
+      "category": "design-context",
+      "status": "optional-not-installed",
+      "transport": "remote-mcp",
+      "vendor": "Figma (official)",
+      "docs": "https://developers.figma.com/docs/figma-mcp-server/",
+      "valueForThisUser": "Design-context extraction and design-to-code against a real design system; write-to-canvas in supported clients.",
+      "requiresAccount": true,
+      "requiresPaidPlan": "conditional",
+      "paidPlanEvidence": "Access depends on plan and seat type. Starter seats get up to 20 tool calls per month. View/Collab seats on Organization or Enterprise get up to 6 per month. Dev/Full seats get up to 200/day on Professional and up to 600/day on Enterprise. See https://developers.figma.com/docs/figma-mcp-server/rate-limits-access/",
+      "authMethod": "OAuth login per user",
+      "clientSupportRisk": "unverified",
+      "clientSupportNote": "Figma states that only clients listed in the Figma MCP Catalog can connect, and that new clients must join a waitlist. Whether the installed OpenCode 2.0.22 and Cline 0.0.43 are catalog-listed is NOT verified. Treat as likely blocked until confirmed at https://www.figma.com/mcp-catalog/.",
+      "additionalNote": "Figma also publishes its own skills for MCP clients. Those would be agent-specific and must not be added to the canonical .agents core.",
+      "installAction": "none",
+      "phase": "future-optional"
+    },
+    {
+      "id": "canva-mcp",
+      "name": "Canva MCP server (official, remote)",
+      "category": "design-and-brand-assets",
+      "status": "optional-not-installed",
+      "transport": "remote-mcp",
+      "vendor": "Canva (official)",
+      "docs": "https://www.canva.dev/docs/apps/mcp/",
+      "valueForThisUser": "Design generation and editing, brand kits and asset management, multi-format export, and commenting for social asset production.",
+      "requiresAccount": true,
+      "requiresPaidPlan": "unknown",
+      "paidPlanEvidence": "Not established from the documentation reviewed.",
+      "authMethod": "Canva Developer Platform app plus per-user OAuth",
+      "clientSupportRisk": "unverified",
+      "clientSupportNote": "The published documentation is written for IT admins and for teams embedding Canva into their own assistants, not for an individual connecting a personal coding agent. Individual setup is documented separately in the Canva Help Center.",
+      "installAction": "none",
+      "phase": "future-optional"
+    },
+    {
+      "id": "cline-plugin-agent-browser",
+      "name": "Cline plugin: agent-browser",
+      "category": "browser-automation",
+      "status": "optional-not-installed",
+      "transport": "cline-plugin",
+      "vendor": "cline/plugins",
+      "docs": "https://github.com/cline/plugins",
+      "source": {
+        "repo": "cline/plugins",
+        "license": "Apache-2.0",
+        "ref": "96bde661f630ec23c1ce0cd86a2361a9959ef65a",
+        "refDate": "2026-09-18",
+        "subdir": "plugins/agent-browser"
+      },
+      "valueForThisUser": "Browser automation for checking live pages and publishing output.",
+      "requiresAccount": false,
+      "requiresPaidPlan": false,
+      "agentSpecific": true,
+      "risk": "Executable TypeScript plugin that runs inside Cline. Not portable and not part of the agent-agnostic core.",
+      "installAction": "none",
+      "phase": "future-optional"
+    },
+    {
+      "id": "cline-plugin-jev-browser",
+      "name": "Cline plugin: jev-browser",
+      "category": "browser-automation",
+      "status": "optional-not-installed",
+      "transport": "cline-plugin",
+      "vendor": "cline/plugins",
+      "docs": "https://github.com/cline/plugins",
+      "source": {
+        "repo": "cline/plugins",
+        "license": "Apache-2.0",
+        "ref": "96bde661f630ec23c1ce0cd86a2361a9959ef65a",
+        "refDate": "2026-09-18",
+        "subdir": "plugins/jev-browser"
+      },
+      "valueForThisUser": "Browser control with recording overlay and model-driven navigation.",
+      "requiresAccount": true,
+      "requiresPaidPlan": "unknown",
+      "agentSpecific": true,
+      "risk": "Highest-risk item reviewed. Executable TypeScript with dedicated credentials.ts, credentials.test.ts, a bundled remote-helper binary per platform, and IPC. It stores and manages external service credentials. Do not install without a dedicated review.",
+      "installAction": "none",
+      "phase": "future-optional"
+    },
+    {
+      "id": "accesslint-mcp",
+      "name": "AccessLint MCP server",
+      "category": "accessibility",
+      "status": "rejected-for-core",
+      "transport": "mcp",
+      "docs": "https://github.com/accesslint/skills",
+      "valueForThisUser": "Would power the accesslint accessibility-audit, accessibility-scan and accessibility-inspect skills.",
+      "reasonNotSelected": "Every accesslint skill declares AccessLint MCP tools in allowed-tools, so the skills are inert without this server. The repository also has no LICENSE file. The core already covers WCAG guidance through the instruction-only accessibility-compliance skill.",
+      "installAction": "none",
+      "phase": "not-planned"
+    },
+    {
+      "id": "scrapecreators-api",
+      "name": "ScrapeCreators REST API",
+      "category": "social-research",
+      "status": "optional-not-installed",
+      "transport": "rest-api",
+      "vendor": "ScrapeCreators",
+      "docs": "https://github.com/ScrapeCreators/social-media-research-skills",
+      "valueForThisUser": "Cross-platform social scraping: profiles, posts, comments, transcripts, ads, trends and engagement metrics.",
+      "requiresAccount": true,
+      "requiresPaidPlan": "yes",
+      "authMethod": "SCRAPECREATORS_API_KEY environment variable",
+      "riskNote": "The public-post research skills in that repository are declared as requiring this key, so the whole family is gated behind a paid service. It also carries a scraping/ToS dimension the user should consider before use.",
+      "installAction": "none",
+      "phase": "future-optional"
+    },
+    {
+      "id": "impeccable-cli",
+      "name": "Impeccable CLI and design-detector hook",
+      "category": "design",
+      "status": "optional-not-installed",
+      "transport": "local-binary",
+      "vendor": "pbakaus/impeccable",
+      "docs": "https://github.com/pbakaus/impeccable",
+      "source": {
+        "repo": "pbakaus/impeccable",
+        "license": "Apache-2.0",
+        "ref": "6e802bd0ed99f53180e2359fddab6da8d97970d9",
+        "refDate": "2026-10-04",
+        "subdir": ".agents/skills/impeccable/scripts"
+      },
+      "valueForThisUser": "Deterministic anti-pattern detection after UI edits, live browser iteration, and project context loading.",
+      "requiresAccount": false,
+      "requiresPaidPlan": false,
+      "requiresRuntime": "self-contained launcher; upstream states no Node or other runtime is required",
+      "riskNote": "No prebuilt binary is committed at the pinned ref. The launcher downloads a binary on first run, which means remote code execution at install time and on every upgrade. The skill degrades gracefully if the launcher is unavailable.",
+      "installAction": "none",
+      "phase": "future-optional",
+      "decision": "The portable instruction layer is installed as core; the CLI, hooks and live-browser layer stay out of the default install."
+    },
+    {
+      "id": "github-cli",
+      "name": "GitHub CLI (gh)",
+      "category": "tooling-prerequisite",
+      "status": "required-later-not-installed",
+      "transport": "cli",
+      "vendor": "GitHub",
+      "docs": "https://cli.github.com/",
+      "valueForThisUser": "Required only to create and publish this repository in Phase 6.",
+      "requiresAccount": true,
+      "requiresPaidPlan": false,
+      "installPlan": "winget install GitHubCLI, then gh auth login interactively with the user present. Never store or print a token.",
+      "installAction": "none",
+      "phase": "6"
+    },
+    {
+      "id": "nodejs",
+      "name": "Node.js / npm",
+      "category": "tooling-prerequisite",
+      "status": "optional-not-installed",
+      "transport": "cli",
+      "vendor": "Node.js Foundation",
+      "valueForThisUser": "Only needed for Node-based optional tooling. The selected core is deliberately Node-free, and neither OpenCode's CLI nor Cline's sidecar needs system Node.",
+      "requiresAccount": false,
+      "requiresPaidPlan": false,
+      "installPlan": "Do not install by default. Add only if the user opts into a Node-dependent optional integration.",
+      "installAction": "none",
+      "phase": "future-optional"
+    }
+  ],
+  "notEvaluated": [
+    {
+      "item": "Google Docs / Sheets / Canva-adjacent CMS MCP servers",
+      "reason": "Out of scope for a community manager and newsroom workflow unless the user names a specific tool."
+    },
+    {
+      "item": "Translation and localization MCP servers",
+      "reason": "No skill in this area was selected, so no integration was researched."
+    }
+  ]
+}

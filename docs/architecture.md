@@ -81,6 +81,31 @@ It is acceptable and desirable to say:
 
 Additional agents should be documented in a compatibility matrix as they are verified. Native `.agents` support should require no installation branch beyond the canonical setup.
 
+### Compatibility matrix
+
+Two different properties must be recorded separately. An agent can support the Agent Skills
+**format** while reading global skills from a **vendor directory**. Only the second property
+determines whether this kit needs a compatibility step.
+
+| Agent | Agent Skills format | Global skills path | Compatibility step needed |
+|---|---|---|---|
+| Cline | yes | `~/.agents/skills/` | none |
+| OpenCode | yes | `~/.agents/skills/` (also reads `~/.config/opencode/skills/` and `~/.claude/skills/`) | none for skills |
+| OpenCode (global instructions) | n/a | `~/.config/opencode/AGENTS.md` only | **one hard link** (see above) |
+| Zed, Warp, Dexto, Kimi Code CLI, Loaf, Sarvam Code | yes | `~/.agents/skills/` | none |
+| Gemini CLI | yes | `~/.gemini/skills/` | documented vendor link |
+| GitHub Copilot | yes | `~/.copilot/skills/` | documented vendor link |
+| Claude Code | yes | `~/.claude/skills/` | documented vendor link |
+| Codex, Cursor, Kiro, Roo Code, Factory, Amp, OpenHands, Goose, Mistral Vibe, Junie, TRAE | yes | vendor-specific | documented vendor link |
+| Freebuff Desktop 0.0.158 (installed here) | **unverified** | **unverified** | unknown — verify before claiming support |
+
+Global-path data for agents other than the two tested implementations is taken from the `skills`
+CLI's supported-agent table, not from each agent's own documentation. Treat it as indicative and
+re-verify before publishing a compatibility claim.
+
+When adding another agent, prefer its native support for `%USERPROFILE%\.agents`. If it only reads a
+vendor directory, document the single minimal link needed — do not duplicate the skill files.
+
 ## Repository role
 
 The GitHub repository is the reproducible definition of the setup, not the live canonical runtime directory.
