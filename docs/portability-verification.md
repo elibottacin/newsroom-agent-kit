@@ -150,3 +150,14 @@ installation of 40 skills. `verify.ps1` reports **zero executable files** across
 
 Python 3.13.15 happens to be present on this machine because the user asked for it, and Node.js is
 not installed. Neither affected any result above.
+
+## 7. Published location
+
+- Repository: https://github.com/elibottacin/newsroom-agent-kit
+- Visibility: **public**, confirmed by the user before creation
+- Default branch: `main`
+- Clone URL used in both READMEs: `git clone https://github.com/elibottacin/newsroom-agent-kit`
+
+The `{{REPO_URL}}` placeholder that stood in through Phases 3 to 5 was replaced with the real URL in
+both `README.md` and `README.es.md`, three occurrences each: the copy/paste installation prompt, the
+manual clone command, and the compatibility reference.

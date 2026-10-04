@@ -105,7 +105,7 @@ compatible para que lo haga por vos:
 ```text
 Set up my global coding-agent skills from this repository on this Windows PC.
 
-Clone {{REPO_URL}}, read its README and installation instructions, and follow the
+Clone https://github.com/elibottacin/newsroom-agent-kit, read its README and installation instructions, and follow the
 repository's supported install path. Use %USERPROFILE%\.agents as the canonical global
 source for AGENTS.md and skills. Preserve and back up any existing user configuration;
 do not silently overwrite unrelated settings. Detect the coding agents installed on this
@@ -117,7 +117,7 @@ repository's verification tooling, and report exactly what was installed, linked
 skipped, or needs my action.
 ```
 
-`{{REPO_URL}}` es un marcador de posición y se reemplazará por la URL real de GitHub al publicar.
+`https://github.com/elibottacin/newsroom-agent-kit` es un marcador de posición y se reemplazará por la URL real de GitHub al publicar.
 
 > El prompt de instalación está en inglés a propósito: es lo que vas a pegarle al agente, y los
 > agentes lo entienden mejor en inglés. Esta documentación es la que leés vos.
@@ -125,7 +125,7 @@ skipped, or needs my action.
 ### Opción 2 — correr los scripts a mano
 
 ```powershell
-git clone {{REPO_URL}} newsroom-agent-kit
+git clone https://github.com/elibottacin/newsroom-agent-kit newsroom-agent-kit
 cd newsroom-agent-kit
 
 # 1. traer los commits fijados de los que vienen las skills (esto va primero:

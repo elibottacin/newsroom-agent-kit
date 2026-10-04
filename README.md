@@ -105,7 +105,7 @@ let it do the work:
 ```text
 Set up my global coding-agent skills from this repository on this Windows PC.
 
-Clone {{REPO_URL}}, read its README and installation instructions, and follow the
+Clone https://github.com/elibottacin/newsroom-agent-kit, read its README and installation instructions, and follow the
 repository's supported install path. Use %USERPROFILE%\.agents as the canonical global
 source for AGENTS.md and skills. Preserve and back up any existing user configuration;
 do not silently overwrite unrelated settings. Detect the coding agents installed on this
@@ -117,12 +117,12 @@ repository's verification tooling, and report exactly what was installed, linked
 skipped, or needs my action.
 ```
 
-`{{REPO_URL}}` is a placeholder and will be replaced with the real GitHub URL at publication.
+`https://github.com/elibottacin/newsroom-agent-kit` is a placeholder and will be replaced with the real GitHub URL at publication.
 
 ### Option 2 — run the scripts yourself
 
 ```powershell
-git clone {{REPO_URL}} newsroom-agent-kit
+git clone https://github.com/elibottacin/newsroom-agent-kit newsroom-agent-kit
 cd newsroom-agent-kit
 
 # 1. fetch the pinned upstream commits the skills come from (run this first:
