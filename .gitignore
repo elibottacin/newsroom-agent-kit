@@ -1,0 +1,63 @@
+# Secrets and credentials — never commit
+*.env
+*.env.*
+.env
+.env.*
+secrets.json
+secrets.*.json
+*.pem
+*.key
+*.pfx
+*.p12
+credentials.json
+.netrc
+.npmrc
+auth.json
+token.json
+tokens.json
+cookies.txt
+*-cookies.txt
+
+# Local backups created by installer/uninstall tooling (machine-specific)
+backups/
+*.bak
+*.backup
+*.orig
+*.rej
+
+# Installer logs and local diagnostic output
+logs/
+*.log
+diagnostics/
+*.diagnostics.json
+
+# Machine-specific / generated local state
+state/
+.install-state.json
+.env.local
+*.local.json
+
+# Editor / OS noise
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*~
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Dependency / build caches
+node_modules/
+.cache/
+.temp/
+tmp/
+dist/
+build/
+coverage/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
