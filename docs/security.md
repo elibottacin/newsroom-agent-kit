@@ -618,6 +618,37 @@ extra tool definitions for no capability gain, because the CLI already exposes
 112 generated plus 19 hand-written command groups. Neither is added without user
 approval and a documented missing capability.
 
+### SEC-32 - `apikeys:list` returns the first API key unredacted
+
+Severity: **medium, upstream defect**. The command is `apikeys:list`, with no
+hyphen. Its response redacts every key correctly as a `keyPreview`
+(`sk_25d92...cb259700`) and then, separately, returns a top-level `firstApiKey`
+field containing a **complete, unredacted key**.
+
+Observed live in Phase 10. The value was the key created at signup, not the one
+`auth:login` wrote to `~/.zernio/config.json`, so the credential the kit actually
+uses was not exposed. Hashes of the two values were compared without printing
+either, and they differ. The signup key had never been used.
+
+That key was nonetheless a live full-scope, read-write credential, and it landed
+in an agent transcript. Response: the user was told plainly and asked to revoke
+it, and the kit's guidance is now not to run this command where output could be
+logged or pasted.
+
+The inconsistency is the real problem. Every key in the array is redacted, so the
+one plaintext field is plainly unintended rather than a documented export
+feature.
+
+### SEC-33 - Validation failures exit 0
+
+Severity: **low, but a real footgun**. `validate:post` returned
+`{"valid":false,"errors":[...]}` and the CLI still exited 0. An agent that trusted
+the exit code would proceed to schedule a post the API had already rejected.
+
+This is why the global instructions say to use `validate:post` and to read its
+result, rather than treating a zero exit as approval. The kit does not shell out
+to this command unattended, and the human-approval rule still applies.
+
 ## Residual risks after Phase 3
 
 1. **Vendor-framing risk (SEC-07) is resolved by forking.** 27 skills are sanitised forks with

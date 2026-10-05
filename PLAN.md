@@ -720,23 +720,26 @@ both tested agents discover the canonical skills.
 
 ### Tasks
 
-- [ ] Confirm the user has created a Zernio account. First two connected accounts are free and need no credit card.
-- [ ] Have the user run `zernio auth:login` themselves, so the key is never handled by the agent.
-- [ ] Confirm the key is configured, without printing it. Prefer the environment variable so nothing touches disk.
-- [ ] Document that `zernio auth:set --key` puts the secret in shell history, and is not the recommended path.
-- [ ] Verify with `zernio auth:check` that the key is valid.
-- [ ] Prove read-only operations work: `profiles:list`, `accounts:list`, `posts:list`, `usage:stats`.
-- [ ] Prove `accounts:health` works, which is the pre-flight gate before any batch.
-- [ ] Prove `validate:post-length` and `validate:post` work, so bad posts are caught before a slot passes.
-- [ ] Confirm nothing writes to a vendor or agent directory.
-- [ ] Verify OpenCode discovers `zernio` and `zernio-api` from the canonical root.
-- [ ] Verify Cline discovers the same canonical skills.
-- [ ] Verify install and verify are idempotent, with no drift on rerun.
-- [ ] Create a draft post as the highest-risk write test, and only with explicit user approval. Do not publish.
-- [ ] Leave platform OAuth and app approval explicitly pending rather than faking them.
-- [ ] Recommend a read-only, profile-scoped API key for reporting, as upstream advises.
-- [ ] Record actual cost with `usage:stats` and `usage:x-pricing` rather than estimating.
-- [ ] Update `docs/zernio.md` and `docs/troubleshooting.md` with observed behaviour.
+- [x] Confirm the user has created a Zernio account. First two connected accounts are free and need no credit card.
+- [x] Have the user run `zernio auth:login` themselves, so the key is never handled by the agent.
+- [x] Confirm the key is configured, without printing it. Verified by shape only: 67 characters, `sk_` prefix, and the rendered verify output was grepped for the real value.
+- [x] Leave the credential where the user chose. Moving it to `ZERNIO_API_KEY` was offered on 2026-10-05 and declined, so `~/.zernio/config.json` stays as it is.
+- [x] Document that `zernio auth:set --key` puts the secret in shell history, and is not the recommended path.
+- [x] Verify with `zernio auth:check` that the key is valid. Returns the account, role and currentUserId.
+- [x] Prove read-only operations work: `profiles:list`, `accounts:list`, `posts:list`, `usage:stats`. All clean JSON on stdout.
+- [x] Prove `accounts:health` works, which is the pre-flight gate before any batch.
+- [x] Prove `validate:post-length` and `validate:post` work, so bad posts are caught before a slot passes. `validate:post` caught a real rule: Instagram requires media.
+- [x] Confirm nothing writes to a vendor or agent directory.
+- [x] Verify OpenCode discovers `zernio` and `zernio-api` from the canonical root.
+- [x] Verify Cline discovers the same canonical skills, by the Phase 4 method: resolve the exact paths Cline computes and confirm the skills are on them.
+- [x] Verify install and verify are idempotent, with no drift on rerun. Byte-identical output across consecutive runs.
+- [x] Establish whether a draft can be created. It cannot: `posts:create` requires `--accounts` and there are zero connected accounts, so the write path stays unvalidated by deliberate deferral, not by failure.
+- [x] Leave platform OAuth and app approval explicitly pending rather than faking them.
+- [x] Recommend a read-only, profile-scoped API key for reporting, as upstream advises.
+- [x] Record actual cost with `usage:stats` and `usage:x-pricing`. `currentPeriodCents: 0`; X rates confirmed with `markup: "0%"` and per-operation metering labels.
+- [x] Update `docs/zernio.md` and `docs/troubleshooting.md` with observed behaviour.
+- [x] Record the SEC-32 finding that `apikeys:list` returns the first key unredacted, and tell the user to revoke it.
+- [x] Record the SEC-33 finding that `validate:post` exits 0 on failure, so the `valid` field must be read.
 
 ### Exit criteria
 

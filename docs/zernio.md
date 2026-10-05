@@ -391,7 +391,101 @@ In exchange: no local runtime, no data to back up, no server to patch, and a
 99.7%+ uptime claim with a public status page. For a single community manager's
 workflow on a 3.44 GB laptop, that is the better side of the trade.
 
-## Related
+## Observed behaviour (Phase 10, live against the real service)
+
+Recorded from actual responses, not from documentation. All calls were read-only
+and no account was connected at the time.
+
+### Authentication
+
+`zernio.cmd auth:check` returns the account, not just a boolean:
+
+```json
+{"success":true,"message":"API key is valid",
+ "users":[{"name":"...","role":"owner"}],"currentUserId":"..."}
+```
+
+### Read operations all return clean JSON on stdout
+
+| Command | Observed |
+|---|---|
+| `profiles:list` | one profile `Default`, `accountCount: 0` |
+| `accounts:list` | `{"accounts":[],"hasAnalyticsAccess":true}` |
+| `posts:list --limit 3` | `{"posts":[],"pagination":{"total":0,"pages":0}}` |
+| `usage:stats` | `planName: "Usage-Based"`, `connectedAccounts: 0`, `spend.currentPeriodCents: 0` |
+
+`hasAnalyticsAccess: true` on a usage-based account with zero connected accounts
+is **live evidence that analytics is not gated behind a paid add-on**, which
+resolves contradiction 1 in "Documentation inconsistencies" below in favour of the
+pricing page.
+
+### `accounts:health` is a usable pre-flight gate
+
+```json
+{"summary":{"total":0,"healthy":0,"warning":0,"error":0,"needsReconnect":0},"accounts":[]}
+```
+
+With accounts connected this is the check that catches an expired token or a
+rate-limited account before a batch is attempted.
+
+### The pre-flight validators work, and one caught a real rule
+
+`validate:post-length --text "Prueba corta"` returned per-platform limits for 15
+platforms and variants, from `snapchat` at 160 characters up to `facebook` at
+63,206.
+
+`validate:post --platforms "instagram,twitter,facebook"` returned:
+
+```json
+{"valid":false,"errors":[{"platform":"instagram",
+  "error":"Instagram posts require media content (images or videos)"}]}
+```
+
+**Operational gotcha: the CLI exits 0 even when validation fails.** The result must
+be read from the `valid` field. An agent that trusts the exit code would schedule
+a post the API had already said was invalid.
+
+### `usage:x-pricing` is better than the pricing page
+
+It returns `markup: "0%"`, a `lastVerified` date, and a `metering` label per
+operation, which the pricing page does not:
+
+| Metering label | Meaning |
+|---|---|
+| `always` | billed on every call: `content_create`, `dmSend`, article draft/publish |
+| `analytics_optin` | billed **only if analytics sync is switched on** |
+| `inbox_optin` | billed **only if inbox sync is switched on** |
+| `absorbed` | not billed separately |
+
+This is the practical cost-control lever: `posts_read` is `analytics_optin` and
+`inbox_optin`, so **with both opt-ins off, reading X posts costs nothing.**
+`content_create_with_url` is the `always` tier at $0.20.
+
+### Confirmed absences
+
+Searching the full `--help` output confirms the Phase 8B finding: there is **no**
+`blogs`, `wordpress`, `shopify`, `voice`, `calls`, general phone-number purchase,
+or `feedback` command. `whatsappphonenumbers:*` exists but is WhatsApp-specific,
+not the general phone-number inventory the API documents. This is why the
+`zernio-api` reference skill is installed alongside the CLI rather than instead of
+it.
+
+### `apikeys:list` leaks the first key in full — see SEC-32
+
+The command is `apikeys:list`, with no hyphen. Its response redacts each key as
+`keyPreview` (`sk_25d92...cb259700`) **but also returns a top-level `firstApiKey`
+field containing a complete, unredacted key.** The value is a different key from
+the one in `~/.zernio/config.json`, so the kit's own credential was not exposed,
+but it is a live full-scope read-write credential. Never run this command where
+its output might be logged or pasted, and revoke the signup key.
+
+### The write path cannot be validated without a connected account
+
+`posts:create` requires `--text` and `--accounts`, and `--draft` is a boolean
+flag. With zero connected accounts there is no `accountId` to pass, so no draft
+can be created. The write path stays unvalidated until an account is connected,
+which is a deliberate deferral rather than a failure.
+
 
 - `docs/social-backend-decision.md` — the Postiz-versus-Zernio comparison and
   the decision.

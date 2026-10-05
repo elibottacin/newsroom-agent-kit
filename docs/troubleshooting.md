@@ -199,6 +199,36 @@ Almost always a `PATH` problem. A freshly installed package is on disk but not i
 the running session's `PATH`. Open a new terminal. If it persists, check the
 `Execution dependencies` section of verify for the path it reports.
 
+### `validate:post` says the post is invalid but the exit code is 0
+
+Expected, and a real footgun. The CLI does not set a non-zero exit code on a
+validation failure:
+
+```
+{"valid":false,"errors":[{"platform":"instagram",
+  "error":"Instagram posts require media content (images or videos)"}]}
+```
+
+**Read the `valid` field, never the exit code.** Observed live in Phase 10.
+
+### `apikeys:list` printed a whole API key
+
+Do not run it where the output is logged or pasted. It redacts every key as
+`keyPreview` and then separately returns a top-level `firstApiKey` field with a
+complete, unredacted key. See SEC-32.
+
+If you need to see your keys, read `~/.zernio/config.json` shape only, or use the
+Zernio dashboard.
+
+To revoke a key you no longer want:
+
+```
+zernio.cmd apikeys:delete <keyId>
+```
+
+`apikeys:list` gives you the `_id`. The `Default Key` created at signup is a good
+candidate to revoke once the CLI key is working, since the kit does not use it.
+
 ### Phase 9 versus Phase 11 warnings
 
 `verify.ps1` reports three expected warnings on a Phase 9 install:
