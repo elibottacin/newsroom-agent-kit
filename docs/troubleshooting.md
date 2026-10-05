@@ -111,6 +111,45 @@ delete-then-recreate so the link cannot be orphaned.
 The selected setup needs local software, not just markdown. `install.ps1
 -InstallPrerequisites` provisions it from `manifest/dependencies.json`.
 
+### `zernio` throws a PSSecurityException about scripts being disabled
+
+**Expected on this machine, and not a broken install.** npm writes three shims for
+every global command:
+
+```
+zernio        (POSIX shell)
+zernio.cmd    (Windows command)
+zernio.ps1    (PowerShell)
+```
+
+The effective execution policy here is `Restricted`, which blocks `.ps1`. When
+you type bare `zernio`, PowerShell resolves to `zernio.ps1` and refuses to run it.
+The error names `zernio.ps1`, which is the giveaway.
+
+**Use the `.cmd` form.** It is not blocked, because a batch file is not a script:
+
+```
+zernio.cmd auth:login
+zernio.cmd auth:check
+zernio.cmd accounts:list
+```
+
+This is also why the kit's own instructions and scripts always use the `.cmd`
+extension. `hyperframes.cmd` behaves the same way once HyperFrames is installed.
+
+Do **not** fix this by loosening the execution policy. If you want bare `zernio`
+to work, the least invasive option is a PowerShell profile function rather than a
+security change:
+
+```powershell
+function zernio { & "$env:LOCALAPPDATA\Microsoft\WinGet\Packages\OpenJS.NodeJS.LTS_Microsoft.Winget.Source_8wekyb3d8bbwe\node-v24.19.0-win-x64\zernio.cmd" @args }
+```
+
+That is per-user, reversible, and PowerShell-only. `Set-ExecutionPolicy
+-Scope CurrentUser RemoteSigned` would also work, but it changes the machine's
+security posture for every script, not just npm shims, so it is not this kit's
+call to make.
+
 ### `zernio` is not recognised after installing
 
 **This is expected until you open a new terminal.** winget and npm both add the

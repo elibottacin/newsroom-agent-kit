@@ -116,6 +116,12 @@ Reach for the narrowest skill that fits. Load one, do the work, move on.
 
 Two capabilities have a real backend. Use them; do not reimplement them in prose.
 
+**Command name on this machine.** npm installs three shims per command, and this
+machine's execution policy is `Restricted`, which blocks the `.ps1` one. So always
+invoke these CLIs with the `.cmd` extension: `zernio.cmd`, `hyperframes.cmd`.
+A bare `zernio` fails with a `PSSecurityException`, not because anything is
+missing. Never work around it by loosening the execution policy.
+
 **`zernio` — social execution.** When a task reaches the point of actually
 publishing, scheduling, queueing, drafting in the tool, uploading media,
 reading or replying to comments and DMs, sending a broadcast, or reading a
@@ -123,14 +129,14 @@ post's native metrics for a connected platform, use the `zernio` skill and CLI.
 
 - If no API key is configured, or the platform is not connected, say so and
   stop. Do not substitute another backend.
-- Every local media file must go through `zernio media:upload` first. Use the
+- Every local media file must go through `zernio.cmd media:upload` first. Use the
   returned public URL.
-- Check `zernio accounts:health` before a big batch; it reports rate limits and
-  token expiry.
-- Use `zernio validate:post` before scheduling. Catching a bad post before the
-  slot passes is better than after.
+- Check `zernio.cmd accounts:health` before a big batch; it reports rate limits
+  and token expiry.
+- Use `zernio.cmd validate:post` before scheduling. Catching a bad post before
+  the slot passes is better than after.
 - Reading and analytics on X are billed at X's own rates, and a post containing
-  a URL costs $0.200. Check `zernio usage:stats` and `usage:x-pricing` rather
+  a URL costs $0.200. Check `zernio.cmd usage:stats` and `usage:x-pricing` rather
   than guessing, and keep X analytics or inbox sync off unless asked.
 - Zernio cannot post to Facebook Groups. `facebook-groups` work stays in the
   group itself.
