@@ -1,0 +1,275 @@
+{
+  "$comment": "Machine-level dependency inventory for the Newsroom Agent Kit extension (Postiz self-hosted + HyperFrames). Phase 8 discovery output. This file is the machine-readable source of truth that later phases use to change install.ps1, update.ps1, verify.ps1 and uninstall.ps1. Ownership values decide whether normal uninstall may touch a dependency: never-remove means the kit must not uninstall it.",
+  "schemaVersion": 1,
+  "generated": "2026-10-04",
+  "hostMachine": {
+    "os": "Windows 11 Home Single Language 10.0.26200",
+    "totalPhysicalMemoryGB": 3.44,
+    "freePhysicalMemoryGBAtDiscovery": 0.31,
+    "elevatedDuringDiscovery": false,
+    "packageManager": "winget 1.29.380",
+    "git": "2.56.0.windows.1",
+    "symbolicLinksWork": false,
+    "hardLinksWork": true
+  },
+
+  "ownershipValues": {
+    "kit-installed": "Installed by this kit and safe for the kit to uninstall on request.",
+    "shared": "May be used by unrelated software. Detect, use, never silently uninstall.",
+    "user-owned": "Predates the kit or is outside its scope. Never remove.",
+    "os-feature": "Windows feature. Never remove as part of a normal uninstall.",
+    "ephemeral-cache": "Regenerable download cache. Safe to clear only on request."
+  },
+
+  "hyperframes": {
+    "upstream": {
+      "repo": "heygen-com/hyperframes",
+      "license": "Apache-2.0",
+      "reviewedRef": "dc3665ab61b254ca7a0de087b1bfbd2ddcfbf67e",
+      "refDate": "2026-10-04",
+      "cliPackage": "@hyperframes/cli",
+      "cliVersionObserved": "0.8.126"
+    },
+    "dependencies": [
+      {
+        "id": "nodejs",
+        "name": "Node.js (LTS)",
+        "purpose": "Runtime for the HyperFrames CLI, npx and the headless render pipeline.",
+        "requiredVersion": ">=22",
+        "evidence": "packages/cli/package.json engines.node '>=22'; README badge 'node >=22'; README 'Requirements: Node.js 22+, FFmpeg'.",
+        "currentState": "MISSING on this machine",
+        "installMechanism": "winget install --id OpenJS.NodeJS.LTS -e",
+        "elevationRequired": true,
+        "runsContinuously": false,
+        "portsOrServices": "none",
+        "persistentData": "%LOCALAPPDATA%\\Programs\\nodejs, %APPDATA%\\npm-cache, %APPDATA%\\npm",
+        "updateMechanism": "winget upgrade OpenJS.NodeJS.LTS",
+        "uninstallImplications": "winget uninstall removes Node AND any global npm packages including the kit's own CLIs. Shared risk.",
+        "ownership": "shared",
+        "ownershipNote": "Must not be removed by a normal kit uninstall even if the kit installed it, unless the user explicitly approves, because global npm CLIs and user scripts may depend on it.",
+        "verification": "node --version reports >=22"
+      },
+      {
+        "id": "npm-npx",
+        "name": "npm / npx",
+        "purpose": "Package manager and on-demand package runner used to invoke the HyperFrames CLI.",
+        "requiredVersion": "bundled with Node",
+        "currentState": "MISSING (ships with Node.js)",
+        "installMechanism": "included with Node.js",
+        "elevationRequired": false,
+        "runsContinuously": false,
+        "portsOrServices": "none",
+        "persistentData": "%APPDATA%\\npm-cache",
+        "updateMechanism": "with Node.js",
+        "uninstallImplications": "with Node.js",
+        "ownership": "shared",
+        "verification": "npx --version"
+      },
+      {
+        "id": "hyperframes-cli",
+        "name": "@hyperframes/cli (bin: hyperframes)",
+        "purpose": "Deterministic local render, preview, lint, check, timeline, catalog and skill lifecycle commands.",
+        "requiredVersion": "0.8.126 observed at the reviewed ref",
+        "currentState": "MISSING (Node.js absent, so nothing can be installed yet)",
+        "installMechanism": "npm install -g @hyperframes/cli",
+        "elevationRequired": false,
+        "runsContinuously": false,
+        "portsOrServices": "local preview server binds an ephemeral port while previewing only",
+        "persistentData": "npm global prefix; per-project node_modules when a composition project exists",
+        "updateMechanism": "npm update -g @hyperframes/cli, reviewed before applying",
+        "uninstallImplications": "npm uninstall -g @hyperframes/cli",
+        "ownership": "kit-installed",
+        "verification": "hyperframes --version"
+      },
+      {
+        "id": "ffmpeg",
+        "name": "FFmpeg (with ffprobe)",
+        "purpose": "Encodes captured frames into MP4 and mixes audio. Required for any render.",
+        "requiredVersion": "recent release; upstream states FFmpeg without pinning a major version",
+        "currentState": "MISSING on this machine",
+        "installMechanism": "winget install --id Gyan.FFmpeg -e",
+        "elevationRequired": "usually no for the user-scope winget package; may prompt",
+        "runsContinuously": false,
+        "portsOrServices": "none",
+        "persistentData": "install directory only",
+        "updateMechanism": "winget upgrade Gyan.FFmpeg",
+        "uninstallImplications": "winget uninstall Gyan.FFmpeg; safe only if nothing else uses ffmpeg",
+        "ownership": "shared",
+        "ownershipNote": "Very commonly shared by other tools. Must not be removed by a normal kit uninstall without explicit approval.",
+        "verification": "ffmpeg -version and ffprobe -version"
+      },
+      {
+        "id": "headless-chrome",
+        "name": "Headless Chrome for frame capture",
+        "purpose": "The renderer seeks each frame in headless Chrome. Provided by @puppeteer/browsers, which the CLI declares as a dependency.",
+        "requiredVersion": "puppeteer-managed",
+        "currentState": "System Google Chrome and Microsoft Edge ARE installed; no puppeteer-managed browser cached yet",
+        "installMechanism": "automatic on first render via @puppeteer/browsers download",
+        "elevationRequired": false,
+        "runsContinuously": false,
+        "portsOrServices": "none",
+        "persistentData": "%USERPROFILE%\\.cache\\puppeteer (regenerable)",
+        "updateMechanism": "re-download on demand",
+        "uninstallImplications": "clear the puppeteer cache; safe, it re-downloads",
+        "ownership": "ephemeral-cache",
+        "verification": "hyperframes check or a smoke render completing"
+      }
+    ]
+  },
+
+  "postiz": {
+    "upstream": {
+      "runtimeRepo": "gitroomhq/postiz-app",
+      "composeRepo": "gitroomhq/postiz-docker-compose",
+      "composeRefReviewed": "dd4969e5e694cd009619a0d53cff14c21104580b",
+      "composeRefDate": "2026-07-30",
+      "agentRepo": "gitroomhq/postiz-agent",
+      "agentRefReviewed": "93a823f6fe6074016207a32c7f192b70b1752044",
+      "agentRefDate": "2026-09-22",
+      "license": "AGPL-3.0",
+      "cliPackage": "postiz",
+      "cliVersionObserved": "2.0.19"
+    },
+    "containerRuntime": [
+      {
+        "id": "wsl2",
+        "name": "Windows Subsystem for Linux 2",
+        "purpose": "Required backend for Docker Desktop on Windows 11 Home. Container images are Linux images.",
+        "requiredVersion": "WSL2, kernel current",
+        "currentState": "NOT INSTALLED - 'wsl --status' reports the subsystem is not installed",
+        "installMechanism": "wsl --install (or winget), then reboot",
+        "elevationRequired": true,
+        "rebootRequired": true,
+        "runsContinuously": true,
+        "portsOrServices": "WSL2 VM",
+        "persistentData": "distro VHDX",
+        "updateMechanism": "Windows Update / wsl --update",
+        "uninstallImplications": "OS optional feature; the kit must never remove it",
+        "ownership": "os-feature",
+        "verification": "wsl --status reports an installed default version"
+      },
+      {
+        "id": "docker-desktop",
+        "name": "Docker Desktop",
+        "purpose": "Container runtime that executes the Postiz compose stack.",
+        "requiredVersion": "current stable",
+        "currentState": "MISSING",
+        "installMechanism": "winget install --id Docker.DockerDesktop -e",
+        "elevationRequired": true,
+        "rebootRequired": "possible after WSL2 install",
+        "runsContinuously": true,
+        "portsOrServices": "publishes the container port; Docker Desktop backend service",
+        "persistentData": "%LOCALAPPDATA%\\Docker, WSL2 distro",
+        "updateMechanism": "Docker Desktop self-update or winget upgrade",
+        "uninstallImplications": "winget uninstall Docker.DockerDesktop. Removes the container runtime but NOT named volumes unless pruned explicitly.",
+        "ownership": "shared",
+        "ownershipNote": "Must not be removed by a normal kit uninstall. It is general-purpose container infrastructure that other projects may use.",
+        "verification": "docker version and docker compose version"
+      }
+    ],
+    "composeStack": {
+      "source": "postiz-docker-compose/docker-compose.yaml",
+      "publishedPort": "4007:5000",
+      "localUrl": "http://localhost:4007",
+      "services": [
+        { "name": "postiz", "image": "ghcr.io/gitroomhq/postiz-app:latest", "role": "main application", "port": "4007:5000" },
+        { "name": "postiz-postgres", "image": "postgres:17-alpine", "role": "application database" },
+        { "name": "postiz-redis", "image": "redis:7.2", "role": "cache and queue" },
+        { "name": "spotlight", "image": "ghcr.io/getsentry/spotlight:latest", "role": "Postiz operations UI" },
+        { "name": "temporal", "image": "temporalio/auto-setup:1.28.1", "role": "durable workflow engine" },
+        { "name": "temporal-postgresql", "image": "postgres:16", "role": "Temporal database" },
+        { "name": "temporal-elasticsearch", "image": "elasticsearch:7.17.27", "role": "Temporal visibility store" },
+        { "name": "temporal-admin-tools", "image": "temporalio/admin-tools:1.28.1-tctl-1.18.4-cli-1.4.1", "role": "Temporal administration" },
+        { "name": "temporal-ui", "image": "temporalio/ui:2.34.0", "role": "Temporal operations UI" }
+      ],
+      "namedVolumes": [
+        { "name": "postgres-volume", "owner": "kit-declared", "containsUserData": true },
+        { "name": "postiz-redis-data", "owner": "kit-declared", "containsUserData": true },
+        { "name": "postiz-config", "owner": "kit-declared", "containsUserData": true },
+        { "name": "postiz-uploads", "owner": "kit-declared", "containsUserData": true },
+        { "name": "temporal-postgres-data", "owner": "kit-declared", "containsUserData": true },
+        { "name": "temporal-elasticsearch-data", "owner": "kit-declared", "containsUserData": true }
+      ],
+      "healthChecks": 7,
+      "uninstallRule": "Normal kit uninstall removes containers and the compose project only. It MUST NOT run 'docker volume rm', 'docker compose down -v', or any prune. Persistent volumes are user data."
+    },
+    "cli": [
+      {
+        "id": "postiz-cli",
+        "name": "postiz CLI (npm: postiz)",
+        "purpose": "Agent execution layer: upload media, create and schedule posts, list and manage posts, read analytics, discover integrations.",
+        "requiredVersion": ">=18 (engines), 2.0.19 observed",
+        "currentState": "MISSING",
+        "installMechanism": "npm install -g postiz",
+        "elevationRequired": false,
+        "runsContinuously": false,
+        "portsOrServices": "none",
+        "persistentData": "%USERPROFILE%\\.postiz\\credentials.json",
+        "credentialNote": "Upstream writes credentials.json with mode 0600 and its directory 0700. On Windows those POSIX modes are largely not enforced, so this file must be treated as a secret regardless.",
+        "updateMechanism": "npm update -g postiz, reviewed before applying",
+        "uninstallImplications": "npm uninstall -g postiz; %USERPROFILE%\\.postiz must be removed only on explicit request because it holds credentials",
+        "ownership": "kit-installed",
+        "verification": "postiz --version"
+      }
+    ],
+    "authentication": {
+      "selfHostedPath": {
+        "method": "API key against a custom endpoint",
+        "env": { "POSTIZ_API_URL": "http://localhost:4007", "POSTIZ_API_KEY": "created in the local instance under Settings > API Keys" },
+        "evidence": "src/auth.ts: 'apiUrl = process.env.POSTIZ_API_URL || \"https://api.postiz.com\"'; src/config.ts reads process.env.POSTIZ_API_URL.",
+        "hostedDependency": "none",
+        "verdict": "This is the only fully self-hosted-compatible authentication path and the one this kit will use."
+      },
+      "hostedPath": {
+        "method": "OAuth2 device flow, 'postiz auth:login'",
+        "defaultAuthServer": "https://cli-auth.postiz.com",
+        "evidence": "src/auth.ts:9 DEFAULT_AUTH_SERVER = 'https://cli-auth.postiz.com'",
+        "verdict": "REJECTED for this kit. It depends on Postiz-hosted infrastructure, which the architecture forbids. The CLI does expose an --auth-server flag, but a self-hosted Postiz does not operate that service."
+      },
+      "humanOnlyStep": "The API key must be generated by the user inside their own local Postiz instance, because the agent must not handle the secret."
+    }
+  },
+
+  "channelCoverageDelta": {
+    "$comment": "Why Postiz cannot replace every platform skill in this kit.",
+    "userPlatforms": ["instagram", "facebook", "facebook-groups", "x", "threads", "bluesky", "tiktok", "youtube", "youtube-shorts", "whatsapp", "telegram", "newsletter"],
+    "coveredByPostiz": ["x", "threads", "instagram", "facebook-page", "youtube", "tiktok", "bluesky", "telegram", "pinterest"],
+    "notCoveredByPostiz": [
+      { "platform": "facebook-groups", "reason": "Postiz publishes to a Facebook Page, not a Group. facebook-groups stays." },
+      { "platform": "whatsapp", "reason": "Not present in the Postiz integration list at the reviewed ref." },
+      { "platform": "newsletter", "reason": "Not present in the Postiz integration list. ListMonk exists but is not configured." }
+    ]
+  },
+
+  "blockingFindings": [
+    {
+      "id": "BLOCK-RAM",
+      "severity": "blocker",
+      "finding": "This machine has 3.44 GB total physical memory and 0.31 GB free at discovery time. The official Postiz compose stack runs nine containers including Elasticsearch, Temporal, two PostgreSQL instances, Redis, admin-tools and a UI, on top of WSL2 and Docker Desktop.",
+      "consequence": "The stack is expected to be unusable or to fail health checks on this hardware. Elasticsearch alone commonly needs 1 GB or more of heap in practice.",
+      "cannotBeAutomated": true,
+      "reason": "Adding RAM is a hardware change.",
+      "decisionNeededFromUser": true,
+      "options": [
+        "Run Postiz on a different, larger machine and point POSTIZ_API_URL at it over the network. The kit side stays identical and fully self-hosted on your side.",
+        "Accept the risk and attempt the local stack, expecting instability.",
+        "Defer Postiz and adopt only the HyperFrames extension for now."
+      ]
+    },
+    {
+      "id": "BLOCK-WSL",
+      "severity": "blocker",
+      "finding": "WSL is not installed, so no Docker backend is available. Docker Desktop on Windows 11 Home requires WSL2.",
+      "consequence": "Postiz cannot run until WSL2 is installed.",
+      "cannotBeAutomated": true,
+      "reason": "wsl --install requires Administrator elevation and a reboot. Both are outside what an unelevated installer may do.",
+      "decisionNeededFromUser": true,
+      "humanStep": {
+        "why": "Enabling an OS virtualization feature needs elevation and a reboot.",
+        "action": "Run 'wsl --install' from an Administrator PowerShell, then reboot.",
+        "where": "Administrator PowerShell on this PC.",
+        "nonSecretResultNeeded": "wsl --status reporting an installed default version 2."
+      }
+    }
+  ]
+}

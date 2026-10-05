@@ -411,6 +411,102 @@ manifest change.
 
 ---
 
+## Extension findings — Phase 8 (Postiz and HyperFrames)
+
+These two additions are not instruction-only skills. They bring executable
+service and runtime code onto the machine, so they get their own findings
+rather than inheriting the trust level of a static `SKILL.md`.
+
+### SEC-19 - Postiz self-hosted is a continuously running AGPL-3.0 service stack
+
+Severity: **medium-high**. Nine containers from the official
+`postiz-docker-compose` run continuously and hold the user's social platform
+tokens, scheduled queue, uploaded media and content. Licence is **AGPL-3.0**,
+which is materially different from the MIT/Apache set already in the core:
+self-hosted use is fine, but the kit does not vendor or modify Postiz code, so
+no source-distribution obligation is created by this project.
+
+Specific concerns:
+
+- The images are pulled by tag, and `postiz-app` is pinned to `:latest`. An
+  ordinary `pull` can therefore change what executes without any repository
+  change. Phase 9 must record the resolved image digests so an update is a
+  deliberate act.
+- The stack holds long-lived OAuth tokens for real social accounts. Compromise
+  of the local instance is compromise of those accounts.
+- `temporal-elasticsearch` runs `elasticsearch:7.17.27`, which is a long
+  superseded major line. It is internal to the compose network and not published,
+  but it does widen the attack surface.
+
+Mitigations: the stack publishes exactly one port, `4007:5000`, bound to
+localhost. Persistent state stays in named Docker volumes that a normal
+uninstall never touches.
+
+### SEC-20 - The Postiz OAuth device flow depends on Postiz-hosted infrastructure
+
+Severity: **medium**. `postiz-agent/src/auth.ts:9` sets
+`DEFAULT_AUTH_SERVER = 'https://cli-auth.postiz.com'`. Running `postiz
+auth:login` therefore contacts a Postiz-operated service, which contradicts the
+self-hosted requirement and would silently reintroduce a hosted control plane.
+
+Resolution: the kit uses only `POSTIZ_API_URL` plus an API key issued by the
+local instance. `POSTIZ_API_URL` fully overrides the API endpoint
+(`src/auth.ts:191`, `src/config.ts:16`), so the adopted path has no hosted
+dependency at all. The `postiz auth:login` path is documented as rejected, and
+the global instructions tell the agent never to fall back to it.
+
+### SEC-21 - Upstream's HyperFrames installer writes to a vendor directory and symlinks into agent directories
+
+Severity: **medium**. `hyperframes skills update` writes the skills to both
+`~/.agents/skills` **and** `~/.claude/skills`, then calls `mirrorGlobalSkills` to
+symlink them into every other installed agent's global directory. The bare
+`npx hyperframes skills` command installs the full published set, and `--all`
+sprays into many agent directories.
+
+This breaks three established project rules at once: vendor skill directories
+are forbidden, `verify.ps1` fails if they exist, and symbolic links cannot be
+created unelevated on this machine.
+
+Resolution: the kit vendors the 10 core skills from the pinned reviewed ref
+instead of running the upstream installer. Upstream freshness stays detectable
+without executing upstream code, because `skills-manifest.json` publishes a
+content hash per skill. No blanket-install command is ever invoked.
+
+### SEC-22 - HyperFrames brings a Node CLI, a managed browser and an FFmpeg dependency
+
+Severity: **medium**. `@hyperframes/cli` declares `@puppeteer/browsers`, which
+downloads and executes a managed Chrome build on first render, plus `giget`
+(which fetches GitHub assets) and `esbuild`/`fontkit`. Rendering then shells
+out to FFmpeg. Node.js itself is a new machine-level dependency that did not
+exist on this PC.
+
+This is the first capability in the project that executes third-party code at
+render time rather than at install time, so it widens the review model: the
+skills are reviewed content, but the CLI, the browser build and the encoder are
+reviewed binaries.
+
+Mitigations: the CLI version is pinned and reviewed before install; the browser
+cache is classified `ephemeral-cache`; cloud renderers and the upstream
+`aws-lambda` and `gcp-cloud-run` packages stay unconfigured.
+
+### SEC-23 - Installing WSL2 and Docker Desktop enlarges the machine's privileged surface
+
+Severity: **medium**. Postiz requires Docker Desktop on WSL2. Neither is
+present. Both need Administrator elevation, and WSL2 needs a reboot.
+
+Docker Desktop is a container runtime with access to the Docker socket, which is
+effectively root on the Linux VM and can bind-mount host paths. It is therefore
+classified ownership `shared`, not kit-installed: the kit may install it with the
+user's approval but must never uninstall it, because other projects may depend on
+it.
+
+### SEC-24 - This machine cannot host the Postiz stack
+
+Severity: **blocker, hardware**. 3.44 GB total physical memory, 0.31 GB free at
+discovery. Nine containers including Elasticsearch and Temporal, on top of WSL2
+and Docker Desktop, with seven health checks. See BLOCK-RAM in
+`manifest/dependencies.json`. Not automatable; requires a user decision.
+
 ## Residual risks after Phase 3
 
 1. **Vendor-framing risk (SEC-07) is resolved by forking.** 27 skills are sanitised forks with

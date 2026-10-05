@@ -81,7 +81,7 @@
     { "name": "web-testing", "reason": "Browser-driven QA of live pages and published output. Cross-agent value but needs a browser runtime, so not default.", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "subdir": "web-testing", "url": "https://github.com/PracticalSwan/agent-skills" } },
     { "name": "web-quality-audit", "reason": "Broader live-site quality audit. Overlaps accessibility-compliance and web-design-guidelines.", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "subdir": "web-quality-audit", "url": "https://github.com/PracticalSwan/agent-skills" } },
     { "name": "goals-and-kpis", "reason": "Sets targets, which analytics-and-reporting deliberately leaves out. Reachable from 11 vendored skills.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/goals-and-kpis", "url": "https://github.com/social-media-skills/skills" } },
-    { "name": "scheduling-and-queue", "reason": "The single most-referenced uninstalled sibling (30 references). Covers scheduling and the confirmation contract. Deliberately not in the default set to limit trigger clutter; add it if scheduling becomes painful.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/scheduling-and-queue", "url": "https://github.com/social-media-skills/skills" } },
+    { "name": "scheduling-and-queue", "reason": "SUPERSEDED BY POSTIZ (Phase 8). This was the single most-referenced uninstalled sibling (30 references). It is an instruction-only skill covering scheduling and the confirmation contract, which is exactly Postiz's native execution surface: queueing, scheduling, post status management and operational post retrieval. An instruction-only scheduling skill should not be added to a machine that has the real backend. Do not install it.", "classification": "replace", "supersededBy": "postiz", "supersededPhase": 8, "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/scheduling-and-queue", "url": "https://github.com/social-media-skills/skills" } },
     { "name": "content-recycling", "reason": "Reusing proven performers. Overlaps cross-platform-repurposing.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/content-recycling", "url": "https://github.com/social-media-skills/skills" } },
     { "name": "profile-optimization", "reason": "Profile fundamentals. Reachable from 10 vendored skills.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/profile-optimization", "url": "https://github.com/social-media-skills/skills" } },
     { "name": "story-pitch", "reason": "Story pitches and query letters. Only useful for external pitching.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "subdir": "journalism-core/skills/story-pitch", "url": "https://github.com/jamditis/claude-skills-journalism" } },
@@ -130,5 +130,42 @@
     "design": ["impeccable", "hallmark", "frontend-design", "web-design-guidelines"],
     "accessibility": ["accessibility-compliance"],
     "social_preview_assets": ["og-image"]
+  },
+
+  "postizRationalisation": {
+    "$comment": "Phase 8 mandatory overlap analysis. Guiding principle: skills do the thinking (strategy, editorial judgement, writing, brand voice, planning, community reasoning, content transformation); Postiz is the execution layer wherever it provides reliable native functionality. Full prose matrix in docs/postiz.md.",
+    "decidedInPhase": 8,
+    "installedSkillsRemoved": 0,
+    "installedSkillsDemoted": 0,
+    "principle": "Skills handle thinking; Postiz handles execution. Do not remove a useful strategy or editorial skill merely because Postiz can publish its output.",
+    "executionBackendSkills": ["content-calendar", "threads-post", "instagram-reels-publishing", "x-growth", "facebook-strategy", "cross-platform-repurposing", "analytics-and-reporting"],
+    "executionBackendNote": "For these skills the thinking half stays and the publishing, scheduling, queueing, media upload and native-metrics retrieval half routes through Postiz for the platforms it covers.",
+    "classification": {
+      "keep_strategic_editorial": ["social-strategy", "content-pillars", "batch-content-plan", "brand-profile", "voice-builder", "reply-and-comment-writer", "engagement-routine", "community-management", "crisis-and-moderation", "email-and-newsletter", "newsroom-style", "ai-writing-detox", "source-verification", "fact-check-workflow", "content-research-and-sourcing", "editorial-workflow"],
+      "keep_complementary": ["caption-writer-sms", "hook-writer", "thread-writer-sms", "carousel-writer-sms", "reels-script", "tiktok-script", "youtube-shorts", "content-audit", "design-and-templates", "og-image"],
+      "postiz_becomes_execution_backend": ["content-calendar", "threads-post", "instagram-reels-publishing", "x-growth", "facebook-strategy", "cross-platform-repurposing", "analytics-and-reporting"],
+      "no_meaningful_overlap": ["facebook-groups", "seo", "accessibility-compliance", "web-design-guidelines", "hallmark", "impeccable", "frontend-design"],
+      "replace": ["scheduling-and-queue"],
+      "demote_to_optional": [],
+      "remove_from_default_install": []
+    },
+    "whyNothingWasRemoved": [
+      "facebook-groups survives because Postiz publishes to a Facebook Page, not a Group.",
+      "reply-and-comment-writer survives because Postiz attaches comments to its own posts; it does not reply to arbitrary inbound comments.",
+      "email-and-newsletter survives because no newsletter integration is configured. ListMonk exists in Postiz but is unset up.",
+      "WhatsApp is absent from Postiz's integration list at the reviewed ref, so it stays manual.",
+      "crisis-and-moderation is deliberately never routed through an automated publishing backend; it is high-stakes and human-in-the-loop."
+    ],
+    "agentBehaviour": "When a task reaches the point of publishing, scheduling, queueing, uploading media or reading a post's native metrics for a Postiz-covered platform, use the postiz skill and CLI against POSTIZ_API_URL=http://localhost:4007. If that local instance is not running or not authenticated, say so and stop. Do not silently fall back to Postiz Cloud, api.postiz.com, cli-auth.postiz.com or the hosted MCP."
+  },
+
+  "hyperframesRationalisation": {
+    "$comment": "Phase 8. HyperFrames fills a genuine gap: the installed set has no motion graphics or video composition capability. It is additive and supersedes no installed skill.",
+    "decidedInPhase": 8,
+    "installedSkillsRemoved": 0,
+    "fillsGap": "deterministic code-driven motion graphics and local video rendering",
+    "skillsAddedInPhase11": ["hyperframes", "hyperframes-animation", "hyperframes-audio", "hyperframes-cli", "hyperframes-core", "hyperframes-creative", "hyperframes-keyframes", "hyperframes-registry", "hyperframes-studio", "media-use"],
+    "installMethod": "vendor-core-set-from-pinned-ref",
+    "agentBehaviour": "For motion graphics, kinetic typography, animated data, lower thirds, headline cards, overlays or explainer visuals, route to the /hyperframes router. Render locally. Do not introduce image-generation or video-generation models, hosted renderers or HeyGen Cloud."
   }
 }

@@ -470,3 +470,292 @@ Confirm the project satisfies its original objective and document future mainten
 - Git history tracks implementation progress, including plan checkbox advancement.
 - No secrets are committed.
 - Documentation is current.
+
+---
+
+# EXTENSION — Postiz self-hosted and HyperFrames
+
+Phases 0-7 above are complete and are not reopened, duplicated, or rewritten.
+This extension adds two capabilities to the same project, and it changes the
+project's shape in one important way:
+
+**Local software becomes part of the reproducible setup.** Previously the kit
+installed instruction files only, and deliberately required no runtime. From
+Phase 8 onward, any runtime, package, container, service or CLI that a
+capability needs is detected, provisioned, verified, updated and reproduced by
+the kit. Required software is not left as an undocumented manual prerequisite
+unless installing it is genuinely unsafe or impossible, in which case it is
+recorded as an explicit blocked prerequisite with exact instructions.
+
+The project identity does not change. It remains an **agent-agnostic `.agents` /
+Agent Skills toolkit**, tested with OpenCode and Cline. Neither Postiz nor
+HyperFrames becomes the identity of the project.
+
+## Extension principles
+
+- `%USERPROFILE%\.agents` remains the single canonical agent configuration root.
+  Runtime software lives in its technically appropriate location and is managed
+  reproducibly; it does not live under `.agents`.
+- Vendor skill directories stay forbidden, including ones created by upstream
+  installers.
+- Ownership is explicit for every dependency. A normal uninstall removes only
+  what is safely attributable to the kit.
+- Self-hosted Postiz only. No Postiz Cloud, no `api.postiz.com`, no
+  `cli-auth.postiz.com`, no hosted Postiz MCP.
+- Local deterministic rendering only. No generative media models, no hosted
+  renderers, no cloud rendering as a default.
+- No secrets and no runtime data in Git.
+- Unavoidable human steps are limited to account, OAuth, developer-approval,
+  genuine elevation/reboot, irreversible actions, and material architecture or
+  cost decisions. Ordinary software installation is not a human step.
+
+---
+
+## Phase 8 - Extension discovery, overlap analysis, dependency inventory, and architecture decisions
+
+### Goals
+
+Research the actual upstream state from primary sources, decide the
+architecture, build the dependency inventory that will drive every later script
+change, and rationalise the existing skill set against Postiz. Install nothing
+in this phase.
+
+### Tasks
+
+- [x] Inspect repository state: branch, remote, clean tree, phases 0-7 intact.
+- [x] Clone and review the four upstream repositories at pinned refs; record ref, date and licence for each.
+- [x] Inspect the live installed skill set and `manifest/skills.json` as the baseline for the overlap analysis.
+- [x] Determine which Postiz repository is the runtime source and which is implementation context.
+- [x] Extract the Postiz compose stack: services, images, published ports, named volumes, health checks.
+- [x] Inspect the Postiz CLI and skill: install method, auth paths, custom-endpoint override, credential storage, capabilities, upstream hard rules.
+- [x] Determine whether the Postiz OAuth device flow depends on Postiz-hosted infrastructure.
+- [x] Choose the fully self-hosted-compatible auth path and record why the other is rejected.
+- [x] Confirm whether any capability requires an MCP layer. If not, record that no MCP is proposed and the condition for revisiting it.
+- [x] Confirm HyperFrames licence, CLI package, version, engine requirement and documented prerequisites.
+- [x] Revalidate the HyperFrames Core Skills model (eager core set vs lazy workflow skills) against current upstream.
+- [x] Determine where the upstream HyperFrames installer writes skills, and identify any conflict with this project's rules.
+- [x] Choose the HyperFrames skill install method and record the rationale.
+- [x] Build the dependency inventory for both capabilities with purpose, version, installed state, Windows mechanism, elevation, run model, ports, persistent data, update, uninstall, ownership and verification.
+- [x] Detect the actual current state of every dependency on this machine.
+- [x] Produce the mandatory Postiz overlap matrix classifying every existing social skill.
+- [x] Record dependency ownership values and the uninstall rules they imply.
+- [x] Create `manifest/dependencies.json` as the machine-readable source of truth.
+- [x] Update `manifest/skills.json` with the rationalisation and supersession records.
+- [x] Update `manifest/integrations.json` with the Postiz, Postiz CLI, HyperFrames and now-required Node.js entries.
+- [x] Write `docs/postiz.md`, `docs/hyperframes.md` and `docs/dependencies.md`.
+- [x] Add the new executable-code findings to `docs/security.md`.
+- [x] Add durable extension invariants to project `AGENTS.md` and to the global instruction template.
+- [x] Fix the defect found while validating: `verify.ps1` advised `install.ps1 -Force` to restore the canonical `AGENTS.md`, but `install.ps1` ignored `-Force` for that file, so the documented recovery path did not exist.
+- [x] Confirm the existing toolchain still passes verification after the manifest changes.
+- [x] Commit Phase 8 with a clean working tree.
+
+### Validation
+
+- `manifest/dependencies.json`, `manifest/skills.json` and `manifest/integrations.json` all parse as JSON.
+- `scripts/verify.ps1` still reports the previously passing result, proving the manifest changes broke nothing.
+- No skill was removed or demoted without a documented reason.
+- Every blocker found is recorded with whether it can be automated and what the user must decide.
+
+### Exit criteria
+
+- Dependency inventory exists and is machine-readable.
+- Overlap matrix covers every installed social skill.
+- Architecture decisions for both capabilities are recorded with evidence.
+- Working tree clean, committed.
+
+### Phase checkpoint
+
+STOP. Report the inventory, the overlap decisions, and every blocker requiring
+a user decision, before any install begins.
+
+---
+
+## Phase 9 - Postiz self-hosted runtime installation and integration
+
+### Goals
+
+Provision the container runtime and stand up the self-hosted Postiz stack,
+without losing data on update and without destroying data on uninstall.
+
+### Tasks
+
+- [ ] Resolve the BLOCK-WSL prerequisite with the user, or record it as an accepted blocked prerequisite.
+- [ ] Resolve the BLOCK-RAM decision with the user before attempting the stack.
+- [ ] Detect existing Docker infrastructure and reuse it if compatible.
+- [ ] Install Docker Desktop only if absent and only with explicit approval.
+- [ ] Materialise the supported compose configuration into a runtime directory outside this repository.
+- [ ] Add a tracked example/template configuration with placeholders only. No `.env` with secrets.
+- [ ] Pin resolved image digests rather than tracking `:latest`.
+- [ ] Start the stack and wait for health checks.
+- [ ] Confirm `http://localhost:4007` is reachable.
+- [ ] Verify persistent state survives a stack restart.
+- [ ] Document backups, upgrade and migration procedure.
+- [ ] Record which dependencies the kit installed, in local uncommitted state.
+- [ ] Extend `scripts/install.ps1` with a dependency-provisioning path.
+- [ ] Extend `scripts/verify.ps1` to report Postiz stack health without leaking secrets.
+- [ ] Extend `scripts/update.ps1` to update the stack without destroying volumes.
+- [ ] Extend `scripts/uninstall.ps1` to remove containers and the compose project only. No volume deletion, no prune.
+- [ ] Document the runtime data locations and how they are backed up.
+
+### Exit criteria
+
+- The stack runs locally, or the blocker is documented as accepted.
+- Install, verify, update and uninstall all understand the Postiz stack.
+- No volume is ever deleted by the kit.
+- No secret is committed.
+
+### Phase checkpoint
+
+STOP and report.
+
+---
+
+## Phase 10 - Postiz global Agent Skill and CLI integration and validation
+
+### Goals
+
+Make the official Postiz Skill and CLI available globally through the canonical
+store, pointed at the local instance, and prove it works.
+
+### Tasks
+
+- [ ] Install the `postiz` CLI as a managed dependency, not as a documented manual step.
+- [ ] Add the portable `postiz` skill to the manifest and materialise it into `%USERPROFILE%\.agents\skills`.
+- [ ] Confirm no vendor wrapper is used: no Cline plugin, Claude plugin, Cursor plugin, Gemini extension or hosted MCP.
+- [ ] Configure `POSTIZ_API_URL=http://localhost:4007` in a local, non-committed mechanism.
+- [ ] Document that the API key is generated by the user in the local instance and never pasted into chat.
+- [ ] Verify the CLI targets the local instance and not Postiz Cloud.
+- [ ] Prove read-only operations work: integration discovery and post listing/status.
+- [ ] Prove analytics retrieval works for a connected integration where permitted.
+- [ ] Verify OpenCode discovers the skill.
+- [ ] Verify Cline discovers the same canonical skill.
+- [ ] Verify install is idempotent and reruns cause no drift.
+- [ ] Leave social-platform OAuth and developer-app steps explicitly pending rather than faking them.
+- [ ] Do not publish a real post as a test without explicit user approval. Prefer drafts and read-only checks.
+- [ ] Update `docs/postiz.md` and `docs/troubleshooting.md` with actual observed behaviour.
+
+### Exit criteria
+
+- CLI installed and callable, pointed at the local instance.
+- Skill discoverable from the canonical root by both tested agents.
+- Read-only paths proven; publishing left to explicit human approval.
+
+### Phase checkpoint
+
+STOP and report.
+
+---
+
+## Phase 11 - HyperFrames runtime, dependencies, and global Core Skills setup
+
+### Goals
+
+Provision Node.js, FFmpeg and the HyperFrames CLI; install the core skills
+through the project's own materialisation path; prove local deterministic
+rendering works.
+
+### Tasks
+
+- [ ] Detect existing Node.js and use it if the version satisfies `>=22`. Do not reinstall or silently upgrade a major version.
+- [ ] Install Node.js LTS only if absent or too old, with the elevation path handled correctly.
+- [ ] Install FFmpeg only if absent, and classify it as shared.
+- [ ] Install `@hyperframes/cli` as a managed dependency at a pinned, reviewed version.
+- [ ] Resolve the `npx hyperframes` versus `@hyperframes/cli` package-name question against the npm registry and record the answer.
+- [ ] Vendor the 10 core skills from the pinned reviewed ref into `vendor/skills/`, each with a `PROVENANCE.md`.
+- [ ] Apply the same vendor-product-deframing review the existing 27 forks received.
+- [ ] Confirm upstream content hashes from `skills-manifest.json` for drift detection.
+- [ ] Do not pre-install the 11 workflow skills. Keep the lazy model.
+- [ ] Add a lint/check or doctor step where the CLI provides one.
+- [ ] Create a small disposable deterministic smoke-test composition: text, shapes, at least one deterministic animation, and a timeline change. No generative media, no cloud service.
+- [ ] Render it locally and prove the MP4 is valid.
+- [ ] Re-render and prove reproducibility of the same project.
+- [ ] Verify `/hyperframes` router availability and Core Skills discovery.
+- [ ] Verify OpenCode discovers the skills.
+- [ ] Verify Cline discovers the same canonical skills.
+- [ ] Add dependency and CLI health checks to `scripts/verify.ps1`.
+- [ ] Confirm generated media is gitignored and not committed.
+- [ ] Update `docs/hyperframes.md` with actual observed behaviour.
+
+### Exit criteria
+
+- Node, FFmpeg and the CLI are installed or correctly detected.
+- The core skills resolve from the canonical root by both tested agents.
+- A valid MP4 renders locally and reproducibly, with no cloud or generative dependency.
+
+### Phase checkpoint
+
+STOP and report.
+
+---
+
+## Phase 12 - Reproducible dependency/bootstrap integration
+
+### Goals
+
+Make the whole extension reproducible from a clean compatible Windows machine
+through the repository's own tooling, with ownership and uninstall boundaries
+that hold.
+
+### Tasks
+
+- [ ] Drive every required dependency from `manifest/dependencies.json` in `scripts/install.ps1`.
+- [ ] Add a dry-run or preview path for dependency provisioning where the current scripts support one.
+- [ ] Make detection-before-install the default, and avoid reinstalling a compatible existing installation.
+- [ ] Record kit-installed versus pre-existing software in local uncommitted state.
+- [ ] Extend `scripts/verify.ps1` to report the status of Postiz, HyperFrames and every dependency without leaking secrets.
+- [ ] Extend `scripts/update.ps1` so upstream code changes are reviewed before they are applied, per the existing review model.
+- [ ] Extend `scripts/uninstall.ps1` with ownership-aware behaviour for every dependency class.
+- [ ] Prove idempotency: rerun install, verify and update with no unintended drift.
+- [ ] Test the full flow against a sandboxed target root so the live installation is not disturbed.
+- [ ] Document the fresh-machine bootstrap path, including which steps remain human-only and why.
+- [ ] Document blocked prerequisites with exact instructions.
+- [ ] Update `docs/maintaining.md` for adding, removing and retiring runtime dependencies.
+
+### Exit criteria
+
+- A fresh compatible machine can reach a functional state from the repository alone, apart from unavoidable account steps.
+- Ownership boundaries are enforced in code, not only in prose.
+- Reruns are safe.
+
+### Phase checkpoint
+
+STOP and report.
+
+---
+
+## Phase 13 - Final end-to-end validation, documentation, GitHub synchronization and handoff
+
+### Goals
+
+Prove the extension meets its definition of done and hand it over.
+
+### Tasks
+
+- [ ] Run the full verification suite and record the result.
+- [ ] Prove the Postiz stack health, or document the accepted blocker.
+- [ ] Prove the Postiz CLI targets the self-hosted instance.
+- [ ] Prove the HyperFrames smoke test renders reproducibly.
+- [ ] Prove OpenCode and Cline both consume every new canonical skill.
+- [ ] Prove no vendor skill directory was created by any installer.
+- [ ] Prove no secret, `.env`, token or runtime data is tracked by Git.
+- [ ] Prove `git status` is clean and local is in sync with `origin`.
+- [ ] Update `README.md` and `README.es.md` with the expanded capabilities, keeping the agent-agnostic identity and both languages consistent.
+- [ ] Update `docs/architecture.md` compatibility matrix and `docs/portability-verification.md`.
+- [ ] Confirm `AGENTS.md` stayed compact and detailed material stayed in `docs/`.
+- [ ] Confirm install, update and uninstall documentation matches actual behaviour.
+- [ ] List every remaining human-only step with why, exact action, where, and the non-secret result needed.
+- [ ] Final commit and push.
+
+### Definition of Done
+
+- Every required machine-level dependency is provisioned or safely detected by the reproducible setup.
+- Postiz runs locally and self-hosted, with Postiz Cloud and the hosted MCP out of the picture.
+- The official Postiz Skill and CLI path is integrated globally and aimed at the local instance.
+- Existing social skills are rationalised against Postiz, with no strategy or editorial skill discarded.
+- Node.js, FFmpeg and the HyperFrames CLI are installed and validated.
+- The HyperFrames core skills are installed reproducibly from the canonical root, with `/hyperframes` as the router, visible to both tested agents.
+- A deterministic smoke-test MP4 renders locally with no generative or cloud dependency.
+- Install, verify, update and uninstall remain idempotent and ownership-aware.
+- No secrets or runtime data are committed.
+- Phases 0-7 remain intact.
+- Final Git state is clean and synchronised with `origin`.

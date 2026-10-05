@@ -107,6 +107,36 @@ Reach for the narrowest skill that fits. Load one, do the work, move on.
 | Build a page with an accessibility checklist | `frontend-design` |
 | WCAG and alt text on a public page | `accessibility-compliance` |
 | Social preview image | `og-image` |
+| Actually publish, schedule, queue or upload media | `postiz` (see Execution layers) |
+| Motion graphics, kinetic type, animated data, video | `hyperframes` |
+
+## Execution layers
+
+Two capabilities have a real backend. Use them; do not reimplement them in prose.
+
+**`postiz` — social execution.** When a task reaches the point of actually
+publishing, scheduling, queueing, drafting in the tool, uploading media,
+discovering integrations, or reading a post's native metrics for a platform
+Postiz covers, use the `postiz` skill and CLI against the **local self-hosted**
+instance at `http://localhost:4007`.
+
+- If that instance is not running or not authenticated, say so and stop. Do not
+  fall back to Postiz Cloud, `api.postiz.com`, `cli-auth.postiz.com`, or the
+  hosted MCP service. Those are not part of this setup.
+- `postiz auth:login` is not the auth path here. It authenticates against a
+  Postiz-hosted service.
+- Every local media file must go through `postiz upload` first. Raw filesystem
+  paths do not work.
+- Postiz does not cover Facebook Groups or WhatsApp. Those stay manual.
+- Rule 4 above still applies: prepare and stage through Postiz, and let the human
+  approve and publish.
+
+**`hyperframes` — motion graphics and video.** For kinetic typography, animated
+statistics, lower thirds, headline cards, overlays, animated screenshots,
+explainer visuals or reusable media templates, route to the `/hyperframes`
+router and render locally. Deterministic code-driven output only. Do not
+introduce image-generation or video-generation models, hosted renderers, or
+cloud rendering services; if one seems useful, name it and let the human decide.
 
 ## Working defaults
 
@@ -130,8 +160,13 @@ Reach for the narrowest skill that fits. Load one, do the work, move on.
 - Never install software, connect an account, or create a paid resource
   without explicit approval.
 - Never print, log, or commit credentials, tokens, cookies, or personal data.
+  If a step needs a secret, have the user enter it into their own machine or
+  environment. Never ask them to paste one into chat.
 - This is a Windows machine using PowerShell 5.1. Scripts run with
   `-ExecutionPolicy Bypass`. Do not assume PowerShell 7 features.
+- Runtime state for these capabilities lives outside `.agents`, under the local
+  application directories and Docker volumes. `.agents` stays the agent
+  configuration root. Do not write runtime data or secrets into it.
 
 ## Optional integrations
 

@@ -156,10 +156,26 @@ if (Test-KitSameContent $t.GlobalSource $t.AgentsFile) {
     Write-KitLog "AGENTS.md already current  (~/.agents/AGENTS.md)" 'OK'
     Add-Plan 'skip' '~/.agents/AGENTS.md' 'identical'
 } elseif (Test-Path -LiteralPath $t.AgentsFile) {
-    Write-KitLog '~/.agents/AGENTS.md exists and differs. It is NOT kit-owned, so it will not be overwritten.' 'WARN'
-    Write-KitLog 'Resolve it manually, then re-run. Nothing was changed.' 'ERROR'
-    $script:Conflicts.Add('~/.agents/AGENTS.md')
-    Add-Plan 'conflict' '~/.agents/AGENTS.md' 'pre-existing file, not kit-owned'
+    # The curated copy differs from what is installed. Never clobber silently: without -Force this
+    # is a conflict, exactly as verify.ps1 reports it. With -Force the curated copy is restored and
+    # the previous file is backed up first, matching how kit-owned skills are replaced.
+    if (-not $Force) {
+        Write-KitLog '~/.agents/AGENTS.md exists and differs from the curated copy. It was not overwritten.' 'WARN'
+        Write-KitLog 'Re-run with -Force to restore the curated copy, or resolve it manually. Nothing was changed.' 'ERROR'
+        $script:Conflicts.Add('~/.agents/AGENTS.md')
+        Add-Plan 'conflict' '~/.agents/AGENTS.md' 'differs from curated copy'
+    } else {
+        Add-Plan 'replace' '~/.agents/AGENTS.md' 'differs from curated copy'
+        if ($DryRun) {
+            Write-KitLog 'would replace ~/.agents/AGENTS.md with the curated copy (previous version backed up)' 'DRYRUN'
+        } else {
+            $bkAgents = New-KitBackup $t.AgentsFile $t.BackupsDir $script:Stamp
+            [void]$script:Backups.Add($bkAgents)
+            [System.IO.File]::Copy($t.GlobalSource, $t.AgentsFile, $true)
+            Write-KitLog 'replaced ~/.agents/AGENTS.md with the curated copy (previous version backed up)' 'OK'
+            [void]$script:Applied.Add('~/.agents/AGENTS.md')
+        }
+    }
 } else {
     Add-Plan 'create' '~/.agents/AGENTS.md' ''
     Write-KitLog 'would install canonical AGENTS.md' 'DRYRUN'

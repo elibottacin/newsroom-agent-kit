@@ -20,6 +20,42 @@ OpenCode and Cline are the initial validation targets because they are installed
 - Never silently overwrite an existing global skill, `AGENTS.md`, rule file, MCP config, plugin config, or agent-specific configuration.
 - Preserve unrelated existing user configuration. Back up before merge or replacement.
 
+## Extension invariants — Postiz and HyperFrames
+
+Added in Phase 8. These are durable and always apply.
+
+- **Local software is part of the reproducible setup.** If a capability needs a
+  runtime, package, container, service or CLI, the installer provisions it or
+  detects it, verification reports it, and fresh-machine bootstrap reproduces
+  it. Do not leave required software as an undocumented manual prerequisite.
+- **Ownership is explicit.** Every dependency declares an ownership value
+  (`kit-installed`, `shared`, `user-owned`, `os-feature`, `ephemeral-cache`) in
+  `manifest/dependencies.json`. A normal uninstall removes only what is safely
+  attributable to the kit. Never uninstall shared software, and never delete
+  Postiz Docker volumes — no `down -v`, no `volume rm`, no prune.
+- **Postiz is the social execution backend; skills are the thinking layer.**
+  Strategy, editorial, writing, voice, planning, community reasoning and
+  content transformation stay in skills. Publishing, scheduling, queueing,
+  media upload, integration discovery and Postiz-supported native metrics route
+  through Postiz. Rationale is recorded in `docs/postiz.md`.
+- **Self-hosted only.** Postiz Cloud, `api.postiz.com`, `cli-auth.postiz.com`
+  and the hosted Postiz MCP are not part of this architecture. The only auth
+  path is an API key from the local instance with `POSTIZ_API_URL` pointed at
+  it. Do not add an MCP layer without user approval and a documented missing
+  capability.
+- **HyperFrames is the deterministic motion layer.** Render locally. Image and
+  video generation models, hosted renderers and cloud rendering are not the
+  default and stay unconfigured.
+- **Secrets and runtime data never enter Git.** No `.env`, tokens, API keys,
+  credentials, database contents, or generated private configuration.
+  Repository-tracked configuration uses examples and placeholders only.
+- **Vendor directories stay forbidden.** Upstream installers that write to
+  `~/.claude/skills`, `~/.config/opencode/skills`, or similar are not used. See
+  `docs/hyperframes.md` for how that shaped the HyperFrames install method.
+
+Detail lives in `docs/postiz.md`, `docs/hyperframes.md`, `docs/dependencies.md`
+and `manifest/dependencies.json`. Do not restate it in this file.
+
 ## Execution contract
 
 `PLAN.md` is the execution source of truth.
