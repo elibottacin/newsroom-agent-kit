@@ -475,6 +475,15 @@ Confirm the project satisfies its original objective and document future mainten
 
 # EXTENSION — Postiz self-hosted and HyperFrames
 
+> **SUPERSEDED IN PART BY PHASE 8B.** Phase 8 was written to add Postiz
+> self-hosted. Phase 8B evaluated Zernio as an alternative and selected it
+> instead, so the social backend is now Zernio and the "Self-hosted Postiz only"
+> principle below no longer describes the default setup. The Phase 8 text is kept
+> as the record of what was decided and then revisited. The governing principles
+> are in `docs/social-backend-decision.md` and in `AGENTS.md`.
+>
+> The HyperFrames half of this extension is unchanged.
+
 Phases 0-7 above are complete and are not reopened, duplicated, or rewritten.
 This extension adds two capabilities to the same project, and it changes the
 project's shape in one important way:
@@ -570,39 +579,119 @@ a user decision, before any install begins.
 
 ---
 
-## Phase 9 - Postiz self-hosted runtime installation and integration
+
+---
+
+## Phase 8B - Zernio evaluation and social backend decision
 
 ### Goals
 
-Provision the container runtime and stand up the self-hosted Postiz stack,
-without losing data on update and without destroying data on uninstall.
+Evaluate Zernio as an alternative operational social backend, compare it
+directly against the Postiz self-hosted architecture researched in Phase 8, and
+decide which one becomes the kit's social execution layer.
+
+Phase 8 is **not** undone or rewritten. Its Postiz research, findings,
+manifests and documentation stay as the record of an evaluated alternative.
+
+Nothing is installed in this phase.
 
 ### Tasks
 
-- [ ] Resolve the BLOCK-WSL prerequisite with the user, or record it as an accepted blocked prerequisite.
-- [ ] Resolve the BLOCK-RAM decision with the user before attempting the stack.
-- [ ] Detect existing Docker infrastructure and reuse it if compatible.
-- [ ] Install Docker Desktop only if absent and only with explicit approval.
-- [ ] Materialise the supported compose configuration into a runtime directory outside this repository.
-- [ ] Add a tracked example/template configuration with placeholders only. No `.env` with secrets.
-- [ ] Pin resolved image digests rather than tracking `:latest`.
-- [ ] Start the stack and wait for health checks.
-- [ ] Confirm `http://localhost:4007` is reachable.
-- [ ] Verify persistent state survives a stack restart.
-- [ ] Document backups, upgrade and migration procedure.
-- [ ] Record which dependencies the kit installed, in local uncommitted state.
-- [ ] Extend `scripts/install.ps1` with a dependency-provisioning path.
-- [ ] Extend `scripts/verify.ps1` to report Postiz stack health without leaking secrets.
-- [ ] Extend `scripts/update.ps1` to update the stack without destroying volumes.
-- [ ] Extend `scripts/uninstall.ps1` to remove containers and the compose project only. No volume deletion, no prune.
-- [ ] Document the runtime data locations and how they are backed up.
+- [x] Confirm the current published and installed state, and the clean tree, before changing anything.
+- [x] Clone and review `zernio-dev/zernio-cli` and `zernio-dev/zernio-api` at pinned refs; record ref, date and licence.
+- [x] Verify the npm registry facts for `@zernio/cli`: published version, licences, dependencies, bins, declared engines.
+- [x] Determine whether `zernio-cli` ships its own `SKILL.md`, and whether `zernio-api` provides a separate skill.
+- [x] Check the official Agent Skills discovery index and catalogue what it publishes.
+- [x] Determine whether the CLI writes to any vendor or agent directory, and whether it carries telemetry.
+- [x] Determine the current Node.js requirement from the package and its CI, not from marketing.
+- [x] Inspect authentication: the device flow, the API key, where the key is stored, and whether env vars override it.
+- [x] Confirm credentials can live outside Git, and record the local storage path.
+- [x] Verify JSON and stdout behaviour is suitable for a coding agent.
+- [x] Catalogue the operational surface: profiles, accounts, posts, drafts, scheduling, queue, media, analytics, inbox, comments and replies, contacts, broadcasts, sequences, automations, logs, usage, validation, webhooks.
+- [x] Establish platform coverage and the per-platform limitations that matter for this user.
+- [x] Establish current rate limits and what they are per plan.
+- [x] Establish the free-tier limits and define exactly what counts as an account.
+- [x] Identify usage-based and pass-through charges, including platform API fees.
+- [x] Determine licensing and which components are open source versus SaaS.
+- [x] Confirm whether any MCP path exists and whether it is needed.
+- [x] Repeat the Phase 8 social-skill overlap analysis against Zernio, including every skill the user named.
+- [x] Check whether one Node.js version can serve both Zernio and HyperFrames, and record it as a shared prerequisite if so.
+- [x] Produce a direct Postiz-versus-Zernio comparison across all requested criteria.
+- [x] Decide the social execution backend, or stop and show the unresolved tradeoff.
+- [x] Record the decision, and the reasoning, in documentation and manifests.
+- [x] Mark Postiz as evaluated but not selected, without deleting its Phase 8 evidence.
+- [x] Revise the not-yet-executed phases so they implement the selected backend, and remove WSL2, Docker and Postiz from the required default dependency plan.
+- [x] Keep HyperFrames planning unchanged.
+- [x] Confirm no secret, key or runtime data is committed, and the working tree is clean.
+- [x] Commit and push Phase 8B.
+
+### Validation
+
+- Both manifests and the new documentation parse as JSON or Markdown without error.
+- The existing `verify.ps1` still passes, proving no regression to the installed core.
+- Every cost and limit claim is traceable to a quoted source line, not to marketing prose.
+- Every overlap classification is justified against a named capability.
+- Phase 0-8 history, checkboxes and commits remain intact.
 
 ### Exit criteria
 
-- The stack runs locally, or the blocker is documented as accepted.
-- Install, verify, update and uninstall all understand the Postiz stack.
-- No volume is ever deleted by the kit.
-- No secret is committed.
+- A defensible decision with concrete evidence, or an explicit unresolved tradeoff shown to the user.
+- The chosen backend's dependency plan is realistic for this machine.
+- Postiz research preserved as evidence.
+- Working tree clean, committed and pushed.
+
+### Phase checkpoint
+
+STOP. Report the recommendation and the proposed revised outline for the later
+phases. Do not execute them until the user approves.
+
+---
+
+## Phase 9 - Shared runtime provisioning and the Zernio CLI
+
+> **Revised in Phase 8B.** This phase previously covered the Postiz self-hosted
+> container runtime. Postiz was evaluated and not selected, so WSL2, Docker
+> Desktop and the nine-container stack are removed from the default dependency
+> plan. What remains is provisioning one shared Node.js runtime and the two CLIs
+> that depend on it. See `docs/social-backend-decision.md`.
+
+### Goals
+
+Provision the single Node.js runtime that serves both `@hyperframes/cli` and
+`@zernio/cli`, and install the Zernio CLI as a managed dependency. No elevation,
+no container runtime, no background service.
+
+### Tasks
+
+- [ ] Detect existing Node.js. If a compatible version is present, use it and change nothing.
+- [ ] Confirm no major-version upgrade of an existing Node is performed silently.
+- [ ] Install Node.js LTS only if absent or too old, and handle the elevation prompt correctly.
+- [ ] Record Node.js as a `shared` prerequisite in local, uncommitted state.
+- [ ] Install `npm install -g @zernio/cli` at the version pinned in `manifest/dependencies.json`.
+- [ ] Detect the version correctly. Remember the unscoped `zernio` package does not exist, so `npx zernio` fails.
+- [ ] Never install the unscoped `late` package. It is an unrelated project.
+- [ ] Materialise the `zernio` skill into `%USERPROFILE%\.agents\skills` from the pinned ref.
+- [ ] Materialise the `zernio-api` reference skill from its pinned ref.
+- [ ] Do not install the six atomic skills from the Agent Skills index, the Claude Code plugin, or the hosted MCP.
+- [ ] Confirm `scripts/verify.ps1` still passes its vendor-isolation check after the new skills land.
+- [ ] Extend `scripts/install.ps1` with a dependency-provisioning path driven by `manifest/dependencies.json`.
+- [ ] Extend `scripts/verify.ps1` to report the Node.js version and the Zernio CLI version without leaking the key.
+- [ ] Extend `scripts/uninstall.ps1` to remove `@zernio/cli` only if the kit installed it, and never remove Node.js.
+- [ ] Leave `%USERPROFILE%\.zernio` in place on uninstall because it holds the credential. Document that explicitly.
+
+### Validation
+
+- `zernio --version` reports the pinned version.
+- `node --version` satisfies `>=22` for HyperFrames.
+- The two skills resolve from `%USERPROFILE%\.agents\skills`.
+- No vendor directory exists.
+- Rerunning the installer produces no drift.
+
+### Exit criteria
+
+- One Node.js runtime serves both CLIs.
+- The Zernio CLI and both skills are installed from the canonical path.
+- Uninstall removes only what the kit owns.
 
 ### Phase checkpoint
 
@@ -610,35 +699,44 @@ STOP and report.
 
 ---
 
-## Phase 10 - Postiz global Agent Skill and CLI integration and validation
+## Phase 10 - Zernio global Agent Skills and read-only validation
+
+> **Revised in Phase 8B.** Previously the Postiz Skill and CLI. The shape is the
+> same and simpler: there is no local instance to stand up, so the validation
+> target is the Zernio API itself, proven read-only and at zero cost on the free
+> two-account tier.
 
 ### Goals
 
-Make the official Postiz Skill and CLI available globally through the canonical
-store, pointed at the local instance, and prove it works.
+Prove the Zernio integration works end to end against the real service, and that
+both tested agents discover the canonical skills.
 
 ### Tasks
 
-- [ ] Install the `postiz` CLI as a managed dependency, not as a documented manual step.
-- [ ] Add the portable `postiz` skill to the manifest and materialise it into `%USERPROFILE%\.agents\skills`.
-- [ ] Confirm no vendor wrapper is used: no Cline plugin, Claude plugin, Cursor plugin, Gemini extension or hosted MCP.
-- [ ] Configure `POSTIZ_API_URL=http://localhost:4007` in a local, non-committed mechanism.
-- [ ] Document that the API key is generated by the user in the local instance and never pasted into chat.
-- [ ] Verify the CLI targets the local instance and not Postiz Cloud.
-- [ ] Prove read-only operations work: integration discovery and post listing/status.
-- [ ] Prove analytics retrieval works for a connected integration where permitted.
-- [ ] Verify OpenCode discovers the skill.
-- [ ] Verify Cline discovers the same canonical skill.
-- [ ] Verify install is idempotent and reruns cause no drift.
-- [ ] Leave social-platform OAuth and developer-app steps explicitly pending rather than faking them.
-- [ ] Do not publish a real post as a test without explicit user approval. Prefer drafts and read-only checks.
-- [ ] Update `docs/postiz.md` and `docs/troubleshooting.md` with actual observed behaviour.
+- [ ] Confirm the user has created a Zernio account. First two connected accounts are free and need no credit card.
+- [ ] Have the user run `zernio auth:login` themselves, so the key is never handled by the agent.
+- [ ] Confirm the key is configured, without printing it. Prefer the environment variable so nothing touches disk.
+- [ ] Document that `zernio auth:set --key` puts the secret in shell history, and is not the recommended path.
+- [ ] Verify with `zernio auth:check` that the key is valid.
+- [ ] Prove read-only operations work: `profiles:list`, `accounts:list`, `posts:list`, `usage:stats`.
+- [ ] Prove `accounts:health` works, which is the pre-flight gate before any batch.
+- [ ] Prove `validate:post-length` and `validate:post` work, so bad posts are caught before a slot passes.
+- [ ] Confirm nothing writes to a vendor or agent directory.
+- [ ] Verify OpenCode discovers `zernio` and `zernio-api` from the canonical root.
+- [ ] Verify Cline discovers the same canonical skills.
+- [ ] Verify install and verify are idempotent, with no drift on rerun.
+- [ ] Create a draft post as the highest-risk write test, and only with explicit user approval. Do not publish.
+- [ ] Leave platform OAuth and app approval explicitly pending rather than faking them.
+- [ ] Recommend a read-only, profile-scoped API key for reporting, as upstream advises.
+- [ ] Record actual cost with `usage:stats` and `usage:x-pricing` rather than estimating.
+- [ ] Update `docs/zernio.md` and `docs/troubleshooting.md` with observed behaviour.
 
 ### Exit criteria
 
-- CLI installed and callable, pointed at the local instance.
-- Skill discoverable from the canonical root by both tested agents.
-- Read-only paths proven; publishing left to explicit human approval.
+- The CLI authenticates and reads against the real service.
+- Both skills are discoverable by both tested agents.
+- Drafts, not published posts, were used for any write test.
+- Cost is reported from the API, not estimated.
 
 ### Phase checkpoint
 
@@ -702,7 +800,7 @@ that hold.
 - [ ] Add a dry-run or preview path for dependency provisioning where the current scripts support one.
 - [ ] Make detection-before-install the default, and avoid reinstalling a compatible existing installation.
 - [ ] Record kit-installed versus pre-existing software in local uncommitted state.
-- [ ] Extend `scripts/verify.ps1` to report the status of Postiz, HyperFrames and every dependency without leaking secrets.
+- [ ] Extend `scripts/verify.ps1` to report the status of Zernio, HyperFrames and every dependency without leaking secrets.
 - [ ] Extend `scripts/update.ps1` so upstream code changes are reviewed before they are applied, per the existing review model.
 - [ ] Extend `scripts/uninstall.ps1` with ownership-aware behaviour for every dependency class.
 - [ ] Prove idempotency: rerun install, verify and update with no unintended drift.
@@ -732,8 +830,8 @@ Prove the extension meets its definition of done and hand it over.
 ### Tasks
 
 - [ ] Run the full verification suite and record the result.
-- [ ] Prove the Postiz stack health, or document the accepted blocker.
-- [ ] Prove the Postiz CLI targets the self-hosted instance.
+- [ ] Prove the Zernio CLI authenticates and reads against the real service, and report actual cost from `usage:stats`.
+- [ ] Prove no WSL, Docker or container runtime was provisioned.
 - [ ] Prove the HyperFrames smoke test renders reproducibly.
 - [ ] Prove OpenCode and Cline both consume every new canonical skill.
 - [ ] Prove no vendor skill directory was created by any installer.
@@ -744,18 +842,20 @@ Prove the extension meets its definition of done and hand it over.
 - [ ] Confirm `AGENTS.md` stayed compact and detailed material stayed in `docs/`.
 - [ ] Confirm install, update and uninstall documentation matches actual behaviour.
 - [ ] List every remaining human-only step with why, exact action, where, and the non-secret result needed.
+- [ ] State the ongoing cost plainly in the README, including the X URL-post pass-through, so the user is not surprised.
 - [ ] Final commit and push.
 
 ### Definition of Done
 
 - Every required machine-level dependency is provisioned or safely detected by the reproducible setup.
-- Postiz runs locally and self-hosted, with Postiz Cloud and the hosted MCP out of the picture.
-- The official Postiz Skill and CLI path is integrated globally and aimed at the local instance.
-- Existing social skills are rationalised against Postiz, with no strategy or editorial skill discarded.
+- One shared Node.js runtime serves both `@hyperframes/cli` and `@zernio/cli`. No second runtime exists.
+- Zernio is the social execution backend, integrated globally through the canonical `.agents` root, with the hosted MCP and the Claude Code plugin out of the picture.
+- Existing social skills are rationalised against Zernio, with no strategy or editorial skill removed or demoted, and `crisis-and-moderation` still refusing autonomous moderation.
 - Node.js, FFmpeg and the HyperFrames CLI are installed and validated.
 - The HyperFrames core skills are installed reproducibly from the canonical root, with `/hyperframes` as the router, visible to both tested agents.
 - A deterministic smoke-test MP4 renders locally with no generative or cloud dependency.
-- Install, verify, update and uninstall remain idempotent and ownership-aware.
+- Install, verify, update and uninstall remain idempotent and ownership-aware, and no shared software is removed.
+- No WSL2, Docker Desktop or container runtime is required or installed.
 - No secrets or runtime data are committed.
-- Phases 0-7 remain intact.
+- Phases 0-8B remain intact, and the Postiz research is preserved as the record of the evaluated alternative.
 - Final Git state is clean and synchronised with `origin`.

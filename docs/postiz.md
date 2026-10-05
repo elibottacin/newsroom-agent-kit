@@ -1,4 +1,19 @@
-# Postiz — self-hosted social execution layer
+# Postiz — self-hosted social execution layer (evaluated, not selected)
+
+> **STATUS: evaluated in Phase 8, rejected as the default backend in Phase 8B.**
+>
+> Zernio was selected instead. This file is preserved **unmodified below this
+> note** as the record of the evaluated alternative. Do not act on it: do not
+> provision WSL2, Docker Desktop or the Postiz stack, and do not install the
+> `postiz` CLI.
+>
+> Why it was rejected: the self-hosted stack cannot run on this machine. The PC
+> has 3.44 GB of RAM with 0.24 GB free against nine containers needing roughly
+> 2.3-3 GB plus 1-1.5 GB of runtime, and WSL is not installed so there is no
+> container backend at all. Neither blocker is automatable.
+>
+> See `docs/social-backend-decision.md` for the comparison and the decision, and
+> `docs/zernio.md` for what was selected.
 
 Postiz is the kit's operational execution layer for social publishing: posting,
 scheduling, drafts, queueing, cross-posting, media upload, integration

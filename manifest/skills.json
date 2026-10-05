@@ -81,7 +81,7 @@
     { "name": "web-testing", "reason": "Browser-driven QA of live pages and published output. Cross-agent value but needs a browser runtime, so not default.", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "subdir": "web-testing", "url": "https://github.com/PracticalSwan/agent-skills" } },
     { "name": "web-quality-audit", "reason": "Broader live-site quality audit. Overlaps accessibility-compliance and web-design-guidelines.", "source": { "repo": "PracticalSwan/agent-skills", "license": "MIT", "ref": "ff6d12f61e8250dd1b988e101a482f6adc05c451", "subdir": "web-quality-audit", "url": "https://github.com/PracticalSwan/agent-skills" } },
     { "name": "goals-and-kpis", "reason": "Sets targets, which analytics-and-reporting deliberately leaves out. Reachable from 11 vendored skills.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/goals-and-kpis", "url": "https://github.com/social-media-skills/skills" } },
-    { "name": "scheduling-and-queue", "reason": "SUPERSEDED BY POSTIZ (Phase 8). This was the single most-referenced uninstalled sibling (30 references). It is an instruction-only skill covering scheduling and the confirmation contract, which is exactly Postiz's native execution surface: queueing, scheduling, post status management and operational post retrieval. An instruction-only scheduling skill should not be added to a machine that has the real backend. Do not install it.", "classification": "replace", "supersededBy": "postiz", "supersededPhase": 8, "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/scheduling-and-queue", "url": "https://github.com/social-media-skills/skills" } },
+    { "name": "scheduling-and-queue", "reason": "SUPERSEDED (Phase 8, reaffirmed Phase 8B). This was the single most-referenced uninstalled sibling (30 references). It is an instruction-only skill covering scheduling and the confirmation contract, which is exactly what a real backend implements natively. Postiz was rejected in Phase 8B; Zernio's Queue API now provides slot configuration, queue preview, next-available-slot and queueing a post against a profile. Do not install it.", "classification": "replace", "supersededBy": "zernio", "supersededPhase": "8 (reaffirmed in 8B)", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/scheduling-and-queue", "url": "https://github.com/social-media-skills/skills" } },
     { "name": "content-recycling", "reason": "Reusing proven performers. Overlaps cross-platform-repurposing.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/content-recycling", "url": "https://github.com/social-media-skills/skills" } },
     { "name": "profile-optimization", "reason": "Profile fundamentals. Reachable from 10 vendored skills.", "source": { "repo": "social-media-skills/skills", "license": "MIT", "ref": "6e30eeb2f6736bda8683b6bbaa674af3641d7945", "subdir": "skills/profile-optimization", "url": "https://github.com/social-media-skills/skills" } },
     { "name": "story-pitch", "reason": "Story pitches and query letters. Only useful for external pitching.", "source": { "repo": "jamditis/claude-skills-journalism", "license": "MIT", "ref": "48fe27b0aefba78fd6e237a02b72ba7bc3bc012d", "subdir": "journalism-core/skills/story-pitch", "url": "https://github.com/jamditis/claude-skills-journalism" } },
@@ -112,7 +112,8 @@
   "knownGaps": [
     "CMS and editorial publishing workflows: deliberately out of scope. The user confirmed they are not needed. No WordPress-specific or generic CMS skill was selected.",
     "Translation and localization: deliberately out of scope per the user. No portable candidate was found in the sources reviewed.",
-    "WhatsApp and Telegram: the user uses them, but no portable, license-clean skill was found. email-and-newsletter covers the owned-channel case. Revisit if this becomes painful.",
+    "WhatsApp and Telegram: the user uses them, but no portable, license-clean skill was found. email-and-newsletter covers the owned-channel case. Revisit if this becomes painful. UPDATED in Phase 8B: Zernio provides a WhatsApp Cloud API messaging path and a Telegram bot-token path as an execution backend, but still no instruction skill for writing WhatsApp or Telegram content.",
+    "CMS and editorial publishing: the execution path now exists. Zernio's Blogs API covers WordPress.com, self-hosted WordPress and Shopify. Still no editorial skill, by the user's original decision.",
     "About 45 sibling skills referenced by the vendored set are not installed. The global AGENTS.md instructs the agent to treat those references as unavailable and to do the work itself rather than inventing content."
   ],
 
@@ -156,7 +157,69 @@
       "WhatsApp is absent from Postiz's integration list at the reviewed ref, so it stays manual.",
       "crisis-and-moderation is deliberately never routed through an automated publishing backend; it is high-stakes and human-in-the-loop."
     ],
-    "agentBehaviour": "When a task reaches the point of publishing, scheduling, queueing, uploading media or reading a post's native metrics for a Postiz-covered platform, use the postiz skill and CLI against POSTIZ_API_URL=http://localhost:4007. If that local instance is not running or not authenticated, say so and stop. Do not silently fall back to Postiz Cloud, api.postiz.com, cli-auth.postiz.com or the hosted MCP."
+    "agentBehaviour": "SUPERSEDED BY ZERNIO in Phase 8B. Kept as the Phase 8 record of the Postiz evaluation. Do not provision WSL2, Docker Desktop or the Postiz stack. See zernioRationalisation for the active behaviour."
+  },
+
+  "postizRationalisation": {
+    "$comment": "PHASE 8 RECORD - SUPERSEDED. Retained unmodified as evidence of the evaluated alternative. Postiz was rejected in Phase 8B because its self-hosted stack cannot run on this machine (3.44 GB RAM, WSL absent). See zernioRationalisation for the active classification and docs/social-backend-decision.md for the comparison. Do not act on this section.",
+    "decidedInPhase": 8,
+    "supersededInPhase": "8B",
+    "installedSkillsRemoved": 0,
+    "installedSkillsDemoted": 0,
+    "principle": "Skills handle thinking; Postiz handles execution. Do not remove a useful strategy or editorial skill merely because Postiz can publish its output.",
+    "executionBackendSkills": ["content-calendar", "threads-post", "instagram-reels-publishing", "x-growth", "facebook-strategy", "cross-platform-repurposing", "analytics-and-reporting"],
+    "classification": {
+      "keep_strategic_editorial": ["social-strategy", "content-pillars", "batch-content-plan", "brand-profile", "voice-builder", "reply-and-comment-writer", "engagement-routine", "community-management", "crisis-and-moderation", "email-and-newsletter", "newsroom-style", "ai-writing-detox", "source-verification", "fact-check-workflow", "content-research-and-sourcing", "editorial-workflow"],
+      "keep_complementary": ["caption-writer-sms", "hook-writer", "thread-writer-sms", "carousel-writer-sms", "reels-script", "tiktok-script", "youtube-shorts", "content-audit", "design-and-templates", "og-image"],
+      "postiz_becomes_execution_backend": ["content-calendar", "threads-post", "instagram-reels-publishing", "x-growth", "facebook-strategy", "cross-platform-repurposing", "analytics-and-reporting"],
+      "no_meaningful_overlap": ["facebook-groups", "seo", "accessibility-compliance", "web-design-guidelines", "hallmark", "impeccable", "frontend-design"],
+      "replace": ["scheduling-and-queue"],
+      "demote_to_optional": [],
+      "remove_from_default_install": []
+    },
+    "whyNothingWasRemoved": [
+      "facebook-groups survives because Postiz publishes to a Facebook Page, not a Group.",
+      "reply-and-comment-writer survived because Postiz attaches comments to its own posts; it does not read or reply to arbitrary inbound comments.",
+      "email-and-newsletter survives because no newsletter integration is configured.",
+      "WhatsApp is absent from Postiz's integration list at the reviewed ref.",
+      "crisis-and-moderation is deliberately never routed through an automated publishing backend."
+    ]
+  },
+
+  "zernioRationalisation": {
+    "$comment": "Phase 8B. ACTIVE. Zernio is the selected social execution backend. The Phase 8 principle is unchanged: skills do the thinking, the backend executes. This classification was re-derived independently against Zernio's actual command surface, not copied from the Postiz matrix.",
+    "decidedInPhase": "8B",
+    "replaces": "postizRationalisation",
+    "installedSkillsRemoved": 0,
+    "installedSkillsDemoted": 0,
+    "executionBackendSkills": ["content-calendar", "batch-content-plan", "threads-post", "instagram-reels-publishing", "x-growth", "facebook-strategy", "cross-platform-repurposing", "analytics-and-reporting", "reply-and-comment-writer", "community-management"],
+    "executionBackendCount": 10,
+    "executionBackendNote": "Up from seven with Postiz. Three skills changed classification because Zernio genuinely implements capabilities Postiz did not: reply-and-comment-writer, community-management, and batch-content-plan.",
+    "classification": {
+      "keep_strategic_editorial": ["social-strategy", "content-pillars", "brand-profile", "voice-builder", "engagement-routine", "crisis-and-moderation", "email-and-newsletter", "newsroom-style", "ai-writing-detox", "source-verification", "fact-check-workflow", "content-research-and-sourcing", "editorial-workflow"],
+      "keep_complementary": ["caption-writer-sms", "hook-writer", "thread-writer-sms", "carousel-writer-sms", "reels-script", "tiktok-script", "youtube-shorts", "content-audit", "design-and-templates", "og-image"],
+      "zernio_becomes_execution_backend": ["content-calendar", "batch-content-plan", "threads-post", "instagram-reels-publishing", "x-growth", "facebook-strategy", "cross-platform-repurposing", "analytics-and-reporting", "reply-and-comment-writer", "community-management"],
+      "no_meaningful_overlap": ["facebook-groups", "seo", "accessibility-compliance", "web-design-guidelines", "hallmark", "impeccable", "frontend-design"],
+      "replace": ["scheduling-and-queue"],
+      "demote_to_optional": [],
+      "remove_from_default_install": []
+    },
+    "changedFromPostiz": [
+      "reply-and-comment-writer: keep -> Zernio execution backend. Postiz could not read or reply to comments; Zernio's inbox can, across platforms, including reviews for Facebook and Google Business.",
+      "community-management: keep -> Zernio execution backend. Belonging and rituals stay as reasoning; broadcasts, multi-step sequences and comment-to-DM automations execute the mechanical parts.",
+      "batch-content-plan: keep -> Zernio execution backend. Brief-writing stays; CSV bulk upload with a dryRun flag executes a period's posts."
+    ],
+    "unchangedDeliberately": [
+      "crisis-and-moderation stays keep - strategic/editorial. Zernio can hide, pin, like and delete comments, but the skill must NOT use those automatically. High-stakes and human-in-the-loop.",
+      "facebook-groups stays no meaningful overlap. Zernio publishes to a Facebook Page, not a Group.",
+      "email-and-newsletter stays keep - strategic/editorial. No newsletter integration is configured.",
+      "scheduling-and-queue stays replace. Zernio's Queue API has slot configuration, queue preview and next-available-slot, which is the genuine backend."
+    ],
+    "skillsAdded": ["zernio", "zernio-api"],
+    "skillsDeferred": ["schedule-post", "connect-account", "list-analytics", "send-message", "run-ads", "manage-blog-articles"],
+    "skillsDeferredReason": "The six atomic skills from the official Agent Skills index describe raw REST and duplicate the zernio CLI skill. Each is sha256-pinned in manifest/dependencies.json for a future gap.",
+    "knownGapsUpdated": "CMS and editorial publishing: Zernio's Blogs API supports WordPress.com, self-hosted WordPress and Shopify. The execution path now exists. This is a capability, not an installed skill: the kit gains the ability to publish articles, not editorial judgement about them.",
+    "agentBehaviour": "When a task reaches the point of publishing, scheduling, queueing, drafting in the tool, uploading media, reading or replying to comments and DMs, sending a broadcast, or reading native post metrics for a connected platform, use the zernio skill and CLI. If no API key is configured or the account is not connected, say so and stop. Do not fall back to Postiz, Postiz Cloud, or any other backend. Never publish, send, delete, hide or moderate autonomously: stage it, show it, and let the human act."
   },
 
   "hyperframesRationalisation": {

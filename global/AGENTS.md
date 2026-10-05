@@ -107,29 +107,36 @@ Reach for the narrowest skill that fits. Load one, do the work, move on.
 | Build a page with an accessibility checklist | `frontend-design` |
 | WCAG and alt text on a public page | `accessibility-compliance` |
 | Social preview image | `og-image` |
-| Actually publish, schedule, queue or upload media | `postiz` (see Execution layers) |
+| Actually publish, schedule, queue or upload media | `zernio` (see Execution layers) |
+| Read or reply to comments, DMs, reviews | `zernio`, then `reply-and-comment-writer` |
+| Broadcasts, drip sequences, comment-to-DM | `zernio` |
 | Motion graphics, kinetic type, animated data, video | `hyperframes` |
 
 ## Execution layers
 
 Two capabilities have a real backend. Use them; do not reimplement them in prose.
 
-**`postiz` — social execution.** When a task reaches the point of actually
+**`zernio` — social execution.** When a task reaches the point of actually
 publishing, scheduling, queueing, drafting in the tool, uploading media,
-discovering integrations, or reading a post's native metrics for a platform
-Postiz covers, use the `postiz` skill and CLI against the **local self-hosted**
-instance at `http://localhost:4007`.
+reading or replying to comments and DMs, sending a broadcast, or reading a
+post's native metrics for a connected platform, use the `zernio` skill and CLI.
 
-- If that instance is not running or not authenticated, say so and stop. Do not
-  fall back to Postiz Cloud, `api.postiz.com`, `cli-auth.postiz.com`, or the
-  hosted MCP service. Those are not part of this setup.
-- `postiz auth:login` is not the auth path here. It authenticates against a
-  Postiz-hosted service.
-- Every local media file must go through `postiz upload` first. Raw filesystem
-  paths do not work.
-- Postiz does not cover Facebook Groups or WhatsApp. Those stay manual.
-- Rule 4 above still applies: prepare and stage through Postiz, and let the human
-  approve and publish.
+- If no API key is configured, or the platform is not connected, say so and
+  stop. Do not substitute another backend.
+- Every local media file must go through `zernio media:upload` first. Use the
+  returned public URL.
+- Check `zernio accounts:health` before a big batch; it reports rate limits and
+  token expiry.
+- Use `zernio validate:post` before scheduling. Catching a bad post before the
+  slot passes is better than after.
+- Reading and analytics on X are billed at X's own rates, and a post containing
+  a URL costs $0.200. Check `zernio usage:stats` and `usage:x-pricing` rather
+  than guessing, and keep X analytics or inbox sync off unless asked.
+- Zernio cannot post to Facebook Groups. `facebook-groups` work stays in the
+  group itself.
+- Rule 4 above still applies, and it applies even though the API can do all of
+  this: stage the action, show it, and let the human approve, publish, send,
+  delete, hide or moderate.
 
 **`hyperframes` — motion graphics and video.** For kinetic typography, animated
 statistics, lower thirds, headline cards, overlays, animated screenshots,
@@ -165,8 +172,8 @@ cloud rendering services; if one seems useful, name it and let the human decide.
 - This is a Windows machine using PowerShell 5.1. Scripts run with
   `-ExecutionPolicy Bypass`. Do not assume PowerShell 7 features.
 - Runtime state for these capabilities lives outside `.agents`, under the local
-  application directories and Docker volumes. `.agents` stays the agent
-  configuration root. Do not write runtime data or secrets into it.
+  application directories. `.agents` stays the agent configuration root. Do not
+  write runtime data or secrets into it.
 
 ## Optional integrations
 

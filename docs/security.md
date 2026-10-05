@@ -507,6 +507,117 @@ discovery. Nine containers including Elasticsearch and Temporal, on top of WSL2
 and Docker Desktop, with seven health checks. See BLOCK-RAM in
 `manifest/dependencies.json`. Not automatable; requires a user decision.
 
+## Extension findings — Phase 8B (Zernio, the selected backend)
+
+Zernio replaces Postiz self-hosted as the default social execution backend. The
+Postiz findings SEC-19 to SEC-24 are retained above as the record of the
+rejected alternative. These are the findings that apply to what is actually
+installed.
+
+### SEC-25 - Zernio is a SaaS dependency, and the trade is deliberate
+
+Severity: **medium, accepted**. Content, DMs, comments, contacts and every
+connected social account's long-lived OAuth token live on Zernio's
+infrastructure, reached over `https://zernio.com/api`. The client, CLI and skills
+are MIT; the service is proprietary and runs on Vercel.
+
+This is a genuine reduction in data control compared with self-hosting, and it
+was chosen knowingly. The alternative was a nine-container stack that cannot run
+on this machine at all (SEC-24), which is not a weaker guarantee of privacy but
+no guarantee of function either. Zernio publishes a status page, claims 99.7%+
+uptime, and offers SOC 2 and GDPR documentation at `trust.zernio.com`.
+
+Mitigations: any account can be disconnected at any time and charging stops; the
+kit never holds a social password, only a scoped API key; and the user can
+create a read-only, profile-scoped, expiring key so a reporting integration
+cannot publish.
+
+### SEC-26 - Zernio credentials are stored unencrypted and are overridable by environment
+
+Severity: **medium**. `src/utils/config.ts` writes the API key to
+`%USERPROFILE%\.zernio\config.json` and applies **no `chmod`**, so on Windows the
+file is readable by anything running as that user. There is a legacy fallback to
+`%USERPROFILE%\.late\config.json`.
+
+Mitigation, and the reason this is acceptable: `ZERNIO_API_KEY` takes precedence
+over the file, so the kit's documented setup keeps the key in the environment and
+never on disk. The file path is removed on uninstall only on explicit request,
+because it holds a credential. Verification reports whether a key is configured
+and never prints it.
+
+A secondary note: `zernio auth:set --key <key>` places the secret in
+command-line arguments, where it can land in shell history. The kit documents the
+device flow (`zernio auth:login`) and the environment variable as the preferred
+paths, and flags `auth:set` as the less safe option.
+
+### SEC-27 - X API costs are passed through and can be incurred silently
+
+Severity: **medium**. Zernio passes X's API costs through at X's exact rates with
+zero markup: reads $0.005, user reads and Article actions $0.010, post and DM
+sends $0.015, and **posts containing a URL $0.200**. For a news outlet posting
+links, that is the line that matters.
+
+Risk is that an agent polls analytics in a loop and accrues cost without anyone
+noticing. Mitigations: `usage:stats` and `usage:x-pricing` exist specifically so
+cost can be read rather than estimated; X analytics and inbox sync are opt-in on
+the account and the kit leaves them off unless the user asks; and the global
+instructions tell the agent to check usage rather than guess and to keep X
+analytics or inbox sync disabled unless requested.
+
+### SEC-28 - @zernio/cli writes the key from a device flow that opens a browser
+
+Severity: **low**. `zernio auth:login` performs a device authorization flow
+against `zernio.com`, opens the default browser, and writes the resulting key to
+disk. The bearer used during the flow is a short-lived device code, and the
+polling endpoint honours 410 expiry and 429 backoff.
+
+This is the same class of action as any OAuth login the user must perform, and it
+is a deliberate human step. The kit does not run it unattended. Verified
+separately that the CLI carries **no telemetry** and makes no network call other
+than to the configured base URL.
+
+### SEC-29 - The Zernio CLI never writes to a vendor or agent directory
+
+Severity: **informational, positive finding**. A full-text search of
+`zernio-cli/src` for `.claude`, `.agents`, `.cursor`, `.codex`, `.gemini` and
+`skills` returns only API pagination parameters named `cursor`.
+
+This is materially better than the HyperFrames installer (SEC-21), which writes
+`~/.claude/skills` and symlinks into other agents. Zernio needs no workaround:
+the kit installs the skill files itself through its own canonical path, and
+verification's vendor-directory check will pass.
+
+### SEC-30 - Zernio reference documentation lags its commercial model
+
+Severity: **low, maturity signal**. Three inconsistencies found, all recorded in
+`docs/zernio.md`:
+
+1. `rules/analytics.md` and `zernio-cli/SKILL.md` both state analytics requires
+   an "analytics add-on", while the pricing page and `llms.txt` state analytics
+   is bundled with every account with no add-ons. This kit assumes **included**,
+   on the authority of the newer commercial documentation.
+2. The platform count is stated as 13, 14, 15 and 16 in four different places.
+   `llms.txt` is taken as current.
+3. `rules/errors.md` still describes a four-tier plan ladder that no longer
+   matches the usage-based pricing model.
+
+None blocks adoption. Together with the project's age — five npm releases since
+March 2026 — they argue for pinning the version, reviewing before each update,
+and re-checking cost assumptions periodically rather than treating any single
+document as authoritative.
+
+### SEC-31 - Two vendor-specific wrappers exist and are deliberately unused
+
+Severity: **informational**. `zernio-dev/zernio-claude-plugin` is a Claude Code
+plugin, and `https://mcp.zernio.com/mcp` is a hosted MCP server registered as
+`com.zernio/zernio`. Both are recorded in `manifest/integrations.json` with
+`installAction: none`.
+
+The MCP server would add a hosted endpoint, a second authentication model and
+extra tool definitions for no capability gain, because the CLI already exposes
+112 generated plus 19 hand-written command groups. Neither is added without user
+approval and a documented missing capability.
+
 ## Residual risks after Phase 3
 
 1. **Vendor-framing risk (SEC-07) is resolved by forking.** 27 skills are sanitised forks with

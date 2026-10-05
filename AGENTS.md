@@ -20,9 +20,9 @@ OpenCode and Cline are the initial validation targets because they are installed
 - Never silently overwrite an existing global skill, `AGENTS.md`, rule file, MCP config, plugin config, or agent-specific configuration.
 - Preserve unrelated existing user configuration. Back up before merge or replacement.
 
-## Extension invariants — Postiz and HyperFrames
+## Extension invariants — social backend and HyperFrames
 
-Added in Phase 8. These are durable and always apply.
+Added in Phase 8, revised in Phase 8B. These are durable and always apply.
 
 - **Local software is part of the reproducible setup.** If a capability needs a
   runtime, package, container, service or CLI, the installer provisions it or
@@ -31,30 +31,37 @@ Added in Phase 8. These are durable and always apply.
 - **Ownership is explicit.** Every dependency declares an ownership value
   (`kit-installed`, `shared`, `user-owned`, `os-feature`, `ephemeral-cache`) in
   `manifest/dependencies.json`. A normal uninstall removes only what is safely
-  attributable to the kit. Never uninstall shared software, and never delete
-  Postiz Docker volumes — no `down -v`, no `volume rm`, no prune.
-- **Postiz is the social execution backend; skills are the thinking layer.**
-  Strategy, editorial, writing, voice, planning, community reasoning and
-  content transformation stay in skills. Publishing, scheduling, queueing,
-  media upload, integration discovery and Postiz-supported native metrics route
-  through Postiz. Rationale is recorded in `docs/postiz.md`.
-- **Self-hosted only.** Postiz Cloud, `api.postiz.com`, `cli-auth.postiz.com`
-  and the hosted Postiz MCP are not part of this architecture. The only auth
-  path is an API key from the local instance with `POSTIZ_API_URL` pointed at
-  it. Do not add an MCP layer without user approval and a documented missing
-  capability.
+  attributable to the kit. Never uninstall shared software.
+- **Zernio is the social execution backend.** Skills do the thinking; the
+  backend executes. Publishing, scheduling, queueing, drafts, media upload,
+  comment and DM handling, broadcasts, sequences and supported native metrics
+  route through Zernio. Rationale and the full comparison in
+  `docs/social-backend-decision.md`.
+- **Postiz self-hosted is evaluated and not selected.** Its Phase 8 research is
+  preserved as evidence. Do not provision WSL2, Docker Desktop or the Postiz
+  stack. See `docs/postiz.md`.
+- **Skill and CLI, never MCP, never a vendor wrapper.** Zernio's hosted MCP at
+  `mcp.zernio.com` and the `zernio-claude-plugin` are both out. Add neither
+  without user approval and a documented missing capability.
+- **Never publish, send or moderate autonomously.** Stage the action, show it,
+  and let the human act. This holds even though the API can do it. In
+  particular, `crisis-and-moderation` must not use hide, pin, like or delete
+  automatically.
+- **Shared Node.js.** One Node.js LTS install serves both `@hyperframes/cli`
+  and `@zernio/cli`. Do not create a second runtime.
 - **HyperFrames is the deterministic motion layer.** Render locally. Image and
   video generation models, hosted renderers and cloud rendering are not the
   default and stay unconfigured.
 - **Secrets and runtime data never enter Git.** No `.env`, tokens, API keys,
-  credentials, database contents, or generated private configuration.
-  Repository-tracked configuration uses examples and placeholders only.
+  credentials, database contents, or generated private configuration. Prefer an
+  environment variable over a config file so the secret never touches disk.
 - **Vendor directories stay forbidden.** Upstream installers that write to
   `~/.claude/skills`, `~/.config/opencode/skills`, or similar are not used. See
-  `docs/hyperframes.md` for how that shaped the HyperFrames install method.
+  `docs/hyperframes.md`.
 
-Detail lives in `docs/postiz.md`, `docs/hyperframes.md`, `docs/dependencies.md`
-and `manifest/dependencies.json`. Do not restate it in this file.
+Detail lives in `docs/zernio.md`, `docs/postiz.md`, `docs/social-backend-decision.md`,
+`docs/hyperframes.md`, `docs/dependencies.md` and `manifest/dependencies.json`.
+Do not restate it in this file.
 
 ## Execution contract
 

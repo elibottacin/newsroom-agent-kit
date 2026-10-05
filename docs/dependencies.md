@@ -23,32 +23,40 @@ a normal uninstall may touch it.
 | `os-feature` | A Windows feature | **No** |
 | `ephemeral-cache` | Regenerable download cache | Only on explicit request |
 
-Applied to this extension, the consequences are:
+Applied to the selected setup, the consequences are:
 
-- **Node.js is `shared`.** It is required by HyperFrames and by the Postiz CLI,
-  but global npm packages and the user's own scripts live on it. Removing Node
-  removes those too. The kit detects a compatible Node and never reinstalls or
-  upgrades it unnecessarily; a major-version upgrade of an existing Node is not
-  performed silently.
+- **Node.js is `shared`.** It is required by both `@hyperframes/cli` and
+  `@zernio/cli`, but global npm packages and the user's own scripts live on it.
+  Removing Node removes those too. The kit detects a compatible Node and never
+  reinstalls or upgrades it unnecessarily; a major-version upgrade of an existing
+  Node is not performed silently.
 - **FFmpeg is `shared`.** It is broadly used by unrelated tooling. Never removed
   without explicit approval.
-- **Docker Desktop is `shared`.** It is general-purpose container
-  infrastructure. Postiz being removed is not a reason to remove Docker.
-- **WSL2 is `os-feature`.** The kit installs it if the user authorises it, and
-  never uninstalls it.
-- **@hyperframes/cli, the `postiz` CLI and the Puppeteer browser cache are
-  `kit-installed` / `ephemeral-cache`.** These are safe for the kit to remove.
+- **`@hyperframes/cli` and `@zernio/cli` are `kit-installed`.** Safe for the kit
+  to remove.
+- **The Puppeteer browser cache is `ephemeral-cache`.** Safe to clear only on
+  request; it re-downloads.
+- **There is no `os-feature` dependency in the default setup.** Nothing requires
+  WSL, Docker, elevation or a reboot. Should Postiz ever be revisited, WSL2
+  becomes `os-feature` and Docker Desktop becomes `shared` — the kit may install
+  them with approval and must never uninstall them.
 
-## Postiz persistent data is user data
+## Zernio credentials are user data
 
-The compose stack's six named volumes hold the user's account, connected social
-integrations, scheduled queue, uploaded media and Postiz configuration. A normal
-uninstall removes containers and the compose project only.
+`%USERPROFILE%\.zernio\config.json` holds the API key, and no `chmod` is applied
+to it, so on Windows it is readable by anything running as that user. A normal
+uninstall therefore **does not delete it**. The documented setup avoids writing
+the key to disk at all by using the `ZERNIO_API_KEY` environment variable, which
+takes precedence over the file.
+
+`%USERPROFILE%\.postiz\credentials.json` is the equivalent path if Postiz is
+ever revived, and is governed by the same rule.
 
 The kit must never run `docker compose down -v`, `docker volume rm`, or any form
 of prune as part of an uninstall or an ordinary update. Volumes are removed only
 when the user explicitly asks, and the command that would do so must be shown
-to them before it runs.
+to them before it runs. None of this applies to the selected setup, which has no
+containers; the rule is retained for the record.
 
 ## Detection, not reinstallation
 
@@ -69,73 +77,89 @@ that ownership can be honoured later without guessing.
 
 ## Dependency summary
 
+**Revised in Phase 8B.** Zernio replaced Postiz self-hosted, so WSL2, Docker
+Desktop and the nine Postiz containers left the required default plan. One
+Node.js runtime now serves both CLIs.
+
 | Dependency | Required by | Version | State at discovery | Ownership |
 |---|---|---|---|---|
-| Node.js | HyperFrames CLI (`>=22`), Postiz CLI (`>=18`) | `>=22` | **missing** | shared |
+| Node.js | **shared**: `@hyperframes/cli` (`>=22`) and `@zernio/cli` (CI uses 24) | `24.x` LTS satisfies both | **missing** | shared |
 | npm / npx | both CLIs | bundled with Node | **missing** | shared |
 | `@hyperframes/cli` | HyperFrames | 0.8.126 at reviewed ref | **missing** | kit-installed |
+| `@zernio/cli` | Zernio social execution | 0.4.1 at reviewed ref | **missing** | kit-installed |
 | FFmpeg + ffprobe | HyperFrames render | recent, unpinned upstream | **missing** | shared |
 | Headless Chrome | HyperFrames frame capture | puppeteer-managed | not cached (system Chrome/Edge present) | ephemeral-cache |
-| WSL2 | Docker Desktop backend | WSL2 | **not installed** | os-feature |
-| Docker Desktop | Postiz compose stack | current stable | **missing** | shared |
-| `postiz` CLI | Postiz agent execution | 2.0.19 at reviewed ref, node `>=18` | **missing** | kit-installed |
-| Postiz compose stack | Postiz runtime | 9 services, 1 published port | not created | kit-declared |
+
+Removed from the required plan: WSL2, Docker Desktop, `postiz-app`, Postgres ×2,
+Redis, Elasticsearch, Temporal, Temporal UI, Temporal admin-tools, Spotlight, and
+the `postiz` CLI. They remain documented under `manifest/dependencies.json` →
+`postiz` as the record of the evaluated alternative.
+
+**Nothing in the default setup requires WSL, Docker, elevation or a reboot.
+Every remaining dependency installs at user level.**
 
 Full per-dependency detail — purpose, evidence, install mechanism, elevation,
 ports, persistent data, update mechanism, uninstall implications, ownership note
 and verification method — is in `manifest/dependencies.json`.
 
-## Blockers found at discovery
+## Blockers resolved by the Phase 8B decision
 
-### BLOCK-RAM — physical memory
+### BLOCK-RAM — physical memory: no longer blocking
 
-This PC has **3.44 GB total physical memory, 0.31 GB free** at discovery time.
+This PC has **3.44 GB total physical memory, 0.24 GB free**. The official Postiz
+stack is nine containers on top of WSL2 and Docker Desktop and was expected to
+fail health checks.
 
-The official Postiz stack runs nine containers — the Postiz app, two PostgreSQL
-instances, Redis, Elasticsearch, Temporal, Temporal admin-tools, Temporal UI and
-Spotlight — on top of WSL2 and Docker Desktop. Elasticsearch alone commonly
-needs 1 GB or more of heap in practice, and the stack declares seven health
-checks that must pass.
+**Resolution: avoided, not fixed.** Adding RAM is a hardware change and cannot be
+automated. Phase 8B selected Zernio, which requires no local services, so the
+blocker no longer applies. The finding is retained so it is not lost: if Postiz
+is ever revisited on larger hardware, it becomes binding again.
 
-The stack is therefore expected to be unusable or to fail health checks on this
-hardware. This cannot be fixed by automation, because adding RAM is a hardware
-change. It needs a user decision.
+### BLOCK-WSL — no container backend: no longer blocking
 
-### BLOCK-WSL — no container backend
+`wsl --status` reported the subsystem is not installed, and Docker Desktop on
+Windows 11 Home requires WSL2. Installing it needs Administrator elevation and a
+reboot.
 
-`wsl --status` reports that the Windows Subsystem for Linux is not installed, and
-Docker Desktop on Windows 11 Home requires WSL2. Installing it needs
-Administrator elevation and a reboot, neither of which an unelevated installer
-may perform.
+**Resolution: avoided.** No container runtime is required by the selected setup.
+If Postiz is revisited, the human step returns: run `wsl --install` from an
+Administrator PowerShell, reboot, and confirm `wsl --status` reports version 2.
 
-- **Why it is needed:** there is no container runtime without it, so Postiz
-  cannot run.
-- **Exact action:** run `wsl --install` from an Administrator PowerShell, then
-  reboot.
-- **Where:** Administrator PowerShell on this PC.
-- **Non-secret result needed afterwards:** `wsl --status` reporting an installed
-  default version 2.
+## The one shared runtime
+
+`@zernio/cli` declares **no `engines` field**, so npm enforces no minimum. Its own
+CI (`.github/workflows/publish.yml`) builds and publishes on **Node 24**, and its
+`@types/node` is `^20.11.0`.
+
+| Consumer | Requirement | Source |
+|---|---|---|
+| `@hyperframes/cli` | `>=22` | its own `engines.node` |
+| `@zernio/cli` | none declared; CI uses 24 | `publish.yml` |
+
+Node 24 satisfies both. **One install, one runtime.** The installer provisions it
+once and both CLIs depend on it.
 
 ## Trust level difference from a static skill
 
-Postiz self-hosted and HyperFrames are **not** instruction-only skills, and the
-project's provenance model reflects that:
+Zernio and HyperFrames are **not** instruction-only skills, and the project's
+provenance model reflects that:
 
-- Postiz self-hosted runs a substantial AGPL-3.0 service stack that executes
-  continuously, holds credentials and social platform tokens, and stores user
-  content in persistent volumes.
-- HyperFrames brings executable Node and render tooling plus an FFmpeg
-  dependency, not just instruction text.
-- Both bring dependencies that download and execute upstream code at runtime:
-  container images for Postiz, npm packages and a managed browser for
-  HyperFrames.
+- **Zernio** is MIT client code, but the service is proprietary SaaS. The CLI is
+  invoked per command and holds an API key; the platform holds long-lived OAuth
+  tokens for every connected social account, plus all content, DMs and comments.
+- **HyperFrames** brings executable Node and render tooling plus an FFmpeg
+  dependency, not just instruction text. Its renderer downloads and executes a
+  managed Chrome build on first use.
+- **Postiz**, if it is ever revisited, would bring a nine-container AGPL-3.0
+  service stack running continuously with persistent volumes.
 
-`docs/security.md` records each of these as its own finding rather than
-inheriting the trust level of a static `SKILL.md`.
+All three download and execute upstream code. `docs/security.md` records each as
+its own finding rather than inheriting the trust level of a static `SKILL.md`.
 
 ## Related
 
-- `docs/postiz.md` — Postiz architecture, auth decision and overlap matrix.
-- `docs/hyperframes.md` — HyperFrames architecture, Core Skills model and the
-  install-location conflict.
+- `docs/zernio.md` — the selected backend's evaluation.
+- `docs/social-backend-decision.md` — the comparison and the decision.
+- `docs/postiz.md` — the preserved Postiz research.
+- `docs/hyperframes.md` — HyperFrames architecture and the install-location conflict.
 - `docs/troubleshooting.md` — what to do when a dependency check fails.
