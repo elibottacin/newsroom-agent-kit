@@ -150,16 +150,32 @@
                              "id":  "github-cli",
                              "name":  "GitHub CLI (gh)",
                              "category":  "tooling-prerequisite",
-                             "status":  "required-later-not-installed",
                              "transport":  "cli",
                              "vendor":  "GitHub",
-                             "docs":  "https://cli.github.com/",
-                             "valueForThisUser":  "Required only to create and publish this repository in Phase 6.",
                              "requiresAccount":  true,
                              "requiresPaidPlan":  false,
-                             "installPlan":  "winget install GitHubCLI, then gh auth login interactively with the user present. Never store or print a token.",
-                             "installAction":  "none",
-                             "phase":  "6"
+                             "phase":  "6",
+                             "installPlan":  "ALREADY PRESENT. No action needed and the kit does not manage it. Verified with \"gh --version\" and \"gh auth status\"; no credential value was read or recorded.",
+                             "phase8DiscoveryNote":  "HISTORICAL. During Phase 2 discovery gh was absent and recorded as \"required-later-not-installed\", to be used only for publishing in Phase 6. Phase 6 installed and authorised it. It is not a dependency of the kit: nothing in the install, update, verify or uninstall path calls it.",
+                             "installedState":  {
+                                                    "installed":  true,
+                                                    "version":  "2.102.0 (2026-09-30)",
+                                                    "authenticated":  true,
+                                                    "account":  "elibottacin",
+                                                    "credentialStore":  "keyring",
+                                                    "tokenScopes":  [
+                                                                        "gist",
+                                                                        "read:org",
+                                                                        "repo",
+                                                                        "workflow"
+                                                                    ],
+                                                    "verifiedOn":  "2026-10-05"
+                                                },
+                             "installAction":  "installed-outside-kit",
+                             "ownership":  "user-owned",
+                             "status":  "installed",
+                             "valueForThisUser":  "NOT a dependency of this kit. Nothing in the install, update, verify or uninstall path calls gh. It was used once, in Phase 6, to create and publish this repository, and is recorded here only because it is present on the machine and owned by the user, not by the kit.",
+                             "docs":  "https://cli.github.com/"
                          },
                          {
                              "id":  "nodejs",
@@ -167,15 +183,17 @@
                              "category":  "runtime-prerequisite",
                              "transport":  "cli",
                              "vendor":  "Node.js Foundation",
-                             "valueForThisUser":  "Superseded decision. Recorded in Phase 2 as an optional Node-free prerequisite. The Phase 8 extension makes Node.js REQUIRED: the HyperFrames CLI declares engines.node \u0027\u003e=22\u0027 and the Postiz CLI declares \u0027\u003e=18\u0027.",
                              "requiresAccount":  false,
                              "requiresPaidPlan":  false,
-                             "installPlan":  "winget install --id OpenJS.NodeJS.LTS -e, only if an existing compatible Node is not detected. Ownership is \u0027shared\u0027: a normal kit uninstall must NOT remove Node, because global npm CLIs and user scripts depend on it. See manifest/dependencies.json.",
                              "changedInPhase":  8,
                              "changeReason":  "Node moved from an explicitly avoided optional prerequisite to a required managed runtime when the Postiz and HyperFrames extensions were added.",
                              "requiresElevation":  true,
                              "phase":  "9",
                              "status":  "installed",
+                             "installAction":  "installed-by-kit",
+                             "phase8bNote":  "Kept as the Phase 8 discovery record: at that point Node was absent and recorded as an avoided optional prerequisite. It became required when the Zernio and HyperFrames extensions were added, then was actually installed in Phase 9.",
+                             "phase8Note":  "HISTORICAL. At Phase 8 discovery Node was recorded as absent and as an avoided optional prerequisite, on the basis that the instruction-only core needed no runtime. It became required when execution backends were added. The original justification cited the HyperFrames CLI and the Postiz CLI; Postiz was evaluated and not selected in Phase 8B, so the current justification is HyperFrames plus Zernio.",
+                             "valueForThisUser":  "REQUIRED. One Node.js LTS runtime serves both selected CLIs: the hyperframes npm package, which declares engines.node \u003e=22, and @zernio/cli, which declares no engines field but whose own CI builds on Node 24. Node 24 satisfies both.",
                              "installedState":  {
                                                     "installed":  true,
                                                     "version":  "v24.19.0",
@@ -184,8 +202,7 @@
                                                     "ownership":  "shared",
                                                     "removableByKit":  false
                                                 },
-                             "installAction":  "installed-by-kit",
-                             "phase8bNote":  "Kept as the Phase 8 discovery record: at that point Node was absent and recorded as an avoided optional prerequisite. It became required when the Zernio and HyperFrames extensions were added, then was actually installed in Phase 9."
+                             "installPlan":  "PROVISIONED. winget install --id OpenJS.NodeJS.LTS -e --scope user, only when a compatible Node is not already detected. Ownership is \"shared\": a normal kit uninstall must NOT remove Node, because global npm CLIs and user scripts depend on it. See manifest/dependencies.json."
                          },
                          {
                              "id":  "postiz-selfhosted",
@@ -389,8 +406,6 @@
                              "cloudNote":  "The upstream aws-lambda and gcp-cloud-run packages and examples exist but are NOT part of this architecture. They stay unconfigured and are documented as optional.",
                              "generativeMediaUsed":  false,
                              "generativeNote":  "Image-generation and video-generation models are out of scope. Within media-use, local media handling, composition, audio and icons are core; generative image, music and voice calls are optional and unconfigured.",
-                             "skillInstallMethod":  "vendor-core-set-from-pinned-ref",
-                             "skillInstallRationale":  "Upstream \u0027hyperframes skills update\u0027 writes to ~/.claude/skills (a vendor directory this project forbids) and then symlinks into other agent directories, which cannot be created unelevated on this machine. \u0027npx skills add\u0027 was already rejected in Phase 2 because it targets ~/.config/opencode/skills. The kit therefore vendors the 10 core skills from the pinned reviewed ref, matching the existing 27-skill vendoring model. Upstream freshness remains checkable via skills-manifest.json content hashes.",
                              "coreSkills":  [
                                                 "hyperframes",
                                                 "hyperframes-animation",
@@ -420,11 +435,6 @@
                                                               "npx hyperframes skills (bare - installs the full published set)",
                                                               "--all (sprays into many agent directories)"
                                                           ],
-                             "safeUpstreamCommands":  [
-                                                          "npx hyperframes skills update (bare)",
-                                                          "npx hyperframes skills check [--json]",
-                                                          "npx hyperframes init"
-                                                      ],
                              "requiresElevation":  false,
                              "executableCodeSurface":  "Node CLI, a puppeteer-managed headless browser, FFmpeg encoding, and esbuild/fontkit processing.",
                              "skillsInstalled":  [
@@ -459,7 +469,50 @@
                                                     "heygenSignedIn":  false,
                                                     "renderSmokeTest":  "deferred, needs more RAM",
                                                     "verifiedOn":  "2026-10-05"
-                                                }
+                                                },
+                             "skillInstallRationale":  "The 10 core skills are declared in manifest/skills.json as PINNED FETCH entries and materialised reproducibly from the reviewed upstream ref dc3665ab into canonical %USERPROFILE%\\.agents\\skills by the normal installer. They are NOT hand-maintained vendored forks under vendor/skills/, and they are not modified. Upstream\u0027s own skill installer was rejected because it writes ~/.claude/skills and symlinks into other agents\u0027 directories, both of which this project forbids. In this project a \"vendored\" entry specifically means a fork whose upstream product claims were rewritten (SEC-07); that does not apply to a tool the kit actually installs, so no fork was created.",
+                             "vendoredSkillsUnaffected":  "The 27 real vendored forks under vendor/skills/ are unchanged and remain a separate delivery mode.",
+                             "skillInstallMethod":  "pinned-fetch-materialised-from-pinned-ref",
+                             "vendorPathUsed":  false,
+                             "upstreamCommandAssessment":  {
+                                                               "assessedOn":  "2026-10-05",
+                                                               "method":  "Static source inspection of packages/cli/src/commands/skills.ts and init.ts at the reviewed ref. No upstream command was executed to test this.",
+                                                               "readOnly":  [
+                                                                                {
+                                                                                    "command":  "npx hyperframes skills check",
+                                                                                    "verdict":  "safe",
+                                                                                    "why":  "checkCommand performs no filesystem writes. Read-only freshness report, also available as --json for CI."
+                                                                                }
+                                                                            ],
+                                                               "writesVendorDirectory":  [
+                                                                                             {
+                                                                                                 "command":  "npx hyperframes skills update",
+                                                                                                 "verdict":  "NOT SAFE for this kit",
+                                                                                                 "why":  "updateSkills writes real files to ~/.claude/skills, which Claude Code reads at global priority, in addition to ~/.agents/skills, then mirrorGlobalSkills fans them into other agents\u0027 directories. Violates the .agents-only rule and the no-symlink constraint."
+                                                                                             },
+                                                                                             {
+                                                                                                 "command":  "npx hyperframes init",
+                                                                                                 "verdict":  "NOT SAFE for this kit",
+                                                                                                 "why":  "init.ts keepSkillsCurrent documents that the install \"lands once GLOBALLY (~/.claude/skills + ~/.agents/skills)\". init calls it, so scaffolding a project also refreshes global skills into a vendor directory."
+                                                                                             }
+                                                                                         ],
+                                                               "rejected":  [
+                                                                                {
+                                                                                    "command":  "npx hyperframes skills (bare)",
+                                                                                    "verdict":  "REJECT",
+                                                                                    "why":  "The parent handler runs updateSkills({ all: true }) when no positional is given, installing the FULL published set."
+                                                                                },
+                                                                                {
+                                                                                    "command":  "--all",
+                                                                                    "verdict":  "REJECT",
+                                                                                    "why":  "Sprays into many agent directories."
+                                                                                }
+                                                                            ],
+                                                               "kitPolicy":  "This kit installs and refreshes HyperFrames skills ONLY through manifest/skills.json and the installer, which writes solely to %USERPROFILE%\\.agents\\skills. No upstream skill-lifecycle command is used for global skill installation or updates, at any time."
+                                                           },
+                             "safeUpstreamCommands":  [
+
+                                                      ]
                          }
                      ],
     "notEvaluated":  [

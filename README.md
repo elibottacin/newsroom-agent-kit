@@ -277,12 +277,21 @@ another coding agent.
 | File | What it answers |
 |---|---|
 | `docs/architecture.md` | How the layout works, the compatibility matrix, when to delete the bridge |
+| `docs/social-backend-decision.md` | **Why Zernio and not Postiz, with a direct comparison and the cost reasoning** |
+| `docs/zernio.md` | The selected social backend: capabilities, auth, cost, platform limits, observed behaviour |
+| `docs/postiz.md` | The evaluated and **not** selected alternative, kept as evidence |
+| `docs/hyperframes.md` | The motion and video layer: Core Skills model, dependency needs, observed behaviour |
+| `docs/dependencies.md` | Every runtime dependency, ownership, provisioning and what uninstall may remove |
 | `docs/discovery.md` | Why each candidate was chosen or rejected, with evidence |
-| `docs/security.md` | Supply-chain findings, licences, residual risks |
+| `docs/security.md` | Supply-chain findings, licences, residual risks, including the allowlist decision |
 | `docs/environment.md` | The bootstrap machine's state, as evidence |
-| `docs/install-verification.md` | What was actually observed after installing |
-| `docs/portability-verification.md` | What was checked before publishing, including the clean-machine bootstrap test |
+| `docs/install-verification.md` | What was actually observed after installing (historical Phase 4 snapshot) |
+| `docs/portability-verification.md` | What was checked before publishing (historical Phase 5 snapshot) |
 | `docs/troubleshooting.md` | Every error the scripts can produce, and what to do |
+| `docs/maintaining.md` | Adding, retiring and updating skills and dependencies; known gaps |
+| `docs/bootstrap-state.md` | Where the repository started from |
+| `docs/seed-discovery.md` | The initial candidate research that seeded Phase 2 |
+| `PLAN.md` | Every phase, task and validation, including what is still deferred |
 
 ## Licence
 

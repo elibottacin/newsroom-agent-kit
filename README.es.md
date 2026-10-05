@@ -285,12 +285,21 @@ cómo sumar otro agente de programación.
 | Archivo | Qué responde |
 |---|---|
 | `docs/architecture.md` | Cómo funciona el layout, la matriz de compatibilidad, cuándo borrar el puente |
+| `docs/social-backend-decision.md` | **Por qué Zernio y no Postiz, con comparación directa y el razonamiento de coste** |
+| `docs/zernio.md` | El backend social elegido: capacidades, auth, coste, límites por plataforma, comportamiento observado |
+| `docs/postiz.md` | La alternativa evaluada y **no** elegida, conservada como evidencia |
+| `docs/hyperframes.md` | La capa de motion y video: modelo Core Skills, dependencias, comportamiento observado |
+| `docs/dependencies.md` | Cada dependencia de runtime, su ownership, aprovisionamiento y qué puede quitar el uninstall |
 | `docs/discovery.md` | Por qué se eligió o rechazó cada candidato, con evidencia |
-| `docs/security.md` | Hallazgos de cadena de suministro, licencias, riesgos residuales |
+| `docs/security.md` | Hallazgos de cadena de suministro, licencias, riesgos residuales, incluida la decisión de la lista blanca |
 | `docs/environment.md` | El estado de la máquina base, como evidencia |
-| `docs/install-verification.md` | Qué se observó realmente después de instalar |
-| `docs/portability-verification.md` | Qué se verificó antes de publicar, incluida la prueba de bootstrap en una máquina limpia |
+| `docs/install-verification.md` | Qué se observó realmente después de instalar (instantánea histórica de Fase 4) |
+| `docs/portability-verification.md` | Qué se verificó antes de publicar (instantánea histórica de Fase 5) |
 | `docs/troubleshooting.md` | Todos los errores que pueden dar los scripts, y qué hacer |
+| `docs/maintaining.md` | Agregar, retirar y actualizar skills y dependencias; brechas conocidas |
+| `docs/bootstrap-state.md` | De dónde partió el repositorio |
+| `docs/seed-discovery.md` | La investigación inicial que alimentó la Fase 2 |
+| `PLAN.md` | Cada fase, tarea y validación, incluido lo que sigue aplazado |
 
 ## Licencia
 
