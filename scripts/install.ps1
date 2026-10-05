@@ -26,6 +26,12 @@ param(
     # Off by default. Requires your explicit approval.
     [switch]$InstallPrerequisites,
 
+    # With -InstallPrerequisites, provision only these dependency ids.
+    # Omit to provision the whole declared plan. Lets one phase provision its own
+    # dependencies without pulling in another phase's, for example Node and the Zernio CLI
+    # without also installing the HyperFrames CLI.
+    [string[]]$Dependencies,
+
     # Redirect the install into a throwaway directory instead of %USERPROFILE%\.agents.
     # Used to test this toolchain without touching real user state.
     [string]$TargetRoot,
@@ -47,6 +53,9 @@ $script:Skipped = New-Object System.Collections.ArrayList
 $script:Conflicts = New-Object System.Collections.ArrayList
 $script:Backups = New-Object System.Collections.ArrayList
 $script:PrereqFailed = New-Object System.Collections.ArrayList
+$script:DepsPresent = New-Object System.Collections.ArrayList
+$script:DepsInstalled = New-Object System.Collections.ArrayList
+$script:DepsFailed = New-Object System.Collections.ArrayList
 $script:Stamp = Get-KitStamp
 
 function Add-Plan {
@@ -94,43 +103,142 @@ if ($isAdmin) {
 
 # ------------------------------------------------------------ prerequisites ---
 
+# ------------------------------------------------------------- dependencies ---
+
+# Local software is part of the reproducible setup. The list comes from manifest/dependencies.json,
+# so the manifest is the single source of truth and adding a capability means adding an entry there
+# rather than editing this script.
+#
+# Two rules govern this section:
+#   * Detect before installing. A compatible existing installation is used and never replaced, and an
+#     existing installation that is merely older is reported rather than silently upgraded.
+#   * Ownership governs removal, not installation. A `shared` dependency is installed when absent
+#     because the capability needs it, but uninstall.ps1 will still never remove it.
+
 if ($InstallPrerequisites) {
-    $winget = Get-Command winget -ErrorAction SilentlyContinue
-    if (-not $winget) {
-        Write-KitLog 'winget not found. Cannot install prerequisites.' 'ERROR'
+    Write-KitLog 'Dependency provisioning requested.' 'INFO'
+
+    if ($t.IsSandbox) {
+        Write-KitLog 'Target is a sandbox. Skipping dependency provisioning so real software is never touched.' 'WARN'
     } else {
-        foreach ($pkg in @('Python.Python.3.13', 'OpenJS.NodeJS.LTS')) {
-            Write-KitLog "prerequisite: $pkg"
-            if ($DryRun) {
-                Write-KitLog "would run: winget install --id $pkg -e --accept-package-agreements --accept-source-agreements" 'DRYRUN'
-                continue
-            }
-            # winget exit codes that matter here:
-            #   0                installed
-            #   -1978335189 / 0x8A15002B  no applicable package found
-            #   -1978335212 / 0x8A150014  a newer version is already installed
-            #   1602              the installer was cancelled, usually a declined UAC prompt
-            & winget install --id $pkg -e --accept-package-agreements --accept-source-agreements 2>&1 |
-                ForEach-Object { Write-KitLog "  $_" }
-            $code = $LASTEXITCODE
-            if ($code -eq 0) {
-                Write-KitLog "  $pkg installed" 'OK'
-            } elseif ($code -eq 1602) {
-                Write-KitLog "  $pkg NOT installed: exit 1602, the installer was cancelled." 'ERROR'
-                Write-KitLog '  This usually means a UAC prompt was declined or timed out. The kit does not need it.' 'WARN'
-                [void]$script:PrereqFailed.Add($pkg)
-            } elseif ($code -eq -1978335212 -or $code -eq -1978335189) {
-                Write-KitLog "  $pkg already installed or not applicable (exit $code)" 'OK'
-            } else {
-                Write-KitLog "  $pkg NOT installed: winget exit $code" 'ERROR'
-                [void]$script:PrereqFailed.Add($pkg)
+        $winget = Get-Command winget -ErrorAction SilentlyContinue
+        $plan = @(Get-KitDependencyManifest)
+        if ($Dependencies -and $Dependencies.Count -gt 0) {
+            # Invoking through `powershell -File script.ps1 -Dependencies a,b,c` hands the array over
+            # as one comma-joined string rather than an array, so split on commas as well. Without
+            # this the filter silently matches nothing and provisioning does nothing.
+            $wanted = @($(foreach ($d in $Dependencies) { ([string]$d) -split ',' }) | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+            $plan = @($plan | Where-Object { $wanted -contains $_.id })
+            Write-KitLog "Provisioning a subset: $($wanted -join ', ')" 'INFO'
+            if ($plan.Count -eq 0) {
+                Write-KitLog "None of those ids are in the declared plan. Declared: $(@(Get-KitDependencyManifest | ForEach-Object { $_.id }) -join ', ')" 'WARN'
             }
         }
-        if ($script:PrereqFailed.Count -eq 0) {
-            Write-KitLog 'All requested prerequisites are present. New tools appear in a new session only.' 'OK'
+        if ($plan.Count -eq 0 -and -not ($Dependencies -and $Dependencies.Count -gt 0)) {
+            Write-KitLog 'No dependencies declared. Nothing to do.' 'INFO'
+        }
+
+        foreach ($dep in $plan) {
+            $state = Get-KitDependencyState -Dep $dep
+            $satisfied = $state.Installed -and (Test-KitVersionSatisfies -Found $state.Version -Required $dep.requiredVersion)
+
+            if ($satisfied) {
+                Write-KitLog "$($dep.id) : present, $($state.Version)  [$($dep.ownership)]" 'OK'
+                if ($state.RefreshPath) {
+                    Write-KitLog "  found at $(Format-KitPath $state.Path); not on this session's PATH yet. Open a new terminal to use it." 'INFO'
+                }
+                [void]$script:DepsPresent.Add($dep.id)
+                continue
+            }
+
+            # A dependency with no command to probe is a cache or a download that appears on first
+            # use. Report it, but never treat it as a provisioning failure, or the summary would
+            # claim the setup is incomplete on a machine where nothing is actually wrong.
+            if (-not $state.Command) {
+                Write-KitLog "$($dep.id) : not present yet. Appears on first use. [$($dep.ownership)]" 'INFO'
+                [void]$script:DepsPresent.Add($dep.id)
+                continue
+            }
+
+            if ($state.Installed) {
+                # Present but below the declared floor. Report; do not upgrade across a version the
+                # user may depend on without being asked.
+                Write-KitLog "$($dep.id) : present but older than required ($($state.Version) vs '$($dep.requiredVersion)'). Left alone." 'WARN'
+                Write-KitLog "  Upgrade it yourself if you want the newer version: $($dep.installMechanism)" 'INFO'
+                [void]$script:DepsPresent.Add($dep.id)
+                continue
+            }
+
+            $mechanism = [string]$dep.installMechanism
+            if ($DryRun) {
+                Write-KitLog "$($dep.id) : missing. Would install with: $mechanism" 'DRYRUN'
+                continue
+            }
+
+            Write-KitLog "$($dep.id) : missing. Installing." 'INFO'
+
+            # npm globals ride on the Node runtime, so Node has to exist first.
+            if ($mechanism -match '^npm ' -and -not (Get-KitDependencyState -Dep ([pscustomobject]@{ id = 'nodejs' })).Installed) {
+                Write-KitLog '  Node.js is required first and is not installed yet.' 'ERROR'
+                [void]$script:DepsFailed.Add($dep.id)
+                continue
+            }
+
+            if ($mechanism -match '^winget ') {
+                if (-not $winget) {
+                    Write-KitLog '  winget is not available on this machine.' 'ERROR'
+                    [void]$script:DepsFailed.Add($dep.id)
+                    continue
+                }
+                $pkg = ($mechanism -replace '^winget install --id\s+', '' -replace '\s+-e.*$', '')
+                # --scope user keeps the install out of the machine-wide MSI path, which needs a UAC
+                # prompt this kit must never require. Node.js ships as a zip that winget extracts and
+                # hash-verifies, so nothing is executed from an unverified download.
+                & winget install --id $pkg -e --scope user --silent --disable-interactivity `
+                    --accept-package-agreements --accept-source-agreements 2>&1 |
+                    ForEach-Object { Write-KitLog "  $_" }
+                $code = $LASTEXITCODE
+                if ($code -eq 0 -or $code -eq -1978335212) {
+                    Write-KitLog "  $pkg installed" 'OK'
+                    [void]$script:DepsInstalled.Add($dep.id)
+                } else {
+                    Write-KitLog "  $pkg NOT installed: winget exit $code" 'ERROR'
+                    [void]$script:DepsFailed.Add($dep.id)
+                }
+            } elseif ($mechanism -match '^npm ') {
+                $npm = Get-KitDependencyState -Dep ([pscustomobject]@{ id = 'npm-npx' })
+                if (-not $npm.Installed) {
+                    Write-KitLog '  npm is not available.' 'ERROR'
+                    [void]$script:DepsFailed.Add($dep.id)
+                    continue
+                }
+                $pkgName = ($mechanism -replace '^npm install -g\s+', '' -replace '\s+at version.*$', '').Trim()
+                $pinned = $dep.pinnedVersion
+                $target = if ($pinned) { "$pkgName@$pinned" } else { $pkgName }
+                & $npm.Path install -g $target --no-fund --no-audit 2>&1 |
+                    ForEach-Object { if ($_ -match 'npm notice') { } else { Write-KitLog "  $_" } }
+                if ($LASTEXITCODE -eq 0) {
+                    Write-KitLog "  $target installed" 'OK'
+                    [void]$script:DepsInstalled.Add($dep.id)
+                } else {
+                    Write-KitLog "  $target NOT installed: npm exit $LASTEXITCODE" 'ERROR'
+                    [void]$script:DepsFailed.Add($dep.id)
+                }
+            } else {
+                Write-KitLog "  no automated mechanism is declared for '$mechanism'. Install it manually." 'WARN'
+                [void]$script:DepsFailed.Add($dep.id)
+            }
+        }
+
+        if ($script:DepsFailed.Count -eq 0) {
+            Write-KitLog 'All declared dependencies are present.' 'OK'
         } else {
-            Write-KitLog "Prerequisites incomplete: $($script:PrereqFailed -join ', ')" 'WARN'
-            Write-KitLog 'This does not affect the installed setup. The skills are markdown and need neither runtime.' 'WARN'
+            Write-KitLog "Dependencies incomplete: $($script:DepsFailed -join ', ')" 'WARN'
+            Write-KitLog 'The skills still install; only the execution backends are affected.' 'WARN'
+        }
+        if ($script:DepsInstalled.Count -gt 0) {
+            Write-KitLog "Installed by this kit: $($script:DepsInstalled -join ', ')" 'INFO'
+            Write-KitLog 'Open a new terminal so a new PATH is picked up.' 'INFO'
         }
     }
 }
@@ -211,16 +319,21 @@ foreach ($entry in $selected) {
     }
 
     $skillFile = Join-Path $source 'SKILL.md'
-    $check = Test-KitSkillFrontmatter $skillFile
+    $check = Test-KitSkillFrontmatter -SkillFile $skillFile -ExpectedName $name
     if (-not $check.Ok) {
         Write-KitLog "$name : invalid SKILL.md ($($check.Problems -join '; '))" 'ERROR'
         $script:Conflicts.Add($name)
         continue
     }
 
-    $code = @(Get-KitCodeFiles $source)
+    $entryFiles = @(Get-KitEntryFiles -Entry $entry -Source $source)
+    $code = @($entryFiles | ForEach-Object { $_ } | Where-Object {
+        $ext = $_.Extension.ToLowerInvariant()
+        $ext -in @('.ps1', '.psm1', '.psd1', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.sh', '.bat', '.cmd', '.exe', '.dll', '.com')
+    })
     if ($code.Count -gt 0) {
-        Write-KitLog "$name : contains executable files and is not approved: $($code -join ', ')" 'ERROR'
+        $names = $code | ForEach-Object { $_.FullName.Substring($source.Length + 1) }
+        Write-KitLog "$name : contains executable files and is not approved: $($names -join ', ')" 'ERROR'
         $script:Conflicts.Add($name)
         continue
     }
@@ -237,10 +350,10 @@ foreach ($entry in $selected) {
             continue
         }
         $same = $true
-        Get-ChildItem -LiteralPath $source -Recurse -File -Force | ForEach-Object {
-            $rel = $_.FullName.Substring($source.Length + 1)
+        foreach ($f in $entryFiles) {
+            $rel = $f.FullName.Substring($source.Length + 1)
             $d = Join-Path $dest $rel
-            if (-not (Test-Path -LiteralPath $d) -or (Get-KitFileHash $d) -ne (Get-KitFileHash $_.FullName)) { $same = $false }
+            if (-not (Test-Path -LiteralPath $d) -or (Get-KitFileHash $d) -ne (Get-KitFileHash $f.FullName)) { $same = $false; break }
         }
         if ($same) {
             Write-KitLog "$name : already current" 'OK'
@@ -258,14 +371,14 @@ foreach ($entry in $selected) {
         Invoke-Plan {
             $bk = New-KitBackup (Join-Path $dest 'SKILL.md') $t.BackupsDir $script:Stamp
             [void]$script:Backups.Add($bk)
-            Copy-KitTree $source $dest
+            Copy-KitEntry -Entry $entry -Source $source -Destination $dest
         }.GetNewClosure()
         Write-KitLog "replaced $name" 'OK'
         [void]$script:Applied.Add($name)
     } else {
         Add-Plan 'create' "~/.agents/skills/$name" ''
         if ($DryRun) { Write-KitLog "would install $name" 'DRYRUN'; continue }
-        Invoke-Plan { Copy-KitTree $source $dest }.GetNewClosure()
+        Invoke-Plan { Copy-KitEntry -Entry $entry -Source $source -Destination $dest }.GetNewClosure()
         Write-KitLog "installed $name" 'OK'
         [void]$script:Applied.Add($name)
     }
@@ -372,11 +485,39 @@ if (-not $DryRun) {
             }
         }
     }
+    # Dependency ownership record. This is machine state, not repository content, and it is the only
+    # thing that lets uninstall.ps1 tell "the kit installed this" from "the user already had this".
+    # Ownership comes from the manifest; kitInstalled is only true for dependencies this run installed
+    # or that a previous run recorded as kit-installed. Never record a `shared` dependency as
+    # kit-removable, so a normal uninstall cannot take the user's Node.js or FFmpeg away.
+    $ownedDeps = @{}
+    foreach ($dep in @(Get-KitDependencyManifest)) {
+        $st = Get-KitDependencyState -Dep $dep
+        $wasKit = $script:DepsInstalled -contains $dep.id
+        if (-not $wasKit -and (Test-Path -LiteralPath $t.StateFile)) {
+            try {
+                $prev = Get-KitText $t.StateFile | ConvertFrom-Json
+                if ($prev.PSObject.Properties.Name -contains 'dependencies' -and
+                    $prev.dependencies.PSObject.Properties.Name -contains $dep.id -and
+                    $prev.dependencies.($dep.id).kitInstalled) { $wasKit = $true }
+            } catch { }
+        }
+        $removable = ([string]$dep.ownership -eq 'kit-installed' -or [string]$dep.ownership -eq 'ephemeral-cache')
+        $ownedDeps[$dep.id] = [pscustomobject]@{
+            ownership    = $dep.ownership
+            installed    = [bool]$st.Installed
+            version      = $st.Version
+            kitInstalled = [bool]($wasKit -and $removable)
+            removable    = $removable
+            checkedAt    = (Get-Date).ToString('s')
+        }
+    }
     $state = [pscustomobject]@{
-        schemaVersion = 1
+        schemaVersion = 2
         updatedAt     = (Get-Date).ToString('s')
         canonicalRoot = '~/.agents'
         skills        = [pscustomobject]$ownedSkills
+        dependencies  = [pscustomobject]$ownedDeps
     }
     Set-KitText $t.StateFile ($state | ConvertTo-Json -Depth 6)
     Write-KitLog 'wrote ~/.agents/state/install-state.json (kit-owned, used by verify and uninstall)' 'OK'

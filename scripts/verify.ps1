@@ -227,6 +227,56 @@ $topRefs = @($realSiblings | Select-Object -First 6) -join ', '
 Write-KitLog ('  Most referenced uninstalled siblings: {0}' -f $topRefs) 'INFO'
 Write-KitLog ('  {0} other hyphenated tokens are file names or API paths, not skills.' -f $otherTokens) 'INFO'
 
+# ------------------------------------------------------------- dependencies ---
+
+# Reports whether the execution backends are usable. This never reads, prints or hashes a credential:
+# it checks only whether a CLI is present and which version it reports, plus whether a configuration
+# file exists. A key that exists is reported as present, never as content.
+Write-KitLog ''
+Write-KitLog 'Execution dependencies' 'INFO'
+
+$plan = @(Get-KitDependencyManifest)
+if ($plan.Count -eq 0) {
+    Write-KitLog '  no dependencies declared' 'INFO'
+} else {
+    foreach ($dep in $plan) {
+        $ds = Get-KitDependencyState -Dep $dep
+        $phase = if ($dep.PSObject.Properties.Name -contains 'provisionedInPhase') { "phase $($dep.provisionedInPhase)" } else { '' }
+        if (-not $ds.Command) {
+            Write-KitLog ("  {0,-16} appears on first use   [{1}]  {2}" -f $dep.id, $dep.ownership, $phase) 'INFO'
+            continue
+        }
+        if ($ds.Installed) {
+            $ver = if ($ds.Version) { $ds.Version } else { 'version unknown' }
+            Write-KitLog ("  {0,-16} {1,-12} [{2}]  {3}" -f $dep.id, $ver, $dep.ownership, $phase) 'OK'
+            [void]$script:Pass.Add($dep.id)
+        } else {
+            Write-KitLog ("  {0,-16} MISSING                [{1}]  {2}  {3}" -f $dep.id, $dep.ownership, $phase, $dep.installMechanism) 'WARN'
+            [void]$script:Warn.Add("$($dep.id) is not installed")
+        }
+    }
+
+    # Zernio credential presence only. The value is never read, printed or compared.
+    $zcfg = Join-Path $env:USERPROFILE '.zernio\config.json'
+    if ($env:ZERNIO_API_KEY) {
+        Write-KitLog '  zernio-auth      API key present in the environment' 'OK'
+        [void]$script:Pass.Add('zernio-auth')
+    } elseif (Test-Path -LiteralPath $zcfg) {
+        Write-KitLog '  zernio-auth      config file present, but not authenticated yet.' 'WARN'
+        Write-KitLog '                    Run "zernio auth:login" in your own terminal, or set ZERNIO_API_KEY.' 'INFO'
+        [void]$script:Warn.Add('zernio is not authenticated yet')
+    } else {
+        Write-KitLog '  zernio-auth      not authenticated. Run "zernio auth:login" in your own terminal.' 'WARN'
+        [void]$script:Warn.Add('zernio is not authenticated yet')
+    }
+
+    # Postiz was evaluated and not selected, so no container runtime is required. If one is present
+    # that is harmless, but worth surfacing so nobody assumes the kit put it there.
+    if (Get-Command docker -ErrorAction SilentlyContinue) {
+        Write-KitLog '  docker           present, and not required. Postiz was evaluated and not selected.' 'INFO'
+    }
+}
+
 Write-KitLog ''
 Write-KitLog 'Summary' 'INFO'
 Write-KitLog "  passed  : $($script:Pass.Count)"

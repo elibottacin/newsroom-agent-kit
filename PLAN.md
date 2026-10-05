@@ -669,29 +669,29 @@ no container runtime, no background service.
 
 ### Tasks
 
-- [ ] Detect existing Node.js. If a compatible version is present, use it and change nothing.
-- [ ] Confirm no major-version upgrade of an existing Node is performed silently.
-- [ ] Install Node.js LTS only if absent or too old, and handle the elevation prompt correctly.
-- [ ] Record Node.js as a `shared` prerequisite in local, uncommitted state.
-- [ ] Install `npm install -g @zernio/cli` at the version pinned in `manifest/dependencies.json`.
-- [ ] Detect the version correctly. Remember the unscoped `zernio` package does not exist, so `npx zernio` fails.
-- [ ] Never install the unscoped `late` package. It is an unrelated project.
-- [ ] Materialise the `zernio` skill into `%USERPROFILE%\.agents\skills` from the pinned ref.
-- [ ] Materialise the `zernio-api` reference skill from its pinned ref.
-- [ ] Do not install the six atomic skills from the Agent Skills index, the Claude Code plugin, or the hosted MCP.
-- [ ] Confirm `scripts/verify.ps1` still passes its vendor-isolation check after the new skills land.
-- [ ] Extend `scripts/install.ps1` with a dependency-provisioning path driven by `manifest/dependencies.json`.
-- [ ] Extend `scripts/verify.ps1` to report the Node.js version and the Zernio CLI version without leaking the key.
-- [ ] Extend `scripts/uninstall.ps1` to remove `@zernio/cli` only if the kit installed it, and never remove Node.js.
-- [ ] Leave `%USERPROFILE%\.zernio` in place on uninstall because it holds the credential. Document that explicitly.
+- [x] Detect existing Node.js. If a compatible version is present, use it and change nothing.
+- [x] Confirm no major-version upgrade of an existing Node is performed silently.
+- [x] Install Node.js LTS only if absent or too old, and handle the elevation prompt correctly.
+- [x] Record Node.js as a `shared` prerequisite in local, uncommitted state.
+- [x] Install `npm install -g @zernio/cli` at the version pinned in `manifest/dependencies.json`.
+- [x] Detect the version correctly. Remember the unscoped `zernio` package does not exist, so `npx zernio` fails.
+- [x] Never install the unscoped `late` package. It is an unrelated project.
+- [x] Materialise the `zernio` skill into `%USERPROFILE%\.agents\skills` from the pinned ref.
+- [x] Materialise the `zernio-api` reference skill from its pinned ref.
+- [x] Do not install the six atomic skills from the Agent Skills index, the Claude Code plugin, or the hosted MCP.
+- [x] Confirm `scripts/verify.ps1` still passes its vendor-isolation check after the new skills land.
+- [x] Extend `scripts/install.ps1` with a dependency-provisioning path driven by `manifest/dependencies.json`.
+- [x] Extend `scripts/verify.ps1` to report the Node.js version and the Zernio CLI version without leaking the key.
+- [x] Extend `scripts/uninstall.ps1` to remove `@zernio/cli` only if the kit installed it, and never remove Node.js.
+- [x] Leave `%USERPROFILE%\.zernio` in place on uninstall because it holds the credential. Document that explicitly.
 
 ### Validation
 
-- `zernio --version` reports the pinned version.
-- `node --version` satisfies `>=22` for HyperFrames.
-- The two skills resolve from `%USERPROFILE%\.agents\skills`.
-- No vendor directory exists.
-- Rerunning the installer produces no drift.
+- [x] `zernio --version` reports the pinned version.
+- [x] `node --version` satisfies `>=22` for HyperFrames.
+- [x] The two skills resolve from `%USERPROFILE%\.agents\skills`.
+- [x] No vendor directory exists.
+- [x] Rerunning the installer produces no drift.
 
 ### Exit criteria
 
@@ -706,6 +706,7 @@ STOP and report.
 ---
 
 ## Phase 10 - Zernio global Agent Skills and read-only validation
+
 
 > **Revised in Phase 8B.** Previously the Postiz Skill and CLI. The shape is the
 > same and simpler: there is no local instance to stand up, so the validation

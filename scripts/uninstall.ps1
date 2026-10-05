@@ -154,6 +154,93 @@ if (Test-Path -LiteralPath $linkPath) {
     Write-KitLog 'no bridge present'
 }
 
+# --------------------------------------------------------------- dependencies ---
+
+# Ownership drives removal. The ownership record says which dependencies this kit installed; the
+# manifest says whether each one may be removed at all. A dependency that was already on the machine,
+# or that other software may share, is reported and left alone even when -Confirm is passed.
+#
+# Credentials are never deleted here. %USERPROFILE%\.zernio holds the API key, and removing it would
+# silently break an authenticated session the user still owns. It is reported with the exact command
+# to run if they do want it gone.
+Write-KitLog ''
+Write-KitLog 'Execution dependencies' 'INFO'
+
+$stateHasDeps = $false
+try {
+    $st = Get-KitText $t.StateFile | ConvertFrom-Json
+    $stateHasDeps = ($st.PSObject.Properties.Name -contains 'dependencies')
+} catch { }
+
+if (-not $stateHasDeps) {
+    Write-KitLog '  no dependency record found. Nothing to remove. This record only exists on installs made with dependency provisioning.'
+} else {
+    foreach ($prop in $st.dependencies.PSObject.Properties) {
+        $id = $prop.Name
+        $rec = $prop.Value
+        $dep = @(Get-KitDependencyManifest | Where-Object { $_.id -eq $id })
+        $ownership = if ($dep.Count -gt 0) { $dep[0].ownership } else { $rec.ownership }
+
+        if (-not $rec.installed) {
+            Write-KitLog "  $id : not installed" 'INFO'
+            continue
+        }
+        if (-not $rec.removable) {
+            Write-KitLog "  $id : LEFT IN PLACE. Ownership is '$ownership', so it may be shared with other software." 'INFO'
+            continue
+        }
+        if (-not $rec.kitInstalled) {
+            Write-KitLog "  $id : LEFT IN PLACE. Present before this kit installed it, so it is not ours to remove." 'INFO'
+            continue
+        }
+
+        # Removable and recorded as kit-installed. Only a Node-backed CLI is handled here; anything
+        # else needs its own removal path and is reported rather than guessed at.
+        $ds = Get-KitDependencyState -Dep ([pscustomobject]@{ id = $id })
+        if (-not $ds.Installed) {
+            Write-KitLog "  $id : already absent" 'INFO'
+            continue
+        }
+        $npmPkg = switch ($id) {
+            'zernio-cli' { '@zernio/cli' }
+            'hyperframes-cli' { '@hyperframes/cli' }
+            default { $null }
+        }
+        if (-not $npmPkg) {
+            Write-KitLog "  $id : installed by this kit, but it has no automated removal path. Remove it with: $($dep[0].installMechanism -replace 'install.*','')" 'WARN'
+            continue
+        }
+        if ($DryRun) {
+            Write-KitLog "  $id : would remove via npm uninstall -g $npmPkg" 'DRYRUN'
+            continue
+        }
+        if (-not $Confirm) {
+            Write-KitLog "  $id : would remove via npm uninstall -g $npmPkg. Re-run with -Confirm." 'WARN'
+            continue
+        }
+        $npm = Get-KitDependencyState -Dep ([pscustomobject]@{ id = 'npm-npx' })
+        if (-not $npm.Installed) {
+            Write-KitLog "  $id : npm is not available, so it was not removed" 'WARN'
+            continue
+        }
+        & $npm.Path uninstall -g $npmPkg 2>&1 | ForEach-Object { if ($_ -notmatch 'npm notice') { Write-KitLog "  $_" } }
+        if ($LASTEXITCODE -eq 0) {
+            Write-KitLog "  $id : removed" 'OK'
+        } else {
+            Write-KitLog "  $id : NOT removed, npm exit $LASTEXITCODE" 'WARN'
+        }
+    }
+
+    # Node.js itself: shared, so it is never removed. Say so explicitly rather than staying silent.
+    Write-KitLog '  nodejs : LEFT IN PLACE. It is shared, and other npm packages depend on it.' 'INFO'
+
+    $zdir = Join-Path $env:USERPROFILE '.zernio'
+    if (Test-Path -LiteralPath $zdir) {
+        Write-KitLog "  credentials: $(Format-KitPath $zdir) LEFT IN PLACE. It holds your API key." 'INFO'
+        Write-KitLog '    To remove it yourself, after revoking the key in the Zernio dashboard: Remove-Item -Recurse -Force (Join-Path $env:USERPROFILE ''.zernio'')' 'INFO'
+    }
+}
+
 # -------------------------------------------------------------- backup restore ---
 
 if ($RestoreBackups -and -not $DryRun) {

@@ -106,6 +106,72 @@ delete-then-recreate so the link cannot be orphaned.
 
 ---
 
+## Execution dependencies
+
+The selected setup needs local software, not just markdown. `install.ps1
+-InstallPrerequisites` provisions it from `manifest/dependencies.json`.
+
+### `zernio` is not recognised after installing
+
+**This is expected until you open a new terminal.** winget and npm both add the
+new directory to the persisted user `PATH`, but the terminal you already have open
+keeps its old copy. Close it and open a new one.
+
+Verify without a new terminal:
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites
+```
+
+The `Execution dependencies` section reports what was found and where, even when
+the current session cannot see it.
+
+### "not recognised" and `npm` is also missing
+
+Node.js is the prerequisite for both CLIs. Install it first:
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites -Dependencies nodejs
+```
+
+### `winget` exits 1602
+
+The installer was cancelled, usually a declined UAC prompt. The kit installs with
+`--scope user` precisely so this does not happen: the Node.js package is a zip
+that winget extracts and hash-verifies, with no machine-wide MSI and no
+elevation. If you still see 1602 you are running an older copy of the script.
+
+### `npx zernio` fails
+
+Expected. The unscoped npm package `zernio` **does not exist**. The package is
+`@zernio/cli`, so use `npx @zernio/cli` or install it globally.
+
+The CLI also ships a legacy binary named `late`. Never install the unscoped
+`late` package: on npm that name belongs to an unrelated project.
+
+### "present but older than required ... Left alone"
+
+The kit found the tool but will not upgrade it across a version you may depend on.
+It prints the upgrade command; run it yourself if you want the newer version.
+
+### A dependency shows MISSING in verify but is installed
+
+Almost always a `PATH` problem. A freshly installed package is on disk but not in
+the running session's `PATH`. Open a new terminal. If it persists, check the
+`Execution dependencies` section of verify for the path it reports.
+
+### Phase 9 versus Phase 11 warnings
+
+`verify.ps1` reports three expected warnings on a Phase 9 install:
+
+| Warning | Meaning | Fixed in |
+|---|---|---|
+| `hyperframes-cli MISSING` | not provisioned yet | Phase 11 |
+| `ffmpeg MISSING` | not provisioned yet | Phase 11 |
+| `zernio-auth not authenticated` | you have not run `zernio auth:login` | Phase 10 |
+
+Each line shows the phase that provisions it. Nothing is broken.
+
 ## `verify.ps1`
 
 ### Exit codes

@@ -51,7 +51,8 @@
                                                  "sharedWith":  [
                                                                     "@hyperframes/cli",
                                                                     "@zernio/cli"
-                                                                ]
+                                                                ],
+                                                 "provisionedInPhase":  "9"
                                              },
                                              {
                                                  "id":  "npm-npx",
@@ -67,7 +68,8 @@
                                                  "updateMechanism":  "with Node.js",
                                                  "uninstallImplications":  "with Node.js",
                                                  "ownership":  "shared",
-                                                 "verification":  "npx --version"
+                                                 "verification":  "npx --version",
+                                                 "provisionedInPhase":  "9"
                                              },
                                              {
                                                  "id":  "hyperframes-cli",
@@ -75,7 +77,7 @@
                                                  "purpose":  "Deterministic local render, preview, lint, check, timeline, catalog and skill lifecycle commands.",
                                                  "requiredVersion":  "0.8.126 observed at the reviewed ref",
                                                  "currentState":  "MISSING (Node.js absent, so nothing can be installed yet)",
-                                                 "installMechanism":  "npm install -g @hyperframes/cli",
+                                                 "installMechanism":  "npm install -g @hyperframes/cli at version 0.8.126",
                                                  "elevationRequired":  false,
                                                  "runsContinuously":  false,
                                                  "portsOrServices":  "local preview server binds an ephemeral port while previewing only",
@@ -83,7 +85,9 @@
                                                  "updateMechanism":  "npm update -g @hyperframes/cli, reviewed before applying",
                                                  "uninstallImplications":  "npm uninstall -g @hyperframes/cli",
                                                  "ownership":  "kit-installed",
-                                                 "verification":  "hyperframes --version"
+                                                 "verification":  "hyperframes --version",
+                                                 "pinnedVersion":  "0.8.126",
+                                                 "provisionedInPhase":  "11"
                                              },
                                              {
                                                  "id":  "ffmpeg",
@@ -100,7 +104,8 @@
                                                  "uninstallImplications":  "winget uninstall Gyan.FFmpeg; safe only if nothing else uses ffmpeg",
                                                  "ownership":  "shared",
                                                  "ownershipNote":  "Very commonly shared by other tools. Must not be removed by a normal kit uninstall without explicit approval.",
-                                                 "verification":  "ffmpeg -version and ffprobe -version"
+                                                 "verification":  "ffmpeg -version and ffprobe -version",
+                                                 "provisionedInPhase":  "11"
                                              },
                                              {
                                                  "id":  "headless-chrome",
@@ -116,7 +121,8 @@
                                                  "updateMechanism":  "re-download on demand",
                                                  "uninstallImplications":  "clear the puppeteer cache; safe, it re-downloads",
                                                  "ownership":  "ephemeral-cache",
-                                                 "verification":  "hyperframes check or a smoke render completing"
+                                                 "verification":  "hyperframes check or a smoke render completing",
+                                                 "provisionedInPhase":  "11"
                                              }
                                          ]
                     },
@@ -423,7 +429,7 @@
                                             "purpose":  "Social execution layer: profiles, accounts, posts, scheduling, drafts, queue, media, analytics, inbox/DMs, comments and replies, reviews, broadcasts, sequences, comment-to-DM automations, webhooks, logs, usage and pre-flight validation.",
                                             "requiredVersion":  "0.4.1 observed; no engines field declared; CI builds on Node 24",
                                             "currentState":  "MISSING (Node.js absent)",
-                                            "installMechanism":  "npm install -g @zernio/cli",
+                                            "installMechanism":  "npm install -g @zernio/cli at version 0.4.1",
                                             "elevationRequired":  false,
                                             "runsContinuously":  false,
                                             "portsOrServices":  "none",
@@ -435,7 +441,10 @@
                                             "verification":  "zernio --version",
                                             "packageNameCaveat":  "The unscoped npm package \"zernio\" does NOT exist, so npx zernio fails. The legacy binary name \"late\" collides with an unrelated unscoped npm package; only ever install the scoped @zernio/cli.",
                                             "touchesVendorDirectories":  false,
-                                            "telemetry":  "none"
+                                            "telemetry":  "none",
+                                            "pinnedVersion":  "0.4.1",
+                                            "installPlanSpec":  "@zernio/cli@0.4.1",
+                                            "provisionedInPhase":  "9"
                                         }
                                     ],
                    "authentication":  {
@@ -455,10 +464,10 @@
                                 "freeTier":  "First 2 connected social accounts free, no credit card required. Unlimited posts, full API, 10,000 sent messages/month, analytics included.",
                                 "graduated":  "$6/account/month for accounts 3-10, $3 for 11-100, $1 for 101+ (uncapped).",
                                 "accountDefinition":  "One connected profile on one platform. Ad accounts count. WordPress and Shopify sites count as accounts.",
-                                "intendedUsage": "FREE TIER, TWO ACCOUNTS. The intended setup is 2 connected accounts on Zernio's free tier with everything else handled manually. The account bill is therefore $0/month. Nothing in the kit assumes a paid plan and no account beyond the free two is required or recommended.",
-    "freeTierCaveat": "The free tier covers ACCOUNTS, not platform API usage. X costs are passed through at X's exact rates on every tier: reads $0.005, post and DM sends $0.015, posts with a URL $0.200. If neither connected account is on X the bill is $0.",
+                                "intendedUsage":  "FREE TIER, TWO ACCOUNTS. The intended setup is 2 connected accounts on Zernio\u0027s free tier with everything else handled manually. The account bill is therefore $0/month. Nothing in the kit assumes a paid plan and no account beyond the free two is required or recommended.",
+                                "freeTierCaveat":  "The free tier covers ACCOUNTS, not platform API usage. X costs are passed through at X\u0027s exact rates on every tier: reads $0.005, post and DM sends $0.015, posts with a URL $0.200. If neither connected account is on X the bill is $0.",
                                 "estimatedExample":  "ILLUSTRATIVE ONLY, not a default and not a recommendation. The kit does not choose or pre-select any account. If someone connected Instagram, Facebook Page, X, Threads, Bluesky, TikTok, YouTube and Telegram, that is 8 accounts = 2 free + 6 x $6 = $36/month. The real bill depends entirely on which accounts the installer chooses.",
-    "accountSelection":  "Installer decision, decided later and revisable. No default account list exists in this project and nothing in the installer touches connected accounts. Start with the 2 free accounts; disconnect any account at any time to stop the charge.",
+                                "accountSelection":  "Installer decision, decided later and revisable. No default account list exists in this project and nothing in the installer touches connected accounts. Start with the 2 free accounts; disconnect any account at any time to stop the charge.",
                                 "passThrough":  "X API at X exact rates, zero markup. Posts with a URL cost $0.200 each; post and DM sends $0.015; reads $0.005. X analytics and inbox sync are opt-in and can be left off.",
                                 "messages":  "First 10,000 sent per month free, then $1 per 10,000. Received messages, comments and reviews are free and never metered.",
                                 "whatsapp":  "Needs a dedicated number from $3/month plus Meta per-message fees, billed by Meta directly from 1 October 2026.",

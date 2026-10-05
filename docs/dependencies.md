@@ -139,6 +139,78 @@ CI (`.github/workflows/publish.yml`) builds and publishes on **Node 24**, and it
 Node 24 satisfies both. **One install, one runtime.** The installer provisions it
 once and both CLIs depend on it.
 
+## Provisioned state (Phase 9)
+
+| Dependency | Version | Ownership | Kit-removable |
+|---|---|---|---|
+| Node.js | v24.19.0 (LTS) | `shared` | **no** |
+| npm / npx | 11.17.0 | `shared` | **no** |
+| `@zernio/cli` | 0.4.1 | `kit-installed` | yes |
+| `@hyperframes/cli` | not yet installed (Phase 11) | `kit-installed` | yes |
+| FFmpeg | not yet installed (Phase 11) | `shared` | **no** |
+| Headless Chrome | appears on first render (Phase 11) | `ephemeral-cache` | on request |
+
+Node.js was installed by `winget install --id OpenJS.NodeJS.LTS -e --scope user`.
+**User scope matters:** it keeps the install out of the machine-wide MSI path,
+which needs a UAC prompt this kit must never require. winget fetched the official
+zip from nodejs.org and verified its hash before extracting, so nothing was
+executed from an unverified download. No elevation and no reboot were needed.
+
+A freshly installed package is usually absent from the current session's `PATH`
+even though it is on disk, which previously made an installed tool look missing.
+Dependency detection therefore searches this session's `PATH`, the persisted user
+and machine `PATH`, and winget's package store, and says so explicitly when a tool
+is found but a new terminal is needed to use it.
+
+### Provisioning a subset
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites -Dependencies nodejs,npm-npx,zernio-cli
+```
+
+Each phase provisions only its own dependencies, so Phase 9 does not drag in
+Phase 11's HyperFrames CLI and FFmpeg. Omit `-Dependencies` to provision the whole
+declared plan.
+
+### What detection deliberately does not do
+
+- It never reinstalls a compatible existing installation.
+- It never silently upgrades an existing installation that is merely older. It
+  reports the version, prints the command to upgrade, and stops.
+- An unreadable version is not treated as an old version. Reporting "too old"
+  there produced a false warning for npm, whose version line was being swallowed
+  by its own stderr notice.
+
+## Ownership and removal
+
+The ownership record lives at
+`%USERPROFILE%\.agents\state\install-state.json`, in a `dependencies` section. It
+is machine state, never committed. It records, per dependency: ownership,
+whether it is installed, the detected version, whether the kit installed it, and
+whether it is removable.
+
+`removable` is the value that matters, and it is derived from ownership, not from
+what the installer happened to do:
+
+| Ownership | Removed by a normal uninstall? |
+|---|---|
+| `kit-installed` | yes, and only if the record also says the kit installed it |
+| `ephemeral-cache` | only on explicit request |
+| `shared` | **never** |
+| `user-owned` | **never** |
+| `os-feature` | **never** |
+
+So uninstalling this kit removes `@zernio/cli` and the skills, and leaves Node.js,
+npm and FFmpeg alone even if the kit installed them, because other software may
+depend on them.
+
+### Credentials are never deleted
+
+`%USERPROFILE%\.zernio\config.json` holds the API key. `uninstall.ps1` reports it
+and prints the exact command to remove it, but never runs it, because deleting it
+would silently break an authenticated session the user still owns. Revoke the key
+in the Zernio dashboard first, then delete the folder yourself.
+
 ## Trust level difference from a static skill
 
 Zernio and HyperFrames are **not** instruction-only skills, and the project's

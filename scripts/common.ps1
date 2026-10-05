@@ -137,7 +137,7 @@ function Test-KitSkillFrontmatter {
         Returns an object with Ok and a Problems array. Parses only the
         frontmatter block; never interprets the body.
     #>
-    param([string]$SkillFile)
+    param([string]$SkillFile, [string]$ExpectedName)
 
     $problems = New-Object System.Collections.ArrayList
     if (-not (Test-Path -LiteralPath $SkillFile)) {
@@ -146,7 +146,10 @@ function Test-KitSkillFrontmatter {
     }
 
     $text = Get-KitText $SkillFile
-    $dirName = Split-Path -Leaf (Split-Path -Parent $SkillFile)
+    # The manifest entry name is the authority. Only fall back to the containing directory when
+    # the caller has no name to check against, so validating a selective entry whose source sits in
+    # a cache directory named "<repo>@<ref>" does not report a false mismatch.
+    $dirName = if ($ExpectedName) { $ExpectedName } else { Split-Path -Leaf (Split-Path -Parent $SkillFile) }
 
     if ($text -notmatch '(?s)^---\s*\r?\n(.*?)\r?\n---') {
         [void]$problems.Add('no YAML frontmatter block')
@@ -264,6 +267,137 @@ function Test-KitSameContent {
     if (-not (Test-Path -LiteralPath $B)) { return $false }
     return ((Get-KitFileHash $A) -eq (Get-KitFileHash $B))
 }
+function Get-KitDependencyManifest {
+    <#
+        The default-plan dependency list, read from manifest/dependencies.json.
+
+        Only sections that describe what the selected setup actually needs are returned. The postiz
+        section is deliberately excluded: Postiz was evaluated and not selected, so its WSL, Docker
+        and container entries must never be provisioned by the installer.
+    #>
+    $path = Join-Path (Get-KitRoot) 'manifest\dependencies.json'
+    if (-not (Test-Path -LiteralPath $path)) {
+        Write-KitLog 'manifest/dependencies.json is missing. Dependency provisioning is unavailable.' 'ERROR'
+        return @()
+    }
+    $doc = Get-KitText $path | ConvertFrom-Json
+
+    $plan = @()
+    foreach ($dep in @($doc.hyperframes.dependencies)) { $plan += $dep }
+    if ($doc.PSObject.Properties.Name -contains 'zernio') {
+        foreach ($dep in @($doc.zernio.dependencies)) { $plan += $dep }
+    }
+    return $plan
+}
+
+function Get-KitDependencyState {
+    <#
+        Detect one dependency. Returns Installed, Version, Path and, when the executable is a
+        winget package that has not been added to this process's PATH yet, a RefreshPath hint.
+
+        Detection never trusts a bare PATH lookup alone. On Windows a freshly installed package is
+        often missing from the current session's PATH even though it is present on disk, which
+        previously made "gh" look absent when it was installed. So the user and machine PATH are
+        also searched directly, and winget's own package directory is checked as a last resort.
+    #>
+    param([Parameter(Mandatory)]$Dep)
+
+    $command = switch ($Dep.id) {
+        'nodejs' { 'node' }
+        'npm-npx' { 'npm' }
+        'hyperframes-cli' { 'hyperframes' }
+        'zernio-cli' { 'zernio' }
+        'ffmpeg' { 'ffmpeg' }
+        default { $null }
+    }
+    if (-not $command) {
+        return [pscustomobject]@{ Id = $Dep.id; Command = ''; Installed = $false; Version = ''; Path = ''; RefreshPath = $false }
+    }
+
+    $candidates = @()
+    $onPath = Get-Command $command -ErrorAction SilentlyContinue
+    if ($onPath) { $candidates += $onPath.Source }
+
+    # This session's PATH, then the persisted user and machine PATH, then winget's package store.
+    $roots = @($env:Path)
+    foreach ($scope in @('User', 'Machine')) {
+        $p = [Environment]::GetEnvironmentVariable('Path', $scope)
+        if ($p) { $roots += ($p -split ';') }
+    }
+    $wingetRoot = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'
+    foreach ($r in $roots) {
+        if (-not $r) { continue }
+        if (Test-Path -LiteralPath $r) {
+            # Prefer the real Windows launchers. npm and the Zernio CLI also ship an extension-less
+            # POSIX shim in the same directory, and picking that one yields an empty --version.
+            foreach ($ext in @('.cmd', '.exe', '.bat', '')) {
+                $c = Join-Path $r ($command + $ext)
+                if (Test-Path -LiteralPath $c) { $candidates += $c }
+            }
+        }
+        if (Test-Path -LiteralPath $wingetRoot) {
+            Get-ChildItem -LiteralPath $wingetRoot -Directory -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name -like "$($Dep.id.Replace('npm-npx', 'NodeJS'))*" -or $_.Name -like '*NodeJS.LTS*' -or $_.Name -like '*zernio*' } |
+                ForEach-Object {
+                    $nested = Join-Path $_.FullName ($command + '.cmd')
+                    if (Test-Path -LiteralPath $nested) { $candidates += $nested }
+                    $nestedExe = Join-Path $_.FullName ($command + '.exe')
+                    if (Test-Path -LiteralPath $nestedExe) { $candidates += $nestedExe }
+                    Get-ChildItem -LiteralPath $_.FullName -Directory -ErrorAction SilentlyContinue |
+                        ForEach-Object {
+                            foreach ($n in @($command + '.cmd', $command + '.exe')) {
+                                $p2 = Join-Path $_.FullName $n
+                                if (Test-Path -LiteralPath $p2) { $candidates += $p2 }
+                            }
+                        }
+                }
+        }
+    }
+
+    foreach ($c in ($candidates | Select-Object -Unique)) {
+        if (-not (Test-Path -LiteralPath $c)) { continue }
+        $version = ''
+        try {
+            # Take the first non-empty line. npm writes notices to stderr, so with 2>&1 the very
+            # first line is often blank and reading only line 1 produced an empty version.
+            $lines = @(& $c --version 2>&1 | ForEach-Object { ([string]$_).Trim() } | Where-Object { $_ })
+            if ($lines.Count -gt 0) { $version = $lines[0] }
+        } catch { $version = '' }
+        $refresh = -not ($onPath -and $onPath.Source -eq $c)
+        return [pscustomobject]@{ Id = $Dep.id; Command = $command; Installed = $true; Version = $version; Path = $c; RefreshPath = $refresh }
+    }
+
+    return [pscustomobject]@{ Id = $Dep.id; Command = $command; Installed = $false; Version = ''; Path = ''; RefreshPath = $false }
+}
+
+function Test-KitVersionSatisfies {
+    <#
+        Loose version gate used only to decide "absent, or too old to use". It is deliberately not a
+        full semver implementation: the point is to avoid reinstalling something that already works
+        and to avoid silently upgrading a major version the user may depend on.
+    #>
+    param([string]$Found, [string]$Required)
+
+    # An unreadable version is not evidence of an old one. Reporting "too old" here produced a false
+    # warning for npm, whose version line was being swallowed by its own stderr notice.
+    if (-not $Found) { return $true }
+    if (-not $Required) { return $true }
+    $min = ($Required -replace '[^0-9\.].*$', '').Trim('.')
+    # A requirement with no version in it ("bundled with Node", "recent") is a floor-less statement.
+    if (-not $min) { return $true }
+    $got = ($Found -replace '[^0-9\.].*$', '').Trim('.')
+    if (-not $got) { return $true }
+    $f = @($got -split '\.' | ForEach-Object { [int]$_ })
+    $m = @($min -split '\.' | ForEach-Object { [int]$_ })
+    for ($i = 0; $i -lt [Math]::Max($f.Count, $m.Count); $i++) {
+        $fv = if ($i -lt $f.Count) { $f[$i] } else { 0 }
+        $mv = if ($i -lt $m.Count) { $m[$i] } else { 0 }
+        if ($fv -gt $mv) { return $true }
+        if ($fv -lt $mv) { return $false }
+    }
+    return $true
+}
+
 function Get-KitSkillSource {
     <#
         Resolve where a manifest entry's files come from.
@@ -282,8 +416,75 @@ function Get-KitSkillSource {
         return [pscustomobject]@{ Path = $vendored; Mode = 'vendor'; Found = $false }
     }
     $cached = Join-Path (Get-KitCacheDir -Entry $Entry -Targets $Targets) $Entry.source.subdir
+    # An empty subdir means "the repository root", which Join-Path renders with a trailing
+    # separator. Callers compute paths relative to the source with Substring($Source.Length + 1),
+    # so a trailing separator would shift every one of them by a character. Normalise it away here,
+    # once, rather than defensively in each consumer.
+    $cached = $cached.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
     return [pscustomobject]@{ Path = $cached; Mode = 'fetch'; Found = (Test-Path -LiteralPath $cached) }
 }
+function Get-KitEntryFiles {
+    <#
+        The exact set of files a manifest entry installs, as paths relative to the source root.
+
+        Most entries install their whole subdirectory and this returns every file, which is the
+        original behaviour. An entry may instead declare an "include" allowlist, which is how a
+        skill is taken from a repository whose root also holds unrelated source. Without this,
+        installing the `zernio` skill would drag zernio-cli's src/ and package.json into
+        ~/.agents/skills and break the "no executable files in a skill" invariant.
+
+        An include pattern matches when the relative path equals it, when it is a glob matching
+        it, or when the path sits under it as a directory.
+    #>
+    param([Parameter(Mandatory)]$Entry, [Parameter(Mandatory)][string]$Source)
+
+    $all = @(Get-ChildItem -LiteralPath $Source -Recurse -File -Force)
+    if (-not ($Entry.PSObject.Properties.Name -contains 'include')) { return $all }
+
+    $patterns = @($Entry.include)
+    if ($patterns.Count -eq 0) { return @() }
+
+    $picked = @()
+    foreach ($f in $all) {
+        $rel = $f.FullName.Substring($Source.Length + 1).Replace('\', '/')
+        foreach ($p in $patterns) {
+            $p = ([string]$p).Replace('\', '/')
+            if ($rel -eq $p -or $rel -like "$p/*" -or $rel -like $p) { $picked += $f; break }
+        }
+    }
+    return $picked
+}
+
+function Copy-KitEntry {
+    <#
+        Install an entry's selected files into the destination, removing anything already there
+        that the entry no longer selects. Same prune-then-copy contract as Copy-KitTree, but driven
+        by an explicit file list so a selective entry stays selective across reruns.
+    #>
+    param([Parameter(Mandatory)]$Entry, [Parameter(Mandatory)][string]$Source, [Parameter(Mandatory)][string]$Destination)
+
+    $files = @(Get-KitEntryFiles -Entry $Entry -Source $Source)
+    if ($files.Count -eq 0) { throw "Entry selected no files from $(Format-KitPath $Source)" }
+
+    if (Test-Path -LiteralPath $Destination) {
+        Get-ChildItem -LiteralPath $Destination -Recurse -File -Force |
+            ForEach-Object { [System.IO.File]::Delete($_.FullName) }
+        Get-ChildItem -LiteralPath $Destination -Recurse -Directory -Force |
+            Sort-Object { $_.FullName.Length } -Descending |
+            ForEach-Object { if (@(Get-ChildItem -LiteralPath $_.FullName -Force).Count -eq 0) { [System.IO.Directory]::Delete($_.FullName) } }
+    } else {
+        New-Item -ItemType Directory -Path $Destination -Force | Out-Null
+    }
+
+    foreach ($f in $files) {
+        $rel = $f.FullName.Substring($Source.Length + 1)
+        $target = Join-Path $Destination $rel
+        $parent = Split-Path -Parent $target
+        if (-not (Test-Path -LiteralPath $parent)) { New-Item -ItemType Directory -Path $parent -Force | Out-Null }
+        [System.IO.File]::Copy($f.FullName, $target, $true)
+    }
+}
+
 function Get-KitCacheDir {
     <#
         The single place that decides where a pinned upstream commit lives on disk.
