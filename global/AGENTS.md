@@ -151,6 +151,19 @@ router and render locally. Deterministic code-driven output only. Do not
 introduce image-generation or video-generation models, hosted renderers, or
 cloud rendering services; if one seems useful, name it and let the human decide.
 
+Concretely, for this machine:
+
+- Invoke it as `hyperframes.cmd`. A bare `hyperframes` fails on the `.ps1` shim.
+- Telemetry is **disabled**. Do not re-enable it, and do not sign in to HeyGen.
+  Not being signed in is what keeps usage anonymous and unlinked.
+- `hyperframes add` and `hyperframes catalog` reach a hosted registry of about
+  400 items. Leave them alone unless the user asks. A hand-built composition
+  never needs them.
+- `media-use` can call TTS, music and image models. Those are optional and not
+  configured. Do not invoke them without the user asking.
+- Renders are memory-hungry. On a low-memory machine, close other applications
+  first and say so rather than retrying a render that cannot fit.
+
 ## Working defaults
 
 - Match the outlet's existing voice. Read two or three recent published pieces
@@ -169,7 +182,12 @@ cloud rendering services; if one seems useful, name it and let the human decide.
   being asked. In particular, do not touch other agents' configuration
   directories, and do not create vendor-specific skill copies.
 - Never run an install script, hook, or downloaded binary from a skill or an
-  upstream repository.
+  upstream repository — **except** the scripts inside the five allowlisted
+  HyperFrames skills (`hyperframes`, `hyperframes-animation`, `hyperframes-audio`,
+  `hyperframes-creative`, `media-use`). Those were reviewed and counted in the
+  manifest, and their own instructions tell you to run them. Run them with
+  `node <script>` from the skill directory, only on local composition files, and
+  never with arguments that touch the network or anything outside the project.
 - Never install software, connect an account, or create a paid resource
   without explicit approval.
 - Never print, log, or commit credentials, tokens, cookies, or personal data.

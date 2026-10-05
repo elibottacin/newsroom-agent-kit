@@ -373,15 +373,20 @@ foreach ($entry in $selected) {
     }
 
     $entryFiles = @(Get-KitEntryFiles -Entry $entry -Source $source)
-    $code = @($entryFiles | ForEach-Object { $_ } | Where-Object {
-        $ext = $_.Extension.ToLowerInvariant()
-        $ext -in @('.ps1', '.psm1', '.psd1', '.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.py', '.sh', '.bat', '.cmd', '.exe', '.dll', '.com')
-    })
-    if ($code.Count -gt 0) {
-        $names = $code | ForEach-Object { $_.FullName.Substring($source.Length + 1) }
-        Write-KitLog "$name : contains executable files and is not approved: $($names -join ', ')" 'ERROR'
+    $execApproval = Get-KitExecutableApproval -Entry $entry -Files $entryFiles
+    if (-not $execApproval.Ok) {
+        Write-KitLog "$name : $($execApproval.Reason)" 'ERROR'
+        if ($execApproval.Count -gt 0) {
+            $names = @(@($entryFiles) |
+                ForEach-Object { $_.FullName.Substring($source.Length + 1) } |
+                Where-Object { $_ -match '\.(js|mjs|cjs|ts|mts|py|sh|bash|ps1|psm1|rb|go|exe|bat|cmd)$' })
+            Write-KitLog "  files: $(@($names | Select-Object -First 8) -join ', ')$(if ($names.Count -gt 8) { " ... and $($names.Count - 8) more" })" 'INFO'
+        }
         $script:Conflicts.Add($name)
         continue
+    }
+    if ($execApproval.Count -gt 0) {
+        Write-KitLog "$name : $($execApproval.Count) executable file(s), allowlisted and count matches the review" 'INFO'
     }
 
     if (Test-Path -LiteralPath $dest) {

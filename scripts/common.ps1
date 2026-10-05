@@ -542,6 +542,60 @@ function Copy-KitEntry {
     }
 }
 
+function Get-KitExecutableApproval {
+    <#
+        Decide whether a skill's executable files are permitted, and whether the count matches.
+
+        Until Phase 11 the rule was absolute: a skill contains zero executable files. That was
+        deliberate (SEC-15) and it held for all 40 original skills. HyperFrames breaks it: five of its
+        core skills ship scripts that their own instructions tell the agent to run, so excluding them
+        would leave 40 broken script references.
+
+        The user chose on 2026-10-05 to install the scripts and relax the rule to an explicit
+        allowlist. An entry opts in with an "executableFiles" block declaring approved and a reviewed
+        count. Anything NOT opted in is still rejected, and an opted-in skill whose count has changed
+        is flagged, so a new unvetted script cannot slip in unnoticed.
+
+        Returns Approved, Count, Declared, Ok and Reason.
+    #>
+    param([Parameter(Mandatory)]$Entry, [string]$Dir, $Files)
+
+    # Use an explicit file list when the caller has one. A selective entry such as `zernio` takes a
+    # single SKILL.md from a repository root that also holds 26 TypeScript files, so scanning the whole
+    # directory reported it as containing 26 unapproved executables. verify.ps1 passes -Dir because
+    # the installed tree is already exactly what was selected.
+    $exts = @('.js', '.mjs', '.cjs', '.ts', '.mts', '.py', '.sh', '.bash', '.ps1', '.psm1', '.rb', '.go', '.exe', '.bat', '.cmd')
+    if ($PSBoundParameters.ContainsKey('Files') -and $null -ne $Files) {
+        $code = @(@($Files) | Where-Object { $exts -contains ([string]$_.Extension).ToLowerInvariant() })
+    } elseif ($Dir) {
+        $code = @(Get-KitCodeFiles $Dir)
+    } else {
+        $code = @()
+    }
+    $hasBlock = ($Entry.PSObject.Properties.Name -contains 'executableFiles') -and $Entry.executableFiles
+    $approved = $false
+    $declared = -1
+    if ($hasBlock) {
+        $approved = [bool]$Entry.executableFiles.approved
+        if ($Entry.executableFiles.PSObject.Properties.Name -contains 'count') {
+            $declared = [int]$Entry.executableFiles.count
+        }
+    }
+
+    if ($code.Count -eq 0) {
+        return [pscustomobject]@{ Approved = $true; Count = 0; Declared = $declared; Ok = $true; Reason = '' }
+    }
+    if (-not $approved) {
+        return [pscustomobject]@{ Approved = $false; Count = $code.Count; Declared = $declared; Ok = $false
+            Reason = "contains $($code.Count) executable file(s) and is not on the allowlist" }
+    }
+    if ($declared -ge 0 -and $declared -ne $code.Count) {
+        return [pscustomobject]@{ Approved = $true; Count = $code.Count; Declared = $declared; Ok = $false
+            Reason = "allowlisted for $declared executable file(s) but found $($code.Count). Review the difference before trusting it." }
+    }
+    return [pscustomobject]@{ Approved = $true; Count = $code.Count; Declared = $declared; Ok = $true; Reason = '' }
+}
+
 function Get-KitCacheDir {
     <#
         The single place that decides where a pinned upstream commit lives on disk.

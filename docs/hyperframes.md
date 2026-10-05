@@ -151,13 +151,99 @@ Within `media-use`, this boundary is: local media handling, composition, audio,
 icons and reuse of existing assets are core behaviour; generative image, music or
 voice calls are optional and are not configured by the kit.
 
-## Open verification item
+## Open verification item — resolved
 
-The README invokes the CLI as `npx hyperframes ...` while the published package
-name at the reviewed ref is `@hyperframes/cli`. Whether an alias package named
-`hyperframes` exists on npm is **not yet confirmed**, because npm is not
-installed on this machine. Phase 11 resolves this against the npm registry
-before anything is installed, and records the result in `manifest/skills.json`.
+The README invokes the CLI as `npx hyperframes ...` while the repository's
+`packages/cli/package.json` is named `@hyperframes/cli`. **Resolved in Phase 11
+against the npm registry, and the answer was the opposite of the guess: the npm
+package is the unscoped name `hyperframes`. `@hyperframes/cli` does not exist on
+the registry.** This is the inverse of Zernio, where the scoped `@zernio/cli` is
+correct and the unscoped name does not exist.
+
+| Item | Value |
+|---|---|
+| npm package | `hyperframes` (unscoped) |
+| Version installed | 0.8.126, pinned to match the reviewed ref |
+| License | Apache-2.0 |
+| `engines.node` | `>=22` |
+| Binaries | `hyperframes`, `hyperframes-localize-fonts` |
+| Published | 2026-10-04, matching the reviewed ref date |
+
+The registry also publishes sibling packages `@hyperframes/core` and
+`@hyperframes/engine` at the same version.
+
+**Release cadence:** 481 versions published as of 2026-10-05, with 0.8.127
+released the same day. That is an extremely high release frequency, which is why
+the version is **pinned rather than tracked**, and why `update.ps1` reviews before
+applying anything.
+
+## Observed behaviour (Phase 11, live)
+
+### `hyperframes.cmd doctor`
+
+| Check | Result |
+|---|---|
+| Version | 0.8.126 |
+| Node.js | v24.19.0, win32 x64 |
+| CPU | 4 cores, AMD Ryzen 3 3250U |
+| **Memory** | **3.4 GB total, low — "renders may fail"** |
+| Disk | 277.5 GB free |
+| Frames cache | `%LOCALAPPDATA%\Temp\hyperframes-extract-cache-*` |
+| Archive extractor | built into Windows |
+| whisper-cpp | not found, optional, needed only for transcription |
+| TTS (Kokoro) | not installed, optional local voice fallback |
+
+It also attempted to invoke `docker`, which is absent, and continued without it.
+Docker stays out of the dependency plan: Postiz was rejected in Phase 8B and
+nothing here needs a container runtime.
+
+The two optional absences are the desired state. Transcription and local voice are
+not part of this kit's scope, and `hyperframes auth status` confirms no HeyGen
+sign-in, which is what keeps those paths unconfigured.
+
+### Telemetry was enabled by default — now disabled
+
+First run printed a telemetry notice. `hyperframes telemetry status` reported
+`enabled`, with an `anonymousId` and `commandCount: 1`. It also states that signing
+in to HeyGen would link usage to the account.
+
+On the user's decision, `hyperframes telemetry disable` was run and the status
+re-read as `disabled`. See SEC-34.
+
+## Installed skill set
+
+The 10 core skills, from the pinned ref `dc3665ab`, installed verbatim into
+`%USERPROFILE%\.agents\skills`:
+
+`hyperframes` (router), `hyperframes-animation`, `hyperframes-audio`,
+`hyperframes-cli`, `hyperframes-core`, `hyperframes-creative`,
+`hyperframes-keyframes`, `hyperframes-registry`, `hyperframes-studio`, `media-use`
+
+That is 344 files, of which **77 are executable scripts**. This forced a change to
+the project's long-standing rule; see SEC-15 for the decision and for the five
+mechanisms that keep the relaxation bounded.
+
+The 11 workflow skills remain uninstalled and lazy. No blanket-install command was
+ever invoked.
+
+### Known boundaries in the installed skills
+
+- `hyperframes-registry` documents a hosted catalogue of roughly 400 items,
+  reachable via `hyperframes add` and `hyperframes catalog`. Left unused.
+- `media-use` can call TTS, music and image-generation models. Optional and
+  unconfigured; `doctor` confirms Kokoro is not installed and no HeyGen sign-in
+  exists.
+- `hyperframes-cli` documents local, HeyGen-hosted cloud, AWS Lambda and Google
+  Cloud Run rendering. Only local rendering is in scope.
+
+## Not yet validated
+
+**No render has been performed.** On the user's decision the render step was
+skipped until more RAM is available, because `doctor` itself warns that renders may
+fail at 0.6 GB free. Consequently the following remain unproven and are carried
+forward: a smoke-test composition rendering to a valid MP4, and reproducibility
+across two renders. Nothing in this document should be read as claiming a render
+has worked.
 
 ## Related
 

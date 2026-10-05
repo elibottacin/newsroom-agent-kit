@@ -66,6 +66,16 @@ Added in Phase 8, revised in Phase 8B. These are durable and always apply.
 - **HyperFrames is the deterministic motion layer.** Render locally. Image and
   video generation models, hosted renderers and cloud rendering are not the
   default and stay unconfigured.
+- **Executable content in skills is allowlisted, not permitted.** The rule was
+  absolute from Phase 2 to Phase 11: zero executable files in any skill. The user
+  relaxed it on 2026-10-05 to an explicit allowlist, because five HyperFrames
+  skills ship scripts their own instructions require. A manifest entry opts in
+  with an `executableFiles` block declaring `approved` and a reviewed `count`.
+  Anything not opted in is still rejected, and a count mismatch is a failure, so
+  a new unvetted script cannot slip in. Never widen the allowlist without the
+  user deciding. See `Get-KitExecutableApproval` and SEC-15.
+- **A skill's code must be run only as that skill's own instructions say**, on
+  local project files, never against the network or paths outside the project.
 - **Secrets and runtime data never enter Git.** No `.env`, tokens, API keys,
   credentials, database contents, or generated private configuration. Prefer an
   environment variable over a config file so the secret never touches disk.

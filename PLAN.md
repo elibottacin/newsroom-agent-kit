@@ -49,6 +49,12 @@ Establish a safe local project repository before making any machine-level change
 - [x] Create an initial baseline commit containing the bootstrap files.
 - [x] Verify `git status` is clean.
 
+- [x] Disable telemetry on the user's decision and confirm the status reads disabled. Recorded as SEC-34.
+- [x] Confirm no HeyGen sign-in, which keeps hosted and generative paths unconfigured.
+- [x] Relax the zero-executable-content invariant to an explicit allowlist on the user's decision. 77 scripts across 5 skills. Recorded as SEC-15.
+- [x] Bound the relaxation: unapproved skills are still rejected and a count mismatch fails verification.
+- [x] Amend the global instructions so allowlisted scripts may be run, and only as their own skill instructs.
+
 ### Exit criteria
 
 - Local Git history exists.
@@ -764,25 +770,25 @@ rendering works.
 
 ### Tasks
 
-- [ ] Detect existing Node.js and use it if the version satisfies `>=22`. Do not reinstall or silently upgrade a major version.
-- [ ] Install Node.js LTS only if absent or too old, with the elevation path handled correctly.
-- [ ] Install FFmpeg only if absent, and classify it as shared.
-- [ ] Install `@hyperframes/cli` as a managed dependency at a pinned, reviewed version.
-- [ ] Resolve the `npx hyperframes` versus `@hyperframes/cli` package-name question against the npm registry and record the answer.
-- [ ] Vendor the 10 core skills from the pinned reviewed ref into `vendor/skills/`, each with a `PROVENANCE.md`.
-- [ ] Apply the same vendor-product-deframing review the existing 27 forks received.
-- [ ] Confirm upstream content hashes from `skills-manifest.json` for drift detection.
-- [ ] Do not pre-install the 11 workflow skills. Keep the lazy model.
-- [ ] Add a lint/check or doctor step where the CLI provides one.
-- [ ] Create a small disposable deterministic smoke-test composition: text, shapes, at least one deterministic animation, and a timeline change. No generative media, no cloud service.
-- [ ] Render it locally and prove the MP4 is valid.
-- [ ] Re-render and prove reproducibility of the same project.
-- [ ] Verify `/hyperframes` router availability and Core Skills discovery.
-- [ ] Verify OpenCode discovers the skills.
-- [ ] Verify Cline discovers the same canonical skills.
-- [ ] Add dependency and CLI health checks to `scripts/verify.ps1`.
-- [ ] Confirm generated media is gitignored and not committed.
-- [ ] Update `docs/hyperframes.md` with actual observed behaviour.
+- [x] Detect existing Node.js and use it if the version satisfies `>=22`. Do not reinstall or silently upgrade a major version.
+- [x] Install Node.js LTS only if absent or too old, with the elevation path handled correctly. Installed 24.19.0 at user scope via winget, hash verified, no elevation.
+- [x] Install FFmpeg only if absent, and classify it as shared. Installed 9.0.2 at user scope, hash verified, recorded as shared and not removable.
+- [x] Install the HyperFrames CLI as a managed dependency at a pinned, reviewed version. The npm package is the unscoped name `hyperframes`; `@hyperframes/cli` does not exist. Installed 0.8.126.
+- [x] Resolve the `npx hyperframes` versus `@hyperframes/cli` package-name question against the npm registry and record the answer. Unscoped `hyperframes` is correct. 481 versions published, so the version is pinned rather than tracked.
+- [x] Materialise the 10 core skills from the pinned reviewed ref into `%USERPROFILE%\.agents\skills`. Installed verbatim as pinned fetches, consistent with the zernio skills, so no fork or de-framing pass is claimed.
+- [x] Decide whether the de-framing review applies. It does not: these are verbatim fetches of a tool the kit actually installs, not forks making claims about an absent product. The narrow woop-social contamination check still passes for all 52 skills.
+- [x] Record the pinned ref as the drift baseline. `skills-manifest.json` publishes per-skill hashes; note that upstream ships 21 skills while the kit installs 10, so the manifest cannot be compared wholesale.
+- [x] Do not pre-install the 11 workflow skills. Keep the lazy model. Confirmed: no blanket-install command was invoked.
+- [x] Add a doctor step. `hyperframes doctor` runs and its results are recorded in docs/hyperframes.md.
+- [ ] DEFERRED, needs more RAM: create a small disposable deterministic smoke-test composition with text, shapes, one deterministic animation and a timeline change. Skipped on 2026-10-05 by user decision; `doctor` warns renders may fail at 0.6 GB free.
+- [ ] DEFERRED, needs more RAM: render it locally and prove the MP4 is valid. No render has been performed and none is claimed.
+- [ ] DEFERRED, needs more RAM: re-render and prove reproducibility of the same project.
+- [x] Verify `/hyperframes` router availability and Core Skills discovery. All 10 discovered natively by the running agent.
+- [x] Verify OpenCode discovers the skills. Proven directly: the running agent enumerated all 10.
+- [x] Verify Cline discovers the same canonical skills, by resolving the exact paths Cline computes from its sidecar.
+- [x] Report the CLI, FFmpeg and authentication status in `scripts/verify.ps1`, showing the phase that provisions each and never printing a credential.
+- [ ] DEFERRED with the render: confirm generated media is gitignored, which can only be checked against a real render.
+- [x] Update `docs/hyperframes.md` with actual observed behaviour, including the package-name correction, doctor output and the telemetry decision.
 
 ### Exit criteria
 

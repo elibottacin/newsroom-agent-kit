@@ -81,6 +81,7 @@ $expected = @($selected | ForEach-Object { $_.name })
 $missing = @()
 $invalid = @()
 $executable = @()
+$allowlisted = @()
 $contaminated = @()
 
 foreach ($entry in $selected) {
@@ -91,8 +92,15 @@ foreach ($entry in $selected) {
     $check = Test-KitSkillFrontmatter (Join-Path $dir 'SKILL.md')
     if (-not $check.Ok) { $invalid += "$name ($($check.Problems -join '; '))" }
 
-    $code = @(Get-KitCodeFiles $dir)
-    if ($code.Count -gt 0) { $executable += "$name ($($code -join ', '))" }
+    # Executable content is rejected unless the manifest entry explicitly allowlists it, and an
+    # allowlisted skill whose reviewed count has changed is also a failure. See
+    # Get-KitExecutableApproval for why the rule moved from absolute to allowlisted in Phase 11.
+    $approval = Get-KitExecutableApproval -Entry $entry -Dir $dir
+    if (-not $approval.Ok) {
+        $executable += "$name ($($approval.Reason))"
+    } elseif ($approval.Count -gt 0) {
+        $allowlisted += "$name ($($approval.Count))"
+    }
 
     $found = @(Get-ChildItem -LiteralPath $dir -Recurse -File -Force |
         Select-String -Pattern 'woop[\s\-_]?social' -CaseSensitive:$false -ErrorAction SilentlyContinue)
@@ -115,8 +123,11 @@ Assert-That ($invalid.Count -eq 0) `
     'every installed SKILL.md has valid frontmatter with name matching its directory' `
     "invalid SKILL.md: $($invalid -join '; ')"
 Assert-That ($executable.Count -eq 0) `
-    'no installed skill contains executable files' `
+    'no installed skill contains unapproved executable files' `
     "executable content found in: $($executable -join '; ')"
+if ($allowlisted.Count -gt 0) {
+    Write-KitLog "  approved executable content, count matches the reviewed manifest: $($allowlisted -join ', ')" 'INFO'
+}
 Assert-That ($contaminated.Count -eq 0) `
     'no installed skill contains third-party product references' `
     "product references found in: $($contaminated -join '; ')"

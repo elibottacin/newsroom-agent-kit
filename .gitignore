@@ -55,7 +55,17 @@ Thumbs.db
 desktop.ini
 .DS_Store
 
-# Dependency / build caches
+# Generated video and media from local renders. Nothing rendered should ever be committed.
+# A rendered MP4 can be hundreds of megabytes and is reproducible from its source project.
+*.mp4
+*.webm
+*.mov
+*.mkv
+*.gif
+renders/
+.smoke-test/
+
+# Node
 node_modules/
 .cache/
 .temp/

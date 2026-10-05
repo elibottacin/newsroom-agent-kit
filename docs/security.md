@@ -649,6 +649,84 @@ This is why the global instructions say to use `validate:post` and to read its
 result, rather than treating a zero exit as approval. The kit does not shell out
 to this command unattended, and the human-approval rule still applies.
 
+### SEC-15 - Executable skill content, revised in Phase 11 to an allowlist
+
+Originally: executable content must not enter a global skill set at all. That
+held for all 40 original skills, and `verify.ps1` enforced it.
+
+**Revised 2026-10-05 by explicit user decision.** HyperFrames breaks the rule:
+five of its ten core skills ship scripts that their own instructions tell the
+agent to run, and 40 distinct script paths are referenced across the
+documentation. Excluding them would have installed broken instructions.
+
+Installed and allowlisted:
+
+| Skill | Scripts | Total files |
+|---|---|---|
+| `hyperframes` | 3 | 29 |
+| `hyperframes-animation` | 6 | 122 |
+| `hyperframes-audio` | 2 | 7 |
+| `hyperframes-creative` | 4 | 79 |
+| `media-use` | 62 | 107 |
+| **total** | **77** | **344** |
+
+The other five core skills contain zero executable content and are not
+allowlisted.
+
+**How the relaxation is bounded, so it cannot silently widen:**
+
+1. An entry opts in explicitly with an `executableFiles` block declaring
+   `approved` and a reviewed `count`.
+2. A skill with executable files that is **not** opted in is still rejected at
+   install and fails verification.
+3. An allowlisted skill whose file count **differs** from the reviewed count
+   fails. A newly added script cannot pass unnoticed; it changes the count.
+4. The count check honours each entry's `include` allowlist, so a selective entry
+   such as `zernio` is measured by what it actually installs rather than by what
+   sits in its source repository. Getting this wrong initially made `zernio`
+   report 26 unapproved executables from the CLI's TypeScript source.
+5. The global instructions were amended: scripts may be run only as their own
+   skill instructs, on local project files, never against the network or paths
+   outside the project.
+
+Residual risk, stated plainly: 77 reviewed third-party scripts are now reachable
+from the global skill set. They were counted, not line-by-line audited. They come
+from an Apache-2.0 project at a pinned commit and operate on local composition
+files, and the global instruction still requires human approval before anything is
+published. If a future skill wants to be allowlisted, that is a user decision, not
+an implementer's.
+
+### SEC-34 - HyperFrames telemetry is enabled by default and links to a HeyGen account
+
+Severity: **medium**. The CLI announced on first run: *"Hyperframes collects
+anonymous usage data to improve the tool. File paths and composition content are
+never collected. If you sign in to HeyGen, your account is linked to your usage."*
+
+Observed state before any decision was taken: `telemetryEnabled: true`, with an
+`anonymousId` already assigned and `commandCount: 1`. It is **opt-out**.
+
+This matters for two reasons. It collects data by default, which most people never
+notice; and signing in to HeyGen — which the CLI offers for hosted rendering and
+optional TTS — would link usage to a real identity.
+
+Resolution, on the user's decision of 2026-10-05: `hyperframes telemetry disable`
+was run and the status re-read as `disabled`. The kit does not sign in to HeyGen,
+which is also what keeps the optional hosted and generative features
+unconfigured. Both facts are recorded in the global instructions so a future agent
+does not undo them.
+
+### SEC-35 - HyperFrames shells out to Docker and can reach a hosted registry
+
+Severity: **low**. `hyperframes doctor` attempted to invoke `docker`, which is not
+installed here, and continued without it. Separately, the `hyperframes-registry`
+skill documents a hosted catalogue of roughly 400 hosted items, reachable through
+`hyperframes add` and `hyperframes catalog`.
+
+Neither is needed. Local rendering is the supported path and Docker was deliberately
+excluded from the dependency plan in Phase 8B, when Postiz was rejected. The
+registry is documented in the global instructions as something to leave alone
+unless the user asks, so the default architecture stays local and cloud-free.
+
 ## Residual risks after Phase 3
 
 1. **Vendor-framing risk (SEC-07) is resolved by forking.** 27 skills are sanitised forks with
