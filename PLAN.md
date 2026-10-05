@@ -627,6 +627,8 @@ Nothing is installed in this phase.
 - [x] Record that this is a note only: nothing in the setup depends on Postiz, and `docs/postiz.md` is written to be usable as an installation guide.
 - [x] Record that which social accounts to connect is the installer's decision, with no default account list and no installer scaffolding for one.
 - [x] Reframe every cost figure as an illustrative example rather than a prediction.
+- [x] Record the confirmed scope decision: two accounts on the Zernio free tier, everything else manual, $0/month in account costs.
+- [x] Record that the free tier covers accounts but not platform API usage, so X pass-through remains the only ongoing cost.
 - [x] Commit and push Phase 8B.
 
 ### Validation

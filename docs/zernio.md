@@ -273,6 +273,14 @@ includes unlimited posts, full API access, 10,000 inbox messages a month and
 analytics. This matters for validation: the kit can be installed and proven
 end-to-end at zero cost.
 
+**Intended usage is the free tier: two accounts, everything else handled
+manually.** The account bill is therefore $0/month.
+
+One caveat that survives the free tier: **it covers accounts, not platform API
+usage.** X costs are passed through at X's exact rates on every tier. If neither
+connected account is on X, the bill is $0. If one is, a text post is about
+$0.015 and a post containing a URL about $0.200.
+
 Beyond 2 accounts, graduated per-account pricing:
 
 | Connected accounts | Price per account per month |
@@ -287,18 +295,18 @@ Instagram account, a TikTok account, a Facebook Page, a YouTube channel each
 count as one. Ad accounts count too. Connected WordPress and Shopify sites count
 as accounts even though they are blogs rather than social publishing targets.
 
-**Estimated cost for one plausible account set.** Connecting Instagram, Facebook
-Page, X, Threads, Bluesky, TikTok, YouTube and Telegram is 8 accounts:
+**Worked example, for arithmetic only.** If someone connected Instagram, Facebook
+Page, X, Threads, Bluesky, TikTok, YouTube and Telegram, that is 8 accounts:
 
 ```
 2 free + 6 x $6 = $36 / month
 ```
 
-**This is an illustration of the arithmetic, not a default and not a
-recommendation.** The kit does not choose or pre-select any account. Connect
-whatever subset makes sense, starting with the 2 free ones, and disconnect any
-account at any time to stop the charge. Adding WhatsApp needs a dedicated number
-(from $3/month) plus Meta's own per-message fees, billed by Meta directly.
+**This is not a default, not a recommendation, and not what this kit intends.**
+The kit does not choose or pre-select any account. Connect whatever subset makes
+sense, starting with the 2 free ones, and disconnect any account at any time to
+stop the charge. Adding WhatsApp needs a dedicated number (from $3/month) plus
+Meta's own per-message fees, billed by Meta directly.
 
 **Pass-through charges that are not optional:**
 

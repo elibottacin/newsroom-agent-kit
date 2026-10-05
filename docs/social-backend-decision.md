@@ -40,6 +40,33 @@ Switch to Postiz self-hosted if any of these become true:
 - Content, DMs or social tokens must stay on your own infrastructure.
 - Per-account cost becomes material at scale.
 
+## Intended usage: the free tier, two accounts
+
+The intended setup is **two connected accounts on Zernio's free tier, and
+everything else handled manually**, the way it was worked before this kit. This
+is a scope decision, not a limitation being worked around.
+
+Consequences:
+
+- **The account bill is $0/month.** The first 2 connected accounts are free with
+  no credit card required, and that tier includes unlimited posts, full API
+  access, 10,000 sent messages a month and analytics.
+- **Rate limit on the free tier is 60 requests/minute**, against 600 on paid
+  tiers. That is ample for a two-account workflow; it is the one thing to keep in
+  mind if a batch ever gets large.
+- **The free tier covers accounts, not platform API usage.** X costs are passed
+  through at X's exact rates on every tier, free included: reads $0.005, post and
+  DM sends $0.015, and **posts containing a URL $0.200**.
+  So if neither of the two accounts is on X, the bill is genuinely $0. If one is,
+  a link post costs about $0.20 and a text post about $0.015.
+- Which two accounts is a decision made later, per account, and can be changed at
+  any time.
+
+This arrangement is a good fit for the stated goal. Two priority accounts get
+full automation including inbox, comments, scheduling and analytics, and the
+remaining platforms keep the manual, human-reviewed workflow that a newsroom
+would want anyway.
+
 ## Which accounts to connect is the installer's decision
 
 **This kit does not choose, require or pre-select any social account.** There is
@@ -50,6 +77,10 @@ Whoever installs this decides which accounts to connect, and can change that
 later: connect or disconnect any account at any time, and disconnecting stops the
 charge. The free tier covers the **first 2 connected accounts**, so a new
 installation can be validated in full before spending anything.
+
+**The intended usage here is exactly that free tier: two accounts, everything
+else manual.** Nothing in the kit assumes a paid plan, and no account beyond the
+free two is required or recommended.
 
 Worth knowing before connecting anything:
 
@@ -117,7 +148,7 @@ Zernio answers yes.
 | **Licence obligation** | AGPL-3.0. Self-host use is fine; no source obligation arises because the kit neither vendors nor modifies Postiz. | MIT client. Closed service |
 | **Free tier** | Not applicable. Everything is yours once the hardware exists. | **First 2 connected accounts free, no credit card.** Unlimited posts, full API, 10,000 messages/month, analytics. |
 | **Cost as usage grows** | Electricity and disk, plus your time | $6/account/month for accounts 3-10, $3 for 11-100, $1 for 101+. Graduated, itemised per account. |
-| **Cost for this user's 8 platforms** | $0, if the hardware existed | **$36/month** |
+| **Cost for this user's 8 platforms** | $0, if the hardware existed | $0/month on the free tier with 2 accounts; $36/month if all 8 were connected |
 
 The cost row is an **illustrative example**, computed from one reading of a media
 outlet's likely platforms. It is not a default, not a recommendation, and not
@@ -264,14 +295,20 @@ adds none.
 
 Stated plainly, because it is a real trade:
 
-- **$36/month** for eight connected accounts, rising per the graduated ladder.
-- **$0.200 per X post containing a URL**, passed through at X's rates. For a news
-  outlet this is the line to watch; roughly $10/month at 50 link posts. X
-  analytics and inbox sync are opt-in and can be left off.
+- **$0/month in account costs**, on the free tier with two connected accounts.
+  That is the intended setup, not a trial.
+- **X API is the exception.** It is passed through at X's rates on every tier,
+  so a text post on X is about $0.015 and a post containing a URL about $0.200.
+  If neither connected account is on X, there is no ongoing cost at all. This is
+  the only line to watch, and `usage:stats` plus `usage:x-pricing` report it
+  rather than requiring a guess.
 - **Content, DMs, comments and social tokens live on Zernio's servers**, not on
   the user's machine.
 - **A young project**: 5 npm releases since March 2026, and its reference
   documentation lags its commercial model in three identified places.
+- **A real functional loss**: the 12-odd channels Zernio does not cover. Under
+  the intended two-account scope this costs nothing, because the unconnected
+  platforms stay manual anyway.
 
 Set against: Postiz cannot run on this machine at all, and would have required
 new hardware plus ongoing container maintenance.
@@ -280,8 +317,8 @@ new hardware plus ongoing container maintenance.
 
 **Adopt Zernio.** It fits this PC, it is materially better at the community and
 inbox work that is this user's actual job, its agent integration is cleaner, its
-credential model is stronger, and it is verifiable end-to-end at zero cost using
-the free 2-account tier before any money is spent.
+credential model is stronger, and on the intended two-account free tier it costs
+nothing at all.
 
 Revisit if any of these become true: the outlet needs a channel only Postiz
 covers; data residency on your own infrastructure becomes a requirement; the

@@ -46,6 +46,11 @@ Added in Phase 8, revised in Phase 8B. These are durable and always apply.
   hardcode a default account list, never require particular accounts, and never
   have the installer touch connected accounts. Start from the free tier and let
   the installer choose.
+- **Intended scope is the Zernio free tier: two accounts, the rest manual.**
+  Nothing may assume a paid plan or require an account beyond the free two. The
+  account bill is $0. The one cost that survives the free tier is X API
+  pass-through, billed at X's rates, so a post containing a URL on X costs
+  $0.200. Do not present the paid rate card as the expected cost.
 - **Postiz self-hosted is evaluated and not selected here.** Its Phase 8 research
   is preserved as evidence. Do not provision WSL2, Docker Desktop or the Postiz
   stack. See `docs/postiz.md`.
