@@ -336,33 +336,43 @@ function Get-KitDependencyState {
             }
         }
         if (Test-Path -LiteralPath $wingetRoot) {
-            Get-ChildItem -LiteralPath $wingetRoot -Directory -ErrorAction SilentlyContinue |
-                Where-Object { $_.Name -like "$($Dep.id.Replace('npm-npx', 'NodeJS'))*" -or $_.Name -like '*NodeJS.LTS*' -or $_.Name -like '*zernio*' } |
-                ForEach-Object {
-                    $nested = Join-Path $_.FullName ($command + '.cmd')
-                    if (Test-Path -LiteralPath $nested) { $candidates += $nested }
-                    $nestedExe = Join-Path $_.FullName ($command + '.exe')
-                    if (Test-Path -LiteralPath $nestedExe) { $candidates += $nestedExe }
-                    Get-ChildItem -LiteralPath $_.FullName -Directory -ErrorAction SilentlyContinue |
-                        ForEach-Object {
-                            foreach ($n in @($command + '.cmd', $command + '.exe')) {
-                                $p2 = Join-Path $_.FullName $n
-                                if (Test-Path -LiteralPath $p2) { $candidates += $p2 }
-                            }
-                        }
-                }
+            # Scan the winget package store generically and recursively, to a bounded depth.
+            # Two earlier attempts were wrong: a name-based filter missed Gyan.FFmpeg entirely, and a
+            # fixed two-level walk missed it again because the binary sits three levels down at
+            # <package>/<version-dir>/bin/ffmpeg.exe. Depth is capped so this cannot become a slow
+            # full-disk walk.
+            foreach ($ext in @('.exe', '.cmd', '.bat')) {
+                $candidates += @(Get-ChildItem -LiteralPath $wingetRoot -Recurse -Depth 3 -Force `
+                    -ErrorAction SilentlyContinue |
+                    Where-Object { $_.Name -eq ($command + $ext) } |
+                    ForEach-Object { $_.FullName })
+            }
         }
     }
 
     foreach ($c in ($candidates | Select-Object -Unique)) {
         if (-not (Test-Path -LiteralPath $c)) { continue }
         $version = ''
-        try {
-            # Take the first non-empty line. npm writes notices to stderr, so with 2>&1 the very
-            # first line is often blank and reading only line 1 produced an empty version.
-            $lines = @(& $c --version 2>&1 | ForEach-Object { ([string]$_).Trim() } | Where-Object { $_ })
-            if ($lines.Count -gt 0) { $version = $lines[0] }
-        } catch { $version = '' }
+        $probeOk = $false
+        # Try the GNU-style flag first, then the BSD-style one. ffmpeg prints its version for
+        # --version but exits -1414549496, while -version exits 0, so probing only --version reported
+        # a working ffmpeg 9.0.2 as missing and then tried to reinstall it.
+        foreach ($flag in @('--version', '-version', '-v')) {
+            try {
+                $lines = @(& $c $flag 2>&1 | ForEach-Object { ([string]$_).Trim() } | Where-Object { $_ })
+                if ($LASTEXITCODE -eq 0 -and $lines.Count -gt 0) {
+                    $version = $lines[0]
+                    $probeOk = $true
+                    break
+                }
+                if (-not $version -and $lines.Count -gt 0) { $version = $lines[0] }
+            } catch { }
+        }
+        # The executable existing is not proof it works. npm writes its .cmd shim before the package
+        # finishes installing, so a failed install leaves a shim that exists but crashes on every
+        # call. hyperframes --version reported "Cannot find module .../bin/hyperframes.mjs" and this
+        # check is what caught it. Require the probe itself to succeed.
+        if (-not $probeOk) { continue }
         $refresh = -not ($onPath -and $onPath.Source -eq $c)
         return [pscustomobject]@{ Id = $Dep.id; Command = $command; Installed = $true; Version = $version; Path = $c; RefreshPath = $refresh }
     }
@@ -396,6 +406,53 @@ function Test-KitVersionSatisfies {
         if ($fv -lt $mv) { return $false }
     }
     return $true
+}
+
+function Initialize-KitNodePath {
+    <#
+        Put a detected Node.js directory on THIS process's PATH.
+
+        Node is installed at user scope, which writes to the persisted user PATH. A terminal opened
+        before the install keeps its old copy, and the kit's own shell sessions are no different.
+
+        That is harmless for running a command directly, but npm runs package lifecycle scripts in a
+        child cmd.exe that inherits the current PATH. esbuild's postinstall calls "node install.js",
+        so with node missing from the session PATH the install died with:
+
+            npm error command C:\WINDOWS\system32\cmd.exe /d /s /c node install.js
+            npm error "node" no se reconoce como un comando interno o externo
+
+        Returns the directory added, or an empty string when there was nothing to do.
+    #>
+    $sep = [System.IO.Path]::PathSeparator
+    $current = $env:Path
+    if ($current -match '(?i)node\.exe') { return '' }
+
+    $roots = @($current)
+    foreach ($scope in @('User', 'Machine')) {
+        $p = [Environment]::GetEnvironmentVariable('Path', $scope)
+        if ($p) { $roots += ($p -split ';') }
+    }
+    $wingetRoot = Join-Path $env:LOCALAPPDATA 'Microsoft\WinGet\Packages'
+    foreach ($r in $roots) {
+        if (-not $r) { continue }
+        if (Test-Path -LiteralPath (Join-Path $r 'node.exe')) {
+            $env:Path = "$r$sep$current"
+            return $r
+        }
+        if (Test-Path -LiteralPath $wingetRoot) {
+            $hit = Get-ChildItem -LiteralPath $wingetRoot -Directory -ErrorAction SilentlyContinue |
+                Where-Object { $_.Name -like '*NodeJS*' } |
+                ForEach-Object { Get-ChildItem -LiteralPath $_.FullName -Directory -ErrorAction SilentlyContinue } |
+                Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'node.exe') } |
+                Select-Object -First 1
+            if ($hit) {
+                $env:Path = "$($hit.FullName)$sep$current"
+                return $hit.FullName
+            }
+        }
+    }
+    return ''
 }
 
 function Get-KitSkillSource {

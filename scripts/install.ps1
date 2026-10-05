@@ -207,10 +207,20 @@ if ($InstallPrerequisites) {
                 )
                 $installed = $false
                 foreach ($attempt in $attempts) {
-                    & winget install --id $pkg -e @($attempt.Args) --silent --disable-interactivity `
-                        --accept-package-agreements --accept-source-agreements 2>&1 |
-                        ForEach-Object { Write-KitLog "  $_" }
-                    $code = $LASTEXITCODE
+                    # A native command's stderr is DATA, not a PowerShell error. Under
+                    # ErrorActionPreference Stop, npm's routine "npm notice new version available"
+                    # became a terminating NativeCommandError and aborted the run AFTER the install
+                    # had succeeded but BEFORE the ownership record was written, so the kit lost
+                    # track of a dependency it had just installed. Relax the preference around the
+                    # native call and restore it afterwards.
+                    $prevEap = $ErrorActionPreference
+                    $ErrorActionPreference = 'Continue'
+                    try {
+                        & winget install --id $pkg -e @($attempt.Args) --silent --disable-interactivity `
+                            --accept-package-agreements --accept-source-agreements 2>&1 |
+                            ForEach-Object { Write-KitLog "  $_" }
+                        $code = $LASTEXITCODE
+                    } finally { $ErrorActionPreference = $prevEap }
                     if ($code -eq 0) {
                         Write-KitLog "  $pkg installed ($($attempt.Label))" 'OK'
                         $installed = $true
@@ -230,6 +240,13 @@ if ($InstallPrerequisites) {
                 }
                 if ($installed) { [void]$script:DepsInstalled.Add($dep.id) } else { [void]$script:DepsFailed.Add($dep.id) }
             } elseif ($mechanism -match '^npm ') {
+                # npm runs lifecycle scripts in a child cmd.exe that inherits THIS process's PATH.
+                # Node is installed at user scope, so a session opened before the install cannot see
+                # it and any package with a postinstall step fails. Make node visible first.
+                $nodeAdded = Initialize-KitNodePath
+                if ($nodeAdded) {
+                    Write-KitLog "  added $(Format-KitPath $nodeAdded) to this session's PATH so npm lifecycle scripts can find node." 'INFO'
+                }
                 $npm = Get-KitDependencyState -Dep ([pscustomobject]@{ id = 'npm-npx' })
                 if (-not $npm.Installed) {
                     Write-KitLog '  npm is not available.' 'ERROR'
@@ -239,16 +256,21 @@ if ($InstallPrerequisites) {
                 $pkgName = ($mechanism -replace '^npm install -g\s+', '' -replace '\s+at version.*$', '').Trim()
                 $pinned = $dep.pinnedVersion
                 $target = if ($pinned) { "$pkgName@$pinned" } else { $pkgName }
-                & $npm.Path install -g $target --no-fund --no-audit 2>&1 |
-                    ForEach-Object { if ($_ -match 'npm notice') { } else { Write-KitLog "  $_" } }
-                if ($LASTEXITCODE -eq 0) {
+                # Same reason as the winget branch: npm's stderr notices must not abort the run.
+                $prevEap = $ErrorActionPreference
+                $ErrorActionPreference = 'Continue'
+                try {
+                    & $npm.Path install -g $target --no-fund --no-audit 2>&1 |
+                        ForEach-Object { if ($_ -notmatch 'npm notice') { Write-KitLog "  $_" } }
+                    $npmCode = $LASTEXITCODE
+                } finally { $ErrorActionPreference = $prevEap }
+                if ($npmCode -eq 0) {
                     Write-KitLog "  $target installed" 'OK'
                     [void]$script:DepsInstalled.Add($dep.id)
                 } else {
-                    Write-KitLog "  $target NOT installed: npm exit $LASTEXITCODE" 'ERROR'
+                    Write-KitLog "  $target NOT installed: npm exit $npmCode" 'ERROR'
                     [void]$script:DepsFailed.Add($dep.id)
-                }
-            } else {
+                }            } else {
                 Write-KitLog "  no automated mechanism is declared for '$mechanism'. Install it manually." 'WARN'
                 [void]$script:DepsFailed.Add($dep.id)
             }

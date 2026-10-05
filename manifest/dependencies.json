@@ -77,7 +77,7 @@
                                                  "purpose":  "Deterministic local render, preview, lint, check, timeline, catalog and skill lifecycle commands.",
                                                  "requiredVersion":  "0.8.126 observed at the reviewed ref",
                                                  "currentState":  "MISSING (Node.js absent, so nothing can be installed yet)",
-                                                 "installMechanism":  "npm install -g @hyperframes/cli at version 0.8.126",
+                                                 "installMechanism":  "npm install -g hyperframes at version 0.8.126",
                                                  "elevationRequired":  false,
                                                  "runsContinuously":  false,
                                                  "portsOrServices":  "local preview server binds an ephemeral port while previewing only",
@@ -87,7 +87,10 @@
                                                  "ownership":  "kit-installed",
                                                  "verification":  "hyperframes --version",
                                                  "pinnedVersion":  "0.8.126",
-                                                 "provisionedInPhase":  "11"
+                                                 "provisionedInPhase":  "11",
+                                                 "packageNameVerified":  true,
+                                                 "packageNameNote":  "CORRECTED in Phase 11. The npm package is the unscoped name \"hyperframes\", NOT \"@hyperframes/cli\", which does not exist on the registry. The opposite of Zernio, where the scoped @zernio/cli is correct and the unscoped name does not exist. Binaries: hyperframes, hyperframes-localize-fonts.",
+                                                 "releaseCadence":  "481 versions published on npm as of 2026-10-05, with 0.8.127 released the same day. Extremely high release frequency, so the version is pinned rather than tracked and updates are reviewed before applying."
                                              },
                                              {
                                                  "id":  "ffmpeg",
