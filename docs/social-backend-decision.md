@@ -6,6 +6,64 @@ self-hosted is evaluated and not selected.**
 Postiz research from Phase 8 is preserved in `docs/postiz.md` as the record of a
 rejected alternative. Nothing in it was deleted or rewritten.
 
+## Why Zernio — and what that reason is not
+
+This choice was made because of **one specific constraint: the machine this kit
+was installed on cannot run the Postiz self-hosted stack.** It has 3.44 GB of RAM
+with 0.24 GB free, against nine containers needing roughly 2.3-3 GB plus 1-1.5 GB
+of runtime, and WSL is not installed so there is no container backend at all.
+
+**That is a hardware verdict, not a capability verdict.** On a machine with
+adequate RAM and a container runtime, **Postiz self-hosted is the better choice
+of the two**, and it would be selected instead. Its reasons are real and they are
+not small: 28+ publishing channels against Zernio's 16, complete data control, no
+per-account cost at any volume, no vendor dependency, and no pass-through
+billing.
+
+So read this decision as:
+
+> **Zernio is the default because of what this machine can run. Postiz
+> self-hosted remains the preferred backend wherever self-hosting is feasible.**
+
+This is a note, not scaffolding. Nothing in the setup depends on Postiz, no
+Postiz component is installed, provisioned or referenced as a requirement, and
+switching back means running the Phase 8 research as an installation guide rather
+than a rejection record. `docs/postiz.md` is written to be usable that way.
+
+### When to revisit
+
+Switch to Postiz self-hosted if any of these become true:
+
+- The kit is installed on a machine with adequate RAM and WSL2 or Hyper-V.
+- A channel is needed that only Postiz covers, such as Medium, Mastodon, the
+  fediverse, WordPress-as-social or ListMonk.
+- Content, DMs or social tokens must stay on your own infrastructure.
+- Per-account cost becomes material at scale.
+
+## Which accounts to connect is the installer's decision
+
+**This kit does not choose, require or pre-select any social account.** There is
+no default account list, no scaffolding for one, and nothing in the installer
+touches connected accounts.
+
+Whoever installs this decides which accounts to connect, and can change that
+later: connect or disconnect any account at any time, and disconnecting stops the
+charge. The free tier covers the **first 2 connected accounts**, so a new
+installation can be validated in full before spending anything.
+
+Worth knowing before connecting anything:
+
+- Each connected profile on a platform counts as one billable account.
+- Instagram requires a **Business** account. TikTok accounts connected through
+  the TikTok for Business app publish **public only**. Bluesky uses an app
+  password, Telegram a bot token, WhatsApp needs a number and a WABA.
+- Facebook Groups cannot be connected at all. The kit publishes to Pages.
+
+Per-account costs are in `docs/zernio.md`. The worked example there is one
+plausible reading of a media outlet's platforms, included to show the arithmetic
+— **not a recommendation and not a default.** The actual bill depends entirely on
+which accounts get chosen.
+
 ## Why the question was reopened
 
 Phase 8 selected Postiz self-hosted on capability, and recorded two blockers.
@@ -60,7 +118,11 @@ Zernio answers yes.
 | **Free tier** | Not applicable. Everything is yours once the hardware exists. | **First 2 connected accounts free, no credit card.** Unlimited posts, full API, 10,000 messages/month, analytics. |
 | **Cost as usage grows** | Electricity and disk, plus your time | $6/account/month for accounts 3-10, $3 for 11-100, $1 for 101+. Graduated, itemised per account. |
 | **Cost for this user's 8 platforms** | $0, if the hardware existed | **$36/month** |
-| **Hidden pass-through costs** | None known | X API at X's exact rates, zero markup. **Posts with a URL cost $0.200 each.** Messages free to 10,000/month. WhatsApp billed by Meta from 1 Oct 2026. |
+
+The cost row is an **illustrative example**, computed from one reading of a media
+outlet's likely platforms. It is not a default, not a recommendation, and not
+what any installer will be charged. See "Which accounts to connect is the
+installer's decision" above.| **Hidden pass-through costs** | None known | X API at X's exact rates, zero markup. **Posts with a URL cost $0.200 each.** Messages free to 10,000/month. WhatsApp billed by Meta from 1 Oct 2026. |
 | **Reliability you own** | You own it, and you maintain it | Vendor-managed, 99.7%+ claimed |
 | **Maturity** | Established project | Young: 5 npm releases since March 2026; reference docs lag the commercial model in three places |
 

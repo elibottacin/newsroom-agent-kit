@@ -1,16 +1,25 @@
 # Postiz — self-hosted social execution layer (evaluated, not selected)
 
-> **STATUS: evaluated in Phase 8, rejected as the default backend in Phase 8B.**
+> **STATUS: evaluated in Phase 8, not selected as the default backend in
+> Phase 8B.**
 >
-> Zernio was selected instead. This file is preserved **unmodified below this
-> note** as the record of the evaluated alternative. Do not act on it: do not
-> provision WSL2, Docker Desktop or the Postiz stack, and do not install the
-> `postiz` CLI.
+> **This was a hardware decision, not a capability judgement.** Postiz
+> self-hosted is the better of the two backends wherever self-hosting is
+> feasible: more publishing channels, complete data control, no per-account cost
+> at any volume, and no vendor dependency. It was not selected here only because
+> the machine this kit was installed on cannot run its stack — 3.44 GB of RAM
+> with 0.24 GB free against nine containers, and no WSL, so no container
+> backend.
 >
-> Why it was rejected: the self-hosted stack cannot run on this machine. The PC
-> has 3.44 GB of RAM with 0.24 GB free against nine containers needing roughly
-> 2.3-3 GB plus 1-1.5 GB of runtime, and WSL is not installed so there is no
-> container backend at all. Neither blocker is automatable.
+> On a machine with adequate RAM and WSL2 or Hyper-V, **select Postiz and use
+> this file as an installation guide.** It is written to be usable that way: it
+> contains the runtime source, the full compose stack, the required
+> authentication path, the volume layout, the upgrade and backup procedure, and
+> the overlap analysis.
+>
+> For the current setup: do not provision WSL2, Docker Desktop or the Postiz
+> stack, and do not install the `postiz` CLI. Nothing in the setup depends on
+> Postiz.
 >
 > See `docs/social-backend-decision.md` for the comparison and the decision, and
 > `docs/zernio.md` for what was selected.

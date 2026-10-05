@@ -287,15 +287,18 @@ Instagram account, a TikTok account, a Facebook Page, a YouTube channel each
 count as one. Ad accounts count too. Connected WordPress and Shopify sites count
 as accounts even though they are blogs rather than social publishing targets.
 
-**Estimated cost for this user's platforms.** Connecting Instagram, Facebook
+**Estimated cost for one plausible account set.** Connecting Instagram, Facebook
 Page, X, Threads, Bluesky, TikTok, YouTube and Telegram is 8 accounts:
 
 ```
 2 free + 6 x $6 = $36 / month
 ```
 
-Adding WhatsApp needs a dedicated number (from $3/month) plus Meta's own
-per-message fees, billed by Meta directly.
+**This is an illustration of the arithmetic, not a default and not a
+recommendation.** The kit does not choose or pre-select any account. Connect
+whatever subset makes sense, starting with the 2 free ones, and disconnect any
+account at any time to stop the charge. Adding WhatsApp needs a dedicated number
+(from $3/month) plus Meta's own per-message fees, billed by Meta directly.
 
 **Pass-through charges that are not optional:**
 

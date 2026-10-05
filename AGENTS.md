@@ -37,8 +37,17 @@ Added in Phase 8, revised in Phase 8B. These are durable and always apply.
   comment and DM handling, broadcasts, sequences and supported native metrics
   route through Zernio. Rationale and the full comparison in
   `docs/social-backend-decision.md`.
-- **Postiz self-hosted is evaluated and not selected.** Its Phase 8 research is
-  preserved as evidence. Do not provision WSL2, Docker Desktop or the Postiz
+- **Zernio was chosen for hardware reasons, not capability.** The machine this
+  was installed on cannot run the Postiz self-hosted stack. Where self-hosting
+  is feasible, Postiz is the better backend and should be selected instead. This
+  is a documented note only: nothing in the setup depends on Postiz, and no
+  Postiz component is provisioned. See `docs/postiz.md`.
+- **Which social accounts to connect is the installer's decision.** Never
+  hardcode a default account list, never require particular accounts, and never
+  have the installer touch connected accounts. Start from the free tier and let
+  the installer choose.
+- **Postiz self-hosted is evaluated and not selected here.** Its Phase 8 research
+  is preserved as evidence. Do not provision WSL2, Docker Desktop or the Postiz
   stack. See `docs/postiz.md`.
 - **Skill and CLI, never MCP, never a vendor wrapper.** Zernio's hosted MCP at
   `mcp.zernio.com` and the `zernio-claude-plugin` are both out. Add neither

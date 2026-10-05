@@ -623,6 +623,10 @@ Nothing is installed in this phase.
 - [x] Revise the not-yet-executed phases so they implement the selected backend, and remove WSL2, Docker and Postiz from the required default dependency plan.
 - [x] Keep HyperFrames planning unchanged.
 - [x] Confirm no secret, key or runtime data is committed, and the working tree is clean.
+- [x] Record that the choice was hardware-driven, not capability-driven, and that Postiz self-hosted is the preferred backend wherever self-hosting is feasible.
+- [x] Record that this is a note only: nothing in the setup depends on Postiz, and `docs/postiz.md` is written to be usable as an installation guide.
+- [x] Record that which social accounts to connect is the installer's decision, with no default account list and no installer scaffolding for one.
+- [x] Reframe every cost figure as an illustrative example rather than a prediction.
 - [x] Commit and push Phase 8B.
 
 ### Validation
