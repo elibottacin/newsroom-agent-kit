@@ -191,20 +191,44 @@ if ($InstallPrerequisites) {
                     continue
                 }
                 $pkg = ($mechanism -replace '^winget install --id\s+', '' -replace '\s+-e.*$', '')
-                # --scope user keeps the install out of the machine-wide MSI path, which needs a UAC
-                # prompt this kit must never require. Node.js ships as a zip that winget extracts and
-                # hash-verifies, so nothing is executed from an unverified download.
-                & winget install --id $pkg -e --scope user --silent --disable-interactivity `
-                    --accept-package-agreements --accept-source-agreements 2>&1 |
-                    ForEach-Object { Write-KitLog "  $_" }
-                $code = $LASTEXITCODE
-                if ($code -eq 0 -or $code -eq -1978335212) {
-                    Write-KitLog "  $pkg installed" 'OK'
-                    [void]$script:DepsInstalled.Add($dep.id)
-                } else {
-                    Write-KitLog "  $pkg NOT installed: winget exit $code" 'ERROR'
-                    [void]$script:DepsFailed.Add($dep.id)
+                # Prefer --scope user so the install stays out of the machine-wide MSI path, which
+                # needs a UAC prompt this kit must never require.
+                #
+                # This is NOT universally safe, and that was verified rather than assumed. The Node.js
+                # LTS manifest declares a WiX MSI as its default installer, yet `--scope user` selected
+                # a zip installer instead: it downloaded nodejs.org's zip, hash-verified it and
+                # extracted it with no elevation. Gyan.FFmpeg is portable/zip, so user scope is safe
+                # there by construction. A package offering only a machine-scope MSI would refuse
+                # user scope entirely, so fall back to the default scope and say plainly that
+                # elevation may now be required.
+                $attempts = @(
+                    @{ Args = @('--scope', 'user'); Label = 'user scope' },
+                    @{ Args = @(); Label = 'default scope (may require elevation)' }
+                )
+                $installed = $false
+                foreach ($attempt in $attempts) {
+                    & winget install --id $pkg -e @($attempt.Args) --silent --disable-interactivity `
+                        --accept-package-agreements --accept-source-agreements 2>&1 |
+                        ForEach-Object { Write-KitLog "  $_" }
+                    $code = $LASTEXITCODE
+                    if ($code -eq 0) {
+                        Write-KitLog "  $pkg installed ($($attempt.Label))" 'OK'
+                        $installed = $true
+                        break
+                    }
+                    if ($code -eq -1978335212) {
+                        Write-KitLog "  $pkg already installed or newer ($($attempt.Label))" 'OK'
+                        $installed = $true
+                        break
+                    }
+                    if ($attempt.Label -eq 'user scope') {
+                        Write-KitLog "  user scope unavailable for $pkg (winget exit $code). Retrying at default scope." 'WARN'
+                        Write-KitLog '  A UAC prompt may appear. Decline it and this dependency is reported as not installed.' 'INFO'
+                    } else {
+                        Write-KitLog "  $pkg NOT installed: winget exit $code ($($attempt.Label))" 'ERROR'
+                    }
                 }
+                if ($installed) { [void]$script:DepsInstalled.Add($dep.id) } else { [void]$script:DepsFailed.Add($dep.id) }
             } elseif ($mechanism -match '^npm ') {
                 $npm = Get-KitDependencyState -Dep ([pscustomobject]@{ id = 'npm-npx' })
                 if (-not $npm.Installed) {

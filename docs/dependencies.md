@@ -151,10 +151,35 @@ once and both CLIs depend on it.
 | Headless Chrome | appears on first render (Phase 11) | `ephemeral-cache` | on request |
 
 Node.js was installed by `winget install --id OpenJS.NodeJS.LTS -e --scope user`.
-**User scope matters:** it keeps the install out of the machine-wide MSI path,
-which needs a UAC prompt this kit must never require. winget fetched the official
-zip from nodejs.org and verified its hash before extracting, so nothing was
-executed from an unverified download. No elevation and no reboot were needed.
+
+### Why `--scope user`, and where that assumption stops
+
+User scope keeps the install out of the machine-wide MSI path, which is what needs
+a UAC prompt. That is exactly what failed in an earlier attempt on this machine,
+where winget exited 1602 after a declined prompt.
+
+**This is verified per package, not assumed.** `winget show --id OpenJS.NodeJS.LTS`
+reports the package's *default* installer as **WiX**, an MSI. Yet `--scope user`
+selected a different installer from the same manifest: the run downloaded
+`https://nodejs.org/dist/v24.19.0/node-v24.19.0-win-x64.zip`, hash-verified it and
+extracted it, with no elevation and no registry entry under `HKLM`.
+
+`Gyan.FFmpeg`, needed in Phase 11, reports **portable (zip)**, so user scope is
+safe there by construction.
+
+So `--scope user` is *not* a universal winget property. A package offering only a
+machine-scope MSI would refuse it. The installer therefore tries user scope first
+and, only if winget rejects it, retries at default scope while saying plainly that
+a UAC prompt may appear. Nothing is left to guess.
+
+Verified end state for the Node.js install:
+
+| Check | Result |
+|---|---|
+| Location | under `%LOCALAPPDATA%\Microsoft\WinGet\Packages\` |
+| In `Program Files` | no |
+| `HKLM\SOFTWARE\Node.js` | absent, so nothing machine-wide was registered |
+| PATH entry | user scope only |
 
 A freshly installed package is usually absent from the current session's `PATH`
 even though it is on disk, which previously made an installed tool look missing.
