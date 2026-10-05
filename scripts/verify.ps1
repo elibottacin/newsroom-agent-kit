@@ -256,17 +256,27 @@ if ($plan.Count -eq 0) {
         }
     }
 
-    # Zernio credential presence only. The value is never read, printed or compared.
+    # Zernio credential status. The value is tested for presence and never printed, logged or hashed.
+    # A config file on its own does not mean authenticated: it counts only if it actually carries a
+    # key. Reporting "config file present, but not authenticated" for a working key was wrong.
     $zcfg = Join-Path $env:USERPROFILE '.zernio\config.json'
+    $zKey = ''
+    if (Test-Path -LiteralPath $zcfg) {
+        try { $zKey = [string]((Get-KitText $zcfg | ConvertFrom-Json).apiKey) } catch { $zKey = '' }
+    }
     if ($env:ZERNIO_API_KEY) {
-        Write-KitLog '  zernio-auth      API key present in the environment' 'OK'
+        Write-KitLog '  zernio-auth      authenticated, key from the environment' 'OK'
+        [void]$script:Pass.Add('zernio-auth')
+    } elseif ($zKey) {
+        # Deliberately reports only the shape, so the log can never leak the secret.
+        Write-KitLog ('  zernio-auth      authenticated, key in ~/.zernio/config.json ({0} chars, {1}...)' -f $zKey.Length, $zKey.Substring(0, [Math]::Min(3, $zKey.Length))) 'OK'
         [void]$script:Pass.Add('zernio-auth')
     } elseif (Test-Path -LiteralPath $zcfg) {
-        Write-KitLog '  zernio-auth      config file present, but not authenticated yet.' 'WARN'
-        Write-KitLog '                    Run "zernio auth:login" in your own terminal, or set ZERNIO_API_KEY.' 'INFO'
+        Write-KitLog '  zernio-auth      config file exists but holds no key.' 'WARN'
+        Write-KitLog '                    Run "zernio.cmd auth:login" in your own terminal.' 'INFO'
         [void]$script:Warn.Add('zernio is not authenticated yet')
     } else {
-        Write-KitLog '  zernio-auth      not authenticated. Run "zernio auth:login" in your own terminal.' 'WARN'
+        Write-KitLog '  zernio-auth      not authenticated. Run "zernio.cmd auth:login" in your own terminal.' 'WARN'
         [void]$script:Warn.Add('zernio is not authenticated yet')
     }
 
