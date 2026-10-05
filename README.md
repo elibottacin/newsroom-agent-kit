@@ -25,8 +25,10 @@ Three properties are treated as non-negotiable:
 2. **Nothing destructive.** The installer is idempotent, refuses to overwrite files it does not own,
    backs up before changing anything, and never runs an install script, hook or binary from a
    third-party repository.
-3. **No hidden requirements.** No account, no API key, no paid service, and — as installed — **zero
-   executable files**. Every skill is markdown.
+3. **No hidden requirements.** The setup states exactly what it needs and provisions it. Two things
+   remain genuinely yours: a **Zernio account** if you want live social execution, and **per-platform
+   OAuth** when you connect an account. Neither is needed to install the kit or to use the editorial
+   skills.
 
 ## Compatibility
 
@@ -56,10 +58,10 @@ link if you add one.
 
 ## What gets installed
 
-40 skills, in two delivery modes:
+**52 skills**, in two delivery modes:
 
 - **Pinned fetch.** Copied verbatim from a commit pinned in `manifest/skills.json`, so behaviour
-  cannot change silently.
+  cannot change silently. 25 core entries, including the Zernio and HyperFrames skills.
 - **Vendored fork.** 27 skills under `vendor/skills/`, each with a `PROVENANCE.md`. These are
   modified copies: their upstream was written around one vendor's product, and leaving those claims in
   place would make an agent conclude that capabilities you *do* have do not exist.
@@ -77,9 +79,51 @@ link if you add one.
 | Website | `seo`, `accessibility-compliance` |
 | Design | `impeccable`, `hallmark`, `frontend-design`, `web-design-guidelines` |
 | Social preview assets | `og-image` |
+| Social execution | `zernio`, `zernio-api` |
+| Motion graphics and video | `hyperframes` (router), `hyperframes-animation`, `hyperframes-audio`, `hyperframes-cli`, `hyperframes-core`, `hyperframes-creative`, `hyperframes-keyframes`, `hyperframes-registry`, `hyperframes-studio`, `media-use` |
 
 `global/AGENTS.md` carries the non-negotiable safety rules and a routing table. It is deliberately
 short; detail belongs in skills.
+
+### Three things this setup includes that a markdown-only skill set would not
+
+**1. Local runtime dependencies.** Required software is a managed part of the setup, not an
+undocumented prerequisite. The installer provisions or detects it, verification reports it, and a
+fresh machine reproduces it.
+
+| Dependency | Why | Ownership |
+|---|---|---|
+| Node.js LTS | Runtime for both CLIs. One install serves both | `shared`, never auto-removed |
+| npm / npx | Ships with Node.js | `shared` |
+| `@zernio/cli` | Social execution CLI | `kit-installed` |
+| `hyperframes` (npm) | Motion graphics and video CLI | `kit-installed` |
+| FFmpeg | Encodes rendered frames | `shared`, never auto-removed |
+| Headless Chrome | Downloaded on first render by the HyperFrames CLI | regenerable cache |
+
+Ownership decides removal, not installation. A `shared` tool is installed when absent because the
+capability needs it, but a normal uninstall will still never remove it.
+
+**2. An external account dependency, for social execution only.** Zernio is a SaaS backend. Live
+publishing, scheduling, inbox and analytics need a Zernio account plus `zernio.cmd auth:login`, which
+you run yourself so the API key never passes through an agent. Everything else works without it.
+**Cost: the intended scope is the first 2 connected accounts, which are free, so $0/month.** Which
+accounts you connect is your decision, changeable at any time. The free tier covers accounts, not
+every platform API charge: X usage is passed through at X's own rates, where a post containing a URL
+costs $0.200. `docs/zernio.md` has the full breakdown.
+
+Postiz self-hosted was evaluated as the alternative and is **not** part of this installation. It needs
+nine containers and cannot run on a low-memory machine. `docs/postiz.md` keeps the research.
+
+**3. Allowlisted executable skill content.** Most skills are instruction and reference text. Five
+HyperFrames skills also ship **77 reviewed scripts** that their own instructions tell the agent to
+run. That is a deliberate exception, bounded so it cannot widen silently: a skill must be declared in
+the manifest, undeclared skills are still rejected, and a change in the file count fails
+verification. `docs/security.md` SEC-15 has the reasoning.
+
+**Motion graphics, honestly:** HyperFrames is installed as the deterministic local motion and video
+layer and its CLI passes its own health check, but **the render smoke test has not been run**. It was
+deferred because the reference machine has 3.4 GB of RAM and the CLI's own `doctor` warns renders may
+fail. Nothing here claims a successful render.
 
 ## Prerequisites
 
@@ -88,21 +132,19 @@ short; detail belongs in skills.
 | Windows | Tested on Windows 11 Home, build 26200 |
 | Windows PowerShell 5.1 | Ships with Windows. **PowerShell 7 is not required.** |
 | Git | Only to clone this repository and to fetch pinned upstream skills |
-| Administrator rights | **Not needed.** Symbolic links fail without elevation; this kit uses hard links, which do not need it. |
-| Node.js / Python | **Not needed.** The installed set contains zero executable files. |
-
-
-Python and Node.js can be installed on demand if you want them for your own tooling:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites
-```
-
-The skill set does not need either. winget may raise a UAC prompt; if you decline it, nothing breaks.
+| Administrator rights | **Not needed.** Everything installs at user scope. Symbolic links would fail without elevation; this kit uses hard links, which do not need it. |
+| Node.js | **Provisioned automatically** if absent, via winget at user scope. Nothing to do by hand. |
+| FFmpeg | **Provisioned automatically** if absent, same mechanism. |
+| A Zernio account | **Only if you want live social publishing.** Not needed for anything else. |
+| Disk | About 2 GB, mostly npm packages and render caches. |
 
 Because the default execution policy is `Restricted`, **every command needs `-ExecutionPolicy Bypass`**.
 Without it Windows refuses to run the script. This is the single most common reason the installer
 appears to do nothing.
+
+Note on npm-installed CLIs: PowerShell resolves a bare `zernio` to npm's `.ps1` shim, which the
+`Restricted` policy blocks. Invoke them as **`zernio.cmd`** and **`hyperframes.cmd`**. The kit's own
+instructions and scripts already do this.
 
 ## Install
 
@@ -126,7 +168,7 @@ repository's verification tooling, and report exactly what was installed, linked
 skipped, or needs my action.
 ```
 
-`https://github.com/elibottacin/newsroom-agent-kit` is a placeholder and will be replaced with the real GitHub URL at publication.
+The repository is published and public at that URL.
 
 ### Option 2 — run the scripts yourself
 
@@ -134,33 +176,39 @@ skipped, or needs my action.
 git clone https://github.com/elibottacin/newsroom-agent-kit newsroom-agent-kit
 cd newsroom-agent-kit
 
-# 1. fetch the pinned upstream commits the skills come from (run this first:
-#    most skills are not stored in this repository, so a dry run before the fetch
+# 1. provision the required local runtime: Node.js, npm, FFmpeg, the Zernio CLI
+#    and the HyperFrames CLI. Detects anything already present and installs
+#    only what is missing. Everything lands at user scope, so no UAC prompt.
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites
+
+# 2. fetch the pinned upstream commits the skills come from (run this before the
+#    dry run: most skills are not stored in this repository, so a dry run first
 #    reports them as missing)
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\update.ps1 -Fetch
 
-# 2. preview every change without writing anything
+# 3. preview every change without writing anything
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -DryRun
 
-# 3. install
+# 4. install the skills and global instructions
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
-# 4. confirm
+# 5. confirm. Reports the skill set AND every dependency with its version.
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
-
-
-
-
-
-
-
-
-
-
 
 ```
 
 `verify.ps1` exits `0` when everything passes, `1` on failure, `2` on warnings only.
+
+One step stays yours, and it does not block the install. For live social execution only:
+
+```powershell
+zernio.cmd auth:login     # opens your browser; the API key never passes through an agent
+```
+
+**Known gap, tracked for the next phase.** The flow above provisions one dependency set at a time. It
+has been run end to end on the reference machine across phases 9 to 11 and reruns are idempotent, but
+there is not yet a single command that provisions dependencies, fetches, installs and verifies in one
+pass. `docs/maintaining.md` records it. Nothing above depends on that gap being closed.
 
 ## Verify, update, uninstall
 
@@ -186,12 +234,25 @@ fork, because that is exactly what reintroduces the third-party product referenc
 
 ## Safety and privacy
 
-- The installer writes **only** inside `%USERPROFILE%\.agents`, plus one hard link at
-  `%USERPROFILE%\.config\opencode\AGENTS.md`. Nothing else on your machine is touched.
-- Logs are redacted to `~/`-relative paths and never print file contents.
-- Uninstall removes only skills recorded in the kit's own ownership record. Skills you installed
-  yourself are left alone and reported.
-- No external account is ever connected. No telemetry is sent by this kit.
+- The installer writes **agent configuration** only inside `%USERPROFILE%\.agents`, plus one hard
+  link at `%USERPROFILE%\.config\opencode\AGENTS.md`. Nothing else in your agent configuration is
+  touched.
+- With `-InstallPrerequisites` it also installs **local software**: Node.js, npm, FFmpeg and two npm
+  CLIs, all at user scope, each detected before install. It never installs anything at machine scope
+  and never needs elevation.
+- Logs are redacted to `~/`-relative paths and never print file contents. Verification reports whether
+  a credential exists and its length, never its value.
+- Uninstall removes only skills and dependencies recorded in the kit's own ownership record. Skills
+  and shared software you already had are left alone and reported. It never deletes your Zernio
+  credentials.
+- **This kit sends no telemetry.** It makes no network calls other than fetching pinned upstream
+  commits and calling the APIs you configure.
+- **Zernio is a third-party SaaS backend** and is the one external dependency. Content, DMs, comments
+  and your social OAuth tokens live on Zernio's servers when you use it. That is a deliberate trade
+  for a local machine that cannot run a container stack.
+- **HyperFrames telemetry was enabled by default upstream and this kit disables it.** It is not signed
+  in to HeyGen, which is what keeps usage anonymous and the optional cloud and generative features
+  unconfigured.
 - One selected skill, `og-image`, comes from a repository with **no licence file**. It is fetched at
   install time rather than redistributed here, but review `manifest/skills.json` before installing.
 
@@ -202,7 +263,7 @@ project.**
 
 - The 27 vendored forks are **frozen**. When their upstream moves, they will not be updated here. They
   keep working — they are self-contained markdown — but they gain no upstream improvements.
-- The 13 pinned skills do not self-update either. The pin guarantees you get the reviewed artifact; it
+- The pinned skills do not self-update either. The pin guarantees you get the reviewed artifact; it
   also means upstream fixes arrive only if someone bumps it.
 - Issues and pull requests are welcome, but **no response, review or merge is promised**, and nothing
   is scheduled for review.

@@ -1,3 +1,5 @@
+> **Historical snapshot.** This file records what was measured in Phase 5, when the setup was 40 instruction-only skills and no local runtime. It is kept as evidence and is not rewritten. The current setup was extended in Phases 8-11; for present state see `manifest/dependencies.json`, `README.md` and the output of `scripts\verify.ps1`.
+
 # Portability verification — Phase 5
 
 What was checked to decide this repository is safe to publish and install on another machine.

@@ -101,7 +101,8 @@ determines whether this kit needs a compatibility step.
 
 Freebuff was verified by the user on 2026-10-04, after the Phase 4 install: both the 40 skills and the
 global instructions were picked up from the canonical location, with no configuration. That was
-observed on the first attempt and needed nothing beyond the canonical install.
+observed on the first attempt and needed nothing beyond the canonical install. (The count was 40 at that
+time; the set grew to 52 in Phases 8 to 11, and the same native discovery applies.)
 
 That makes **three** agents confirmed reading this setup natively from `%USERPROFILE%\.agents`, which
 is the useful signal: the architecture does not depend on any one vendor.
@@ -129,13 +130,23 @@ The installer materializes/synchronizes the selected version into `%USERPROFILE%
 
 ## Two distribution modes
 
-The default install is 40 skills delivered in two different ways, recorded per skill in
-`manifest/skills.json`.
+The default install is **52 skills** delivered in two different ways, recorded per skill in
+`manifest/skills.json`. This count is current as of 2026-10-05, after the Phase 8 to 11 extension.
+Phase 4 to 7 documents elsewhere in this file record 40 skills, which was accurate then.
 
 **Pinned fetch.** The skill is copied verbatim from the commit pinned in `source.ref`. The pin is
 the reviewed artifact, so behaviour cannot change silently. Files are cached locally under
 `~/.agents/cache/upstream/<repo>@<short-ref>` and staged by the installer. No upstream script is
 ever executed.
+
+Pinned fetch comes in two flavours, and the distinction matters for risk:
+
+- **Instruction/reference only.** The great majority. Nothing executable.
+- **With reviewed, allowlisted executable content.** Five of the ten HyperFrames skills ship 77
+  scripts their own instructions require. Each such entry declares an `executableFiles` block with a
+  reviewed count; undeclared skills containing code are rejected, and a count mismatch fails
+  verification. See `docs/security.md` SEC-15. This is why "pinned fetch" no longer implies
+  "nothing executable".
 
 **Vendored fork.** The skill lives in `vendor/skills/<name>` in this repository as a modified copy,
 each with a `PROVENANCE.md` recording the upstream repository, the exact commit, the licence, and

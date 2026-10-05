@@ -25,14 +25,14 @@ a normal uninstall may touch it.
 
 Applied to the selected setup, the consequences are:
 
-- **Node.js is `shared`.** It is required by both `@hyperframes/cli` and
+- **Node.js is `shared`.** It is required by both the `hyperframes` npm package and
   `@zernio/cli`, but global npm packages and the user's own scripts live on it.
   Removing Node removes those too. The kit detects a compatible Node and never
   reinstalls or upgrades it unnecessarily; a major-version upgrade of an existing
   Node is not performed silently.
 - **FFmpeg is `shared`.** It is broadly used by unrelated tooling. Never removed
   without explicit approval.
-- **`@hyperframes/cli` and `@zernio/cli` are `kit-installed`.** Safe for the kit
+- **`hyperframes` and `@zernio/cli` are `kit-installed`.** Safe for the kit
   to remove.
 - **The Puppeteer browser cache is `ephemeral-cache`.** Safe to clear only on
   request; it re-downloads.
@@ -77,18 +77,21 @@ that ownership can be honoured later without guessing.
 
 ## Dependency summary
 
-**Revised in Phase 8B.** Zernio replaced Postiz self-hosted, so WSL2, Docker
-Desktop and the nine Postiz containers left the required default plan. One
-Node.js runtime now serves both CLIs.
+**Revised in Phase 8B, then updated to the installed state in Phase 11.** Zernio
+replaced Postiz self-hosted, so WSL2, Docker Desktop and the nine Postiz
+containers left the required default plan. One Node.js runtime serves both CLIs.
+The versions below were verified on the machine on 2026-10-05. The Phase 8
+inventory recorded every one of these as absent; that record is preserved in
+`manifest/dependencies.json` under `currentStateAtDiscovery`.
 
-| Dependency | Required by | Version | State at discovery | Ownership |
+| Dependency | Required by | Version | Installed state | Ownership |
 |---|---|---|---|---|
-| Node.js | **shared**: `@hyperframes/cli` (`>=22`) and `@zernio/cli` (CI uses 24) | `24.x` LTS satisfies both | **missing** | shared |
-| npm / npx | both CLIs | bundled with Node | **missing** | shared |
-| `@hyperframes/cli` | HyperFrames | 0.8.126 at reviewed ref | **missing** | kit-installed |
-| `@zernio/cli` | Zernio social execution | 0.4.1 at reviewed ref | **missing** | kit-installed |
-| FFmpeg + ffprobe | HyperFrames render | recent, unpinned upstream | **missing** | shared |
-| Headless Chrome | HyperFrames frame capture | puppeteer-managed | not cached (system Chrome/Edge present) | ephemeral-cache |
+| Node.js | **shared**: `hyperframes` (`>=22`) and `@zernio/cli` (CI uses 24) | `24.x` LTS satisfies both | installed, v24.19.0 | shared |
+| npm / npx | both CLIs | bundled with Node | installed, 11.17.0 | shared |
+| `hyperframes` | HyperFrames | 0.8.126, pinned | installed, 0.8.126 | kit-installed |
+| `@zernio/cli` | Zernio social execution | 0.4.1, pinned | installed, 0.4.1 | kit-installed |
+| FFmpeg + ffprobe | HyperFrames render | recent, unpinned upstream | installed, 9.0.2 | shared |
+| Headless Chrome | HyperFrames frame capture | downloaded on first render | not yet cached; no render has been run | ephemeral-cache |
 
 Removed from the required plan: WSL2, Docker Desktop, `postiz-app`, Postgres ×2,
 Redis, Elasticsearch, Temporal, Temporal UI, Temporal admin-tools, Spotlight, and
@@ -133,7 +136,7 @@ CI (`.github/workflows/publish.yml`) builds and publishes on **Node 24**, and it
 
 | Consumer | Requirement | Source |
 |---|---|---|
-| `@hyperframes/cli` | `>=22` | its own `engines.node` |
+| `hyperframes` | `>=22` | its own `engines.node` |
 | `@zernio/cli` | none declared; CI uses 24 | `publish.yml` |
 
 Node 24 satisfies both. **One install, one runtime.** The installer provisions it
@@ -146,8 +149,8 @@ once and both CLIs depend on it.
 | Node.js | v24.19.0 (LTS) | `shared` | **no** |
 | npm / npx | 11.17.0 | `shared` | **no** |
 | `@zernio/cli` | 0.4.1 | `kit-installed` | yes |
-| `@hyperframes/cli` | not yet installed (Phase 11) | `kit-installed` | yes |
-| FFmpeg | not yet installed (Phase 11) | `shared` | **no** |
+| `hyperframes` | 0.8.126, installed | `kit-installed` | yes |
+| FFmpeg | 9.0.2, installed | `shared` | **no** |
 | Headless Chrome | appears on first render (Phase 11) | `ephemeral-cache` | on request |
 
 Node.js was installed by `winget install --id OpenJS.NodeJS.LTS -e --scope user`.

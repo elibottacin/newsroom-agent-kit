@@ -25,6 +25,30 @@ Attribution and licence texts are reproduced in each vendored skill's `PROVENANC
 | [Nutlope/hallmark](https://github.com/Nutlope/hallmark) | MIT | 1 | pinned fetch |
 | [affaan-m/ecc](https://github.com/affaan-m/ecc) | MIT | 1 | pinned fetch, single directory only |
 | [stevysmith/og-image-skill](https://github.com/stevysmith/og-image-skill) | **none found** | 1 | pinned fetch — see risk note below |
+| [zernio-dev/zernio-cli](https://github.com/zernio-dev/zernio-cli) | MIT | 1 (`zernio`) | pinned fetch, instruction only |
+| [zernio-dev/zernio-api](https://github.com/zernio-dev/zernio-api) | MIT | 1 (`zernio-api`) | pinned fetch, instruction only |
+| [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) | Apache-2.0 | 10 | pinned fetch, 5 with **allowlisted executable scripts** |
+
+### Two kinds of pinned fetch, not one
+
+The table above distinguishes them, because they carry different risk:
+
+- **Instruction/reference-only pinned fetch.** Markdown and other non-executable content. This was
+  the only kind present until Phase 11, and the project's `installPolicy` recorded
+  `containsExecutableFiles: false` as a universal rule.
+- **Pinned fetch with reviewed, allowlisted executable skill content.** Five of the ten HyperFrames
+  skills ship **77 scripts** that their own instructions tell the agent to run. These are not vendored
+  forks and are not redistributed here; they are fetched at install time from a pinned commit, exactly
+  like the instruction-only skills.
+
+Pinned fetch therefore no longer implies "nothing executable". The distinction is enforced per skill in
+`manifest/skills.json`, where each allowlisted entry declares an `executableFiles` block with a reviewed
+count, and `verify.ps1` fails both on an undeclared skill containing code and on a declared count that
+no longer matches. See `docs/security.md` SEC-15.
+
+**Upstream licences are unchanged.** Zernio's client and skills are MIT. HyperFrames is Apache-2.0.
+Nothing here is relicensed, and the Zernio *service* is proprietary SaaS — this repository covers the
+client, CLI and skills only, not the hosted service.
 
 ## Licence texts
 

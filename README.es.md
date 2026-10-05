@@ -25,8 +25,9 @@ Tres propiedades se consideran innegociables:
 2. **Nada destructivo.** El instalador es idempotente, se niega a sobrescribir archivos que no son
    suyos, hace backup antes de cambiar algo, y nunca ejecuta un script de instalación, un hook ni un
    binario de un repositorio de terceros.
-3. **Sin requisitos ocultos.** Sin cuenta, sin API key, sin servicio pago y — tal como queda
-   instalado — **cero archivos ejecutables**. Cada skill es markdown.
+3. **Sin requisitos ocultos.** El setup declara qué necesita y lo instala. Dos cosas siguen siendo
+   tuyas: una **cuenta de Zernio** si querés ejecución social real, y el **OAuth por plataforma** cuando
+   conectes una cuenta. Ninguna hace falta para instalar el kit ni para usar las skills editoriales.
 
 ## Compatibilidad
 
@@ -56,10 +57,11 @@ vendor documentado si agregás uno.
 
 ## Qué se instala
 
-40 skills, en dos modos de entrega:
+**52 skills**, en dos modos de entrega:
 
 - **Pinned fetch.** Se copian textualmente desde un commit fijado en `manifest/skills.json`, así que
-  el comportamiento no puede cambiar en silencio.
+  el comportamiento no puede cambiar en silencio. Son 25 entradas del núcleo, incluidas las skills de
+  Zernio y HyperFrames.
 - **Fork vendorizado.** 27 skills en `vendor/skills/`, cada una con su `PROVENANCE.md`. Son copias
   modificadas: su upstream estaba escrito alrededor del producto de un vendor, y dejar esas
   afirmaciones en el texto haría que un agente concluyera que capacidades que *sí* tenés no existen.
@@ -77,9 +79,53 @@ vendor documentado si agregás uno.
 | Web | `seo`, `accessibility-compliance` |
 | Diseño | `impeccable`, `hallmark`, `frontend-design`, `web-design-guidelines` |
 | Assets de preview social | `og-image` |
+| Ejecución social | `zernio`, `zernio-api` |
+| Motion graphics y video | `hyperframes` (router), `hyperframes-animation`, `hyperframes-audio`, `hyperframes-cli`, `hyperframes-core`, `hyperframes-creative`, `hyperframes-keyframes`, `hyperframes-registry`, `hyperframes-studio`, `media-use` |
 
 `global/AGENTS.md` contiene las reglas de seguridad innegociables y una tabla de ruteo. Es
 deliberadamente corto; el detalle va en las skills.
+
+### Tres cosas que incluye este setup y que un conjunto solo-markdown no tendría
+
+**1. Dependencias de runtime locales.** El software requerido es una parte gestionada del setup, no
+una prerrequisito no documentado. El instalador lo aprovisiona o lo detecta, la verificación lo
+informa, y otra máquina lo reproduce.
+
+| Dependencia | Para qué | Ownership |
+|---|---|---|
+| Node.js LTS | Runtime de los dos CLI. Una instalación sirve para ambos | `shared`, nunca se quita solo |
+| npm / npx | Viene con Node.js | `shared` |
+| `@zernio/cli` | CLI de ejecución social | `kit-installed` |
+| `hyperframes` (npm) | CLI de motion graphics y video | `kit-installed` |
+| FFmpeg | Codifica los frames renderizados | `shared`, nunca se quita solo |
+| Headless Chrome | Lo descarga el CLI de HyperFrames en el primer render | caché regenerable |
+
+El ownership decide la eliminación, no la instalación. Una herramienta `shared` se instala si falta
+porque la capacidad la necesita, pero un uninstall normal nunca la va a remover.
+
+**2. Una dependencia de cuenta externa, solo para la ejecución social.** Zernio es un backend SaaS.
+Publicar, programar, leer la bandeja de entrada y las analíticas necesitan una cuenta de Zernio más
+`zernio.cmd auth:login`, que corrés vos para que la API key nunca pase por un agente. Todo lo demás
+funciona sin eso. **Costo: el alcance previsto son las primeras 2 cuentas conectadas, que son
+gratis, o sea $0/mes ($0/month).** Qué cuentas conectás es tu decisión y se puede cambiar en cualquier
+momento. El
+tier gratis cubre las cuentas, no todas las cargas de API de las plataformas: el uso de X se cobra a
+las tarifas de X, donde una publicación con URL cuesta $0,200. `docs/zernio.md` tiene el detalle.
+
+Postiz self-hosted se evaluó como alternativa y **no** forma parte de esta instalación. Necesita nueve
+contenedores y no puede correr en una máquina con poca RAM. `docs/postiz.md` conserva la investigación.
+
+**3. Contenido ejecutable en skills, con lista blanca.** La mayoría de las skills son texto de
+instrucciones y referencia. Cinco skills de HyperFrames incluyen además **77 scripts revisados** que
+sus propias instrucciones le piden al agente ejecutar. Es una excepción deliberada, acotada para que
+no pueda ampliarse en silencio: una skill debe declararse en el manifiesto, las no declaradas se
+siguen rechazando, y un cambio en la cantidad de archivos hace fallar la verificación.
+`docs/security.md` SEC-15 tiene el razonamiento.
+
+**Motion graphics, con honestidad:** HyperFrames está instalado como la capa local determinista de
+motion y video, y su CLI pasa su propio chequeo de salud, pero **el smoke test de render todavía no se
+ejecutó**. Se aplazó porque la máquina de referencia tiene 3,4 GB de RAM y el propio `doctor` del CLI
+advierte que los renders pueden fallar. Nada de esto afirma que un render haya funcionado.
 
 ## Requisitos
 
@@ -88,19 +134,19 @@ deliberadamente corto; el detalle va en las skills.
 | Windows | Probado en Windows 11 Home, build 26200 |
 | Windows PowerShell 5.1 | Viene con Windows. **No hace falta PowerShell 7.** |
 | Git | Solo para clonar este repositorio y traer las skills fijadas por commit |
-| Permisos de administrador | **No hacen falta.** Los enlaces simbólicos fallan sin elevación; este kit usa hard links, que no la necesitan. |
-| Node.js / Python | **No hacen falta.** El conjunto instalado no tiene archivos ejecutables. |
-Python y Node.js se pueden instalar bajo demanda si los querés para tus propias herramientas:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites
-```
-
-El conjunto de skills no necesita ninguno. winget puede mostrar un aviso de UAC; si lo rechazás, nada se rompe.
+| Permisos de administrador | **No hacen falta.** Todo se instala en scope de usuario. Los enlaces simbólicos fallarían sin elevación; este kit usa hard links, que no la necesitan. |
+| Node.js | **Se instala solo** si falta, vía winget en scope de usuario. No hay que hacer nada a mano. |
+| FFmpeg | **Se instala solo** si falta, con el mismo mecanismo. |
+| Una cuenta de Zernio | **Solo si querés publicar de verdad.** No hace falta para nada más. |
+| Disco | Unos 2 GB, sobre todo paquetes npm y cachés de render. |
 
 Como la política de ejecución por defecto es `Restricted`, **todos los comandos necesitan
 `-ExecutionPolicy Bypass`**. Sin eso Windows se niega a ejecutar el script. Es el motivo más común de
 que el instalador parezca no hacer nada.
+
+Sobre los CLI instalados por npm: PowerShell resuelve un `zernio` a secas al shim `.ps1` de npm, que la
+política `Restricted` bloquea. Invocalos como **`zernio.cmd`** y **`hyperframes.cmd`**. Las
+instrucciones y los scripts del propio kit ya lo hacen así.
 
 ## Instalación
 
@@ -124,7 +170,7 @@ repository's verification tooling, and report exactly what was installed, linked
 skipped, or needs my action.
 ```
 
-`https://github.com/elibottacin/newsroom-agent-kit` es un marcador de posición y se reemplazará por la URL real de GitHub al publicar.
+El repositorio está publicado y es público en esa URL.
 
 > El prompt de instalación está en inglés a propósito: es lo que vas a pegarle al agente, y los
 > agentes lo entienden mejor en inglés. Esta documentación es la que leés vos.
@@ -135,22 +181,39 @@ skipped, or needs my action.
 git clone https://github.com/elibottacin/newsroom-agent-kit newsroom-agent-kit
 cd newsroom-agent-kit
 
-# 1. traer los commits fijados de los que vienen las skills (esto va primero:
-#    la mayoría de las skills no están en este repositorio, así que un dry run
-#    antes del fetch las reporta como faltantes)
+# 1. aprovisionar el runtime local requerido: Node.js, npm, FFmpeg, el CLI de
+#    Zernio y el de HyperFrames. Detecta lo que ya está e instala solo lo que
+#    falta. Todo va a scope de usuario, así que no hay aviso de UAC.
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -InstallPrerequisites
+
+# 2. traer los commits fijados de los que vienen las skills (esto va antes del
+#    dry run: la mayoría de las skills no están en este repositorio, así que un
+#    dry run antes las reporta como faltantes)
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\update.ps1 -Fetch
 
-# 2. previsualizar todos los cambios sin escribir nada
+# 3. previsualizar todos los cambios sin escribir nada
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1 -DryRun
 
-# 3. instalar
+# 4. instalar las skills y las instrucciones globales
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\install.ps1
 
-# 4. confirmar
+# 5. confirmar. Informa el conjunto de skills Y cada dependencia con su versión.
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\verify.ps1
 ```
 
 `verify.ps1` devuelve `0` si todo pasa, `1` si hay fallo, `2` si solo hay advertencias.
+
+Un paso queda en tus manos, y no bloquea la instalación. Solo para la ejecución social real:
+
+```powershell
+zernio.cmd auth:login     # abre tu navegador; la API key nunca pasa por un agente
+```
+
+**Brecha conocida, anotada para la próxima fase.** El flujo de arriba aprovisiona un grupo de
+dependencias a la vez. Se ejecutó de punta a punta en la máquina de referencia a lo largo de las fases
+9 a 11, y las repeticiones son idempotentes, pero todavía no hay un único comando que aprovisione
+dependencias, traiga, instale y verifique de una sola vez. `docs/maintaining.md` lo registra. Nada de
+lo anterior depende de que esa brecha se cierre.
 
 ## Verificar, actualizar, desinstalar
 
@@ -177,12 +240,25 @@ exactamente lo que reintroduce las referencias al producto de terceros que el fo
 
 ## Seguridad y privacidad
 
-- El instalador escribe **únicamente** dentro de `%USERPROFILE%\.agents`, más un hard link en
-  `%USERPROFILE%\.config\opencode\AGENTS.md`. No toca nada más de tu máquina.
-- Los logs se redactan a rutas relativas con `~/` y nunca imprimen contenido de archivos.
-- La desinstalación solo borra skills registradas en el registro de propiedad del kit. Las que
-  instalaste vos quedan intactas y se reportan.
-- Nunca se conecta ninguna cuenta externa. Este kit no envía telemetría.
+- El instalador escribe **configuración de agente** únicamente dentro de
+  `%USERPROFILE%\.agents`, más un hard link en `%USERPROFILE%\.config\opencode\AGENTS.md`. No toca
+  nada más de tu configuración de agente.
+- Con `-InstallPrerequisites` también instala **software local**: Node.js, npm, FFmpeg y dos CLI de
+  npm, todo en scope de usuario, cada uno detectado antes de instalar. Nunca instala nada en scope de
+  máquina ni necesita elevación.
+- Los logs se redactan a rutas relativas con `~/` y nunca imprimen contenido de archivos. La
+  verificación informa si una credencial existe y su longitud, nunca su valor.
+- La desinstalación solo borra skills y dependencias registradas en el registro de propiedad del kit.
+  Las skills y el software compartido que ya tenías quedan intactos y se reportan. Nunca borra tus
+  credenciales de Zernio.
+- **Este kit no envía telemetría.** No hace llamadas de red más allá de traer los commits fijados y
+  llamar a las APIs que vos configures.
+- **Zernio es un backend SaaS de terceros** y es la única dependencia externa. Cuando lo usás, el
+  contenido, los DMs, los comentarios y tus tokens OAuth de redes viven en los servidores de Zernio.
+  Es un intercambio deliberado para una máquina local que no puede correr un stack de contenedores.
+- **La telemetría de HyperFrames venía activada por defecto upstream y este kit la desactiva.** No hay
+  sesión iniciada en HeyGen, que es lo que mantiene el uso anónimo y las funciones opcionales de nube
+  y generativas sin configurar.
 - Una skill seleccionada, `og-image`, viene de un repositorio **sin archivo de licencia**. Se trae en
   el momento de instalar en vez de redistribuirse acá, pero revisá `manifest/skills.json` antes de
   instalar.

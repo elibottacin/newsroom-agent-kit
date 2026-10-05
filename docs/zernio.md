@@ -106,7 +106,7 @@ Node 24 satisfies both consumers:
 
 | Consumer | Requirement | Satisfied by Node 24 |
 |---|---|---|
-| `@hyperframes/cli` | `engines.node >=22` | yes |
+| `hyperframes` (npm) | `engines.node >=22` | yes |
 | `@zernio/cli` | none declared; CI uses 24 | yes |
 
 **One Node.js LTS install serves both. It is a single shared managed

@@ -1,3 +1,5 @@
+> **Historical snapshot.** This file records what was measured in Phase 4, when the setup was 40 instruction-only skills and no local runtime. It is kept as evidence and is not rewritten. The current setup was extended in Phases 8-11; for present state see `manifest/dependencies.json`, `README.md` and the output of `scripts\verify.ps1`.
+
 # Install verification — Phase 4
 
 This file is a **record of one bootstrap machine's install**, kept as evidence. Paths use

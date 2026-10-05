@@ -236,6 +236,36 @@ informational by design.
 
 ## Optional integrations
 
+## Known gap: no single bootstrap command
+
+The advertised fresh-machine flow is five separate invocations, documented in
+`README.md`:
+
+```powershell
+.\scripts\install.ps1 -InstallPrerequisites   # provision Node, npm, FFmpeg, both CLIs
+.\scripts\update.ps1 -Fetch                   # fetch the pinned upstream commits
+.\scripts\install.ps1 -DryRun                 # preview
+.\scripts\install.ps1                         # install
+.\scripts\verify.ps1                          # confirm
+```
+
+This was executed end to end on the reference machine across phases 9 to 11, and
+reruns are idempotent, but it is not one command. **Tracked for phase 12.**
+
+Two ordering constraints that a future single entry point must preserve, both
+learned the hard way:
+
+- **`-Fetch` must run before `-DryRun`.** Most skills are not stored in this
+  repository, so a dry run before the fetch reports all of them as missing
+  conflicts and under-reports the real change.
+- **Dependency provisioning needs its own pass.** It is the only step that touches
+  anything outside `%USERPROFILE%\.agents`, so it must stay opt-in rather than
+  being folded silently into a plain `install.ps1`.
+
+Also unproven, and therefore claimed nowhere: the HyperFrames render smoke test,
+deferred on 2026-10-05 because the reference machine has 3.4 GB of RAM and the
+CLI's own `doctor` warns that renders may fail.
+
 `manifest/integrations.json` lists nine of them. **Every entry is `installAction: none`, and none is
 required for the skill set to work.** The installed set is 40 markdown files and needs no account, no
 API key and no network.

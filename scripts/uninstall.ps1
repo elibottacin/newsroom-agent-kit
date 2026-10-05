@@ -203,7 +203,11 @@ if (-not $stateHasDeps) {
         }
         $npmPkg = switch ($id) {
             'zernio-cli' { '@zernio/cli' }
-            'hyperframes-cli' { '@hyperframes/cli' }
+            # The npm package is the UNSCOPED name "hyperframes". "@hyperframes/cli" is the
+            # monorepo's internal package name and does not exist on the registry, so uninstalling
+            # it would have silently removed nothing. "hyperframes-cli" is the SKILL id, not the
+            # package name; keep the two distinct.
+            'hyperframes-cli' { 'hyperframes' }
             default { $null }
         }
         if (-not $npmPkg) {

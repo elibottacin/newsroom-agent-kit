@@ -669,7 +669,7 @@ phases. Do not execute them until the user approves.
 
 ### Goals
 
-Provision the single Node.js runtime that serves both `@hyperframes/cli` and
+Provision the single Node.js runtime that serves both the `hyperframes` npm package and
 `@zernio/cli`, and install the Zernio CLI as a managed dependency. No elevation,
 no container runtime, no background service.
 
@@ -864,7 +864,7 @@ Prove the extension meets its definition of done and hand it over.
 ### Definition of Done
 
 - Every required machine-level dependency is provisioned or safely detected by the reproducible setup.
-- One shared Node.js runtime serves both `@hyperframes/cli` and `@zernio/cli`. No second runtime exists.
+- One shared Node.js runtime serves both the `hyperframes` npm package and `@zernio/cli`. No second runtime exists.
 - Zernio is the social execution backend, integrated globally through the canonical `.agents` root, with the hosted MCP and the Claude Code plugin out of the picture.
 - Existing social skills are rationalised against Zernio, with no strategy or editorial skill removed or demoted, and `crisis-and-moderation` still refusing autonomous moderation.
 - Node.js, FFmpeg and the HyperFrames CLI are installed and validated.

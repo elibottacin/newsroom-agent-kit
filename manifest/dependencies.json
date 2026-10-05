@@ -10,7 +10,8 @@
                         "packageManager":  "winget 1.29.380",
                         "git":  "2.56.0.windows.1",
                         "symbolicLinksWork":  false,
-                        "hardLinksWork":  true
+                        "hardLinksWork":  true,
+                        "nodePath":  "%LOCALAPPDATA%\\Microsoft\\WinGet\\Packages\\OpenJS.NodeJS.LTS_.../node-v24.19.0-win-x64"
                     },
     "ownershipValues":  {
                             "kit-installed":  "Installed by this kit and safe for the kit to uninstall on request.",
@@ -25,14 +26,20 @@
                                          "license":  "Apache-2.0",
                                          "reviewedRef":  "dc3665ab61b254ca7a0de087b1bfbd2ddcfbf67e",
                                          "refDate":  "2026-10-04",
-                                         "cliPackage":  "@hyperframes/cli",
-                                         "cliVersionObserved":  "0.8.126"
+                                         "cliVersionObserved":  "0.8.126",
+                                         "cliPackage":  "hyperframes",
+                                         "cliPackageNote":  "The npm package is the unscoped name \"hyperframes\". \"@hyperframes/cli\" is the monorepo-internal name in packages/cli/package.json and is NOT published to the registry. Confirmed against the npm registry on 2026-10-05. Binaries: hyperframes, hyperframes-localize-fonts.",
+                                         "cliBinaries":  [
+                                                             "hyperframes",
+                                                             "hyperframes-localize-fonts"
+                                                         ],
+                                         "skillNamedHyperframesCli":  "hyperframes-cli is a SKILL id, not the npm package name. The two must not be conflated."
                                      },
                         "dependencies":  [
                                              {
                                                  "id":  "nodejs",
                                                  "name":  "Node.js (LTS)",
-                                                 "purpose":  "Runtime for BOTH CLIs: @hyperframes/cli (engines \u003e=22) and @zernio/cli (no engines declared; its CI builds on Node 24). One install serves both.",
+                                                 "purpose":  "Runtime for BOTH CLIs: the hyperframes npm package (engines \u003e=22) and @zernio/cli (no engines declared; its CI builds on Node 24). One install serves both.",
                                                  "requiredVersion":  "\u003e=22",
                                                  "evidence":  "packages/cli/package.json engines.node \u0027\u003e=22\u0027; README badge \u0027node \u003e=22\u0027; README \u0027Requirements: Node.js 22+, FFmpeg\u0027.",
                                                  "currentState":  "MISSING on this machine",
@@ -49,10 +56,19 @@
                                                  "sharedDependency":  true,
                                                  "selectedVersion":  "24.x LTS",
                                                  "sharedWith":  [
-                                                                    "@hyperframes/cli",
+                                                                    "hyperframes",
                                                                     "@zernio/cli"
                                                                 ],
-                                                 "provisionedInPhase":  "9"
+                                                 "provisionedInPhase":  "9",
+                                                 "currentStateAtDiscovery":  "MISSING on this machine",
+                                                 "installedState":  {
+                                                                        "installed":  true,
+                                                                        "version":  "v24.19.0",
+                                                                        "installedVia":  "winget install --id OpenJS.NodeJS.LTS -e --scope user",
+                                                                        "verifiedBy":  "hyperframes doctor + Get-KitDependencyState",
+                                                                        "checkedOn":  "2026-10-05",
+                                                                        "ownership":  "shared"
+                                                                    }
                                              },
                                              {
                                                  "id":  "npm-npx",
@@ -69,11 +85,20 @@
                                                  "uninstallImplications":  "with Node.js",
                                                  "ownership":  "shared",
                                                  "verification":  "npx --version",
-                                                 "provisionedInPhase":  "9"
+                                                 "provisionedInPhase":  "9",
+                                                 "currentStateAtDiscovery":  "MISSING (ships with Node.js)",
+                                                 "installedState":  {
+                                                                        "installed":  true,
+                                                                        "version":  "11.17.0",
+                                                                        "installedVia":  "bundled with Node.js",
+                                                                        "verifiedBy":  "npm --version",
+                                                                        "checkedOn":  "2026-10-05",
+                                                                        "ownership":  "shared"
+                                                                    }
                                              },
                                              {
                                                  "id":  "hyperframes-cli",
-                                                 "name":  "@hyperframes/cli (bin: hyperframes)",
+                                                 "name":  "hyperframes (npm package; binaries: hyperframes, hyperframes-localize-fonts)",
                                                  "purpose":  "Deterministic local render, preview, lint, check, timeline, catalog and skill lifecycle commands.",
                                                  "requiredVersion":  "0.8.126 observed at the reviewed ref",
                                                  "currentState":  "MISSING (Node.js absent, so nothing can be installed yet)",
@@ -82,15 +107,24 @@
                                                  "runsContinuously":  false,
                                                  "portsOrServices":  "local preview server binds an ephemeral port while previewing only",
                                                  "persistentData":  "npm global prefix; per-project node_modules when a composition project exists",
-                                                 "updateMechanism":  "npm update -g @hyperframes/cli, reviewed before applying",
-                                                 "uninstallImplications":  "npm uninstall -g @hyperframes/cli",
+                                                 "updateMechanism":  "npm update -g hyperframes, reviewed before applying. Upstream published 481 versions as of 2026-10-05, so the version is pinned rather than tracked.",
+                                                 "uninstallImplications":  "npm uninstall -g hyperframes",
                                                  "ownership":  "kit-installed",
-                                                 "verification":  "hyperframes --version",
+                                                 "verification":  "hyperframes.cmd --version",
                                                  "pinnedVersion":  "0.8.126",
                                                  "provisionedInPhase":  "11",
                                                  "packageNameVerified":  true,
-                                                 "packageNameNote":  "CORRECTED in Phase 11. The npm package is the unscoped name \"hyperframes\", NOT \"@hyperframes/cli\", which does not exist on the registry. The opposite of Zernio, where the scoped @zernio/cli is correct and the unscoped name does not exist. Binaries: hyperframes, hyperframes-localize-fonts.",
-                                                 "releaseCadence":  "481 versions published on npm as of 2026-10-05, with 0.8.127 released the same day. Extremely high release frequency, so the version is pinned rather than tracked and updates are reviewed before applying."
+                                                 "packageNameNote":  "CORRECTED in Phase 11 and verified against the npm registry. The published package is the unscoped name \"hyperframes\". \"@hyperframes/cli\" does not exist on the registry. This is the inverse of Zernio, where the scoped @zernio/cli is correct and the unscoped name does not exist. The dependency id stays \"hyperframes-cli\" because that is the skill id.",
+                                                 "releaseCadence":  "481 versions published on npm as of 2026-10-05, with 0.8.127 released the same day. Extremely high release frequency, so the version is pinned rather than tracked and updates are reviewed before applying.",
+                                                 "currentStateAtDiscovery":  "MISSING (Node.js absent, so nothing can be installed yet)",
+                                                 "installedState":  {
+                                                                        "installed":  true,
+                                                                        "version":  "0.8.126",
+                                                                        "installedVia":  "npm install -g hyperframes@0.8.126",
+                                                                        "verifiedBy":  "hyperframes.cmd --version",
+                                                                        "checkedOn":  "2026-10-05",
+                                                                        "ownership":  "kit-installed"
+                                                                    }
                                              },
                                              {
                                                  "id":  "ffmpeg",
@@ -98,22 +132,31 @@
                                                  "purpose":  "Encodes captured frames into MP4 and mixes audio. Required for any render.",
                                                  "requiredVersion":  "recent release; upstream states FFmpeg without pinning a major version",
                                                  "currentState":  "MISSING on this machine",
-                                                 "installMechanism":  "winget install --id Gyan.FFmpeg -e",
+                                                 "installMechanism":  "winget install --id Gyan.FFmpeg -e --scope user",
                                                  "elevationRequired":  "usually no for the user-scope winget package; may prompt",
                                                  "runsContinuously":  false,
                                                  "portsOrServices":  "none",
                                                  "persistentData":  "install directory only",
                                                  "updateMechanism":  "winget upgrade Gyan.FFmpeg",
-                                                 "uninstallImplications":  "winget uninstall Gyan.FFmpeg; safe only if nothing else uses ffmpeg",
+                                                 "uninstallImplications":  "winget uninstall Gyan.FFmpeg; safe only if nothing else uses ffmpeg. Ownership shared, so the kit never runs this.",
                                                  "ownership":  "shared",
                                                  "ownershipNote":  "Very commonly shared by other tools. Must not be removed by a normal kit uninstall without explicit approval.",
                                                  "verification":  "ffmpeg -version and ffprobe -version",
-                                                 "provisionedInPhase":  "11"
+                                                 "provisionedInPhase":  "11",
+                                                 "currentStateAtDiscovery":  "MISSING on this machine",
+                                                 "installedState":  {
+                                                                        "installed":  true,
+                                                                        "version":  "9.0.2",
+                                                                        "installedVia":  "winget install --id Gyan.FFmpeg -e --scope user",
+                                                                        "verifiedBy":  "ffmpeg -version",
+                                                                        "checkedOn":  "2026-10-05",
+                                                                        "ownership":  "shared"
+                                                                    }
                                              },
                                              {
                                                  "id":  "headless-chrome",
                                                  "name":  "Headless Chrome for frame capture",
-                                                 "purpose":  "The renderer seeks each frame in headless Chrome. Provided by @puppeteer/browsers, which the CLI declares as a dependency.",
+                                                 "purpose":  "The renderer seeks each frame in headless Chrome, provided by @puppeteer/browsers, a dependency of the hyperframes npm package.",
                                                  "requiredVersion":  "puppeteer-managed",
                                                  "currentState":  "System Google Chrome and Microsoft Edge ARE installed; no puppeteer-managed browser cached yet",
                                                  "installMechanism":  "automatic on first render via @puppeteer/browsers download",
@@ -125,7 +168,16 @@
                                                  "uninstallImplications":  "clear the puppeteer cache; safe, it re-downloads",
                                                  "ownership":  "ephemeral-cache",
                                                  "verification":  "hyperframes check or a smoke render completing",
-                                                 "provisionedInPhase":  "11"
+                                                 "provisionedInPhase":  "11",
+                                                 "currentStateAtDiscovery":  "System Google Chrome and Microsoft Edge ARE installed; no puppeteer-managed browser cached yet",
+                                                 "installedState":  {
+                                                                        "installed":  false,
+                                                                        "version":  "",
+                                                                        "installedVia":  "downloaded on first render by @puppeteer/browsers",
+                                                                        "verifiedBy":  "not yet exercised, because no render has been run",
+                                                                        "checkedOn":  "2026-10-05",
+                                                                        "ownership":  "ephemeral-cache"
+                                                                    }
                                              }
                                          ]
                     },
@@ -441,13 +493,22 @@
                                             "updateMechanism":  "npm update -g @zernio/cli, reviewed before applying",
                                             "uninstallImplications":  "npm uninstall -g @zernio/cli; %USERPROFILE%\\.zernio removed only on explicit request because it holds the key",
                                             "ownership":  "kit-installed",
-                                            "verification":  "zernio --version",
+                                            "verification":  "zernio.cmd --version",
                                             "packageNameCaveat":  "The unscoped npm package \"zernio\" does NOT exist, so npx zernio fails. The legacy binary name \"late\" collides with an unrelated unscoped npm package; only ever install the scoped @zernio/cli.",
                                             "touchesVendorDirectories":  false,
                                             "telemetry":  "none",
                                             "pinnedVersion":  "0.4.1",
                                             "installPlanSpec":  "@zernio/cli@0.4.1",
-                                            "provisionedInPhase":  "9"
+                                            "provisionedInPhase":  "9",
+                                            "currentStateAtDiscovery":  "MISSING (Node.js absent)",
+                                            "installedState":  {
+                                                                   "installed":  true,
+                                                                   "version":  "0.4.1",
+                                                                   "installedVia":  "npm install -g @zernio/cli@0.4.1",
+                                                                   "verifiedBy":  "zernio.cmd --version + zernio.cmd auth:check",
+                                                                   "checkedOn":  "2026-10-05",
+                                                                   "ownership":  "kit-installed"
+                                                               }
                                         }
                                     ],
                    "authentication":  {
@@ -501,5 +562,7 @@
                                                       "reason":  "Claude Code plugin. Vendor-specific and not needed."
                                                   }
                                               ]
-               }
+               },
+    "stateSchema":  "Each dependency carries currentStateAtDiscovery, which is the Phase 8 observation and is never rewritten, and installedState, which is the live machine state verified by scripts/verify.ps1. Do not overwrite one with the other.",
+    "updatedAtPhase11":  "2026-10-05"
 }

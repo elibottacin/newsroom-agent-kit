@@ -252,7 +252,7 @@ entry is updated to reflect that the execution path now exists.
 
 | Consumer | Requirement | Source |
 |---|---|---|
-| `@hyperframes/cli` | `>=22` | its own `engines.node` |
+| `hyperframes` (npm) | `>=22` | its own `engines.node` |
 | `@zernio/cli` | none declared; CI uses 24 | `publish.yml` |
 
 Node 24 satisfies both. **One Node.js LTS install is a single shared managed
@@ -266,7 +266,7 @@ containers, the Postiz CLI.**
 | Dependency | Purpose | Ownership |
 |---|---|---|
 | Node.js LTS (24) | Shared: HyperFrames CLI and Zernio CLI | `shared` |
-| `@hyperframes/cli` | Motion graphics and video rendering | `kit-installed` |
+| `hyperframes` (npm) | Motion graphics and video rendering | `kit-installed` |
 | `@zernio/cli` | Social execution | `kit-installed` |
 | FFmpeg + ffprobe | HyperFrames encoding | `shared` |
 | Headless Chrome | HyperFrames frame capture | `ephemeral-cache` |

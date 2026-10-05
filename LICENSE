@@ -58,7 +58,17 @@ Most selected skills are **not** included in this repository. They are fetched a
 a commit pinned in `manifest/skills.json`, and they remain under their own upstream licences. Those
 include `jamditis/claude-skills-journalism` (MIT), `blacktwist/social-media-skills` (MIT),
 `Nutlope/hallmark` (MIT), `affaan-m/ecc` (MIT), `PracticalSwan/agent-skills` (MIT AND Apache-2.0),
+`zernio-dev/zernio-cli` (MIT), `zernio-dev/zernio-api` (MIT), `heygen-com/hyperframes` (Apache-2.0),
 and `vercel-labs`-derived content.
+
+**Two kinds of pinned fetch.** Most are instruction and reference content only. Five of the ten
+HyperFrames skills are a pinned fetch that also contains **77 reviewed executable scripts** that their
+own instructions ask the agent to run. Those scripts are declared per skill in `manifest/skills.json`
+under `executableFiles`, and are not redistributed by this repository — they are fetched at install
+time like the rest. See `docs/security.md` SEC-15 for the review and the bounds on it.
+
+Upstream licences are unchanged by this project. Note that the **Zernio service is proprietary SaaS**:
+what is covered here is the MIT-licensed client, CLI and skills, not the hosted service.
 
 One entry is recorded in `manifest/skills.json` with `licenseRisk:
 ACCEPTED-BY-USER-2026-10-04`: `og-image`, whose upstream repository has **no licence file**.

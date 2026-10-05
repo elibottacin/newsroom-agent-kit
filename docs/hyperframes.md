@@ -13,7 +13,7 @@ rendering is not part of the default architecture.
 | License | Apache-2.0 |
 | Reviewed ref | `dc3665ab61b254ca7a0de087b1bfbd2ddcfbf67e` |
 | Ref date | 2026-10-04 |
-| CLI package | `@hyperframes/cli` |
+| CLI npm package | `hyperframes` (unscoped; see the naming note below) |
 | CLI version at reviewed ref | `0.8.126` |
 | CLI binaries | `hyperframes`, `hyperframes-localize-fonts` |
 | CLI engine requirement | Node.js `>=22` |
@@ -33,7 +33,7 @@ Summary:
 
 - **Node.js >=22** — required by the CLI's own `engines` field.
 - **npm / npx** — ships with Node.js; used for on-demand invocation.
-- **@hyperframes/cli** — the CLI itself, installed by the kit.
+- **the `hyperframes` npm package** — the CLI itself, installed by the kit. Upstream names it `@hyperframes/cli` internally, but that name is not published to npm.
 - **FFmpeg (with ffprobe)** — required for encoding. Upstream names FFmpeg as a
   requirement but does not pin a major version.
 - **Headless Chrome** — the renderer seeks each frame in headless Chrome. The
@@ -113,10 +113,21 @@ project does not use.
 
 ### Decision
 
-The kit **vendors the 10 core skills from the pinned reviewed ref** into
-`vendor/skills/`, following the same model already used for the 27 existing
-forks, and installs them into `%USERPROFILE%\.agents\skills` through the normal
-installer. Consequences:
+The kit **materialises the 10 core skills from the pinned reviewed ref** into
+`%USERPROFILE%\.agents\skills` through the normal installer, declared in
+`manifest/skills.json` as **pinned fetch** entries.
+
+They are **not** vendored forks. Upstream's own installer was rejected because it
+writes `~/.claude/skills` and then symlinks into other agents' directories, and
+this project forbids vendor directories and cannot create symlinks unelevated.
+Vendoring into `vendor/skills/` was the Phase 8B plan, but it was not what shipped:
+these skills are taken verbatim from the pinned commit, exactly as the `zernio`
+and `zernio-api` skills are. That distinction matters, because a vendored entry in
+this project means a hand-maintained fork whose upstream product references were
+rewritten (SEC-07), and no such rewrite applies to a tool this kit actually
+installs.
+
+Consequences:
 
 - `%USERPROFILE%\.agents` stays the single canonical store. No vendor
   directories, no symlinks, nothing outside the project's install path.
@@ -247,6 +258,7 @@ has worked.
 
 ## Related
 
-- `docs/dependencies.md` — the dependency inventory and ownership rules.
-- `docs/postiz.md` — the other capability added in this extension.
-- `docs/security.md` — SEC records for executable dependency code.
+- `docs/dependencies.md` - the dependency inventory and ownership rules.
+- `docs/social-backend-decision.md` - the Postiz versus Zernio comparison and the decision.
+- `docs/postiz.md` - the Postiz research, kept as the evaluated and not-selected alternative.
+- `docs/security.md` - SEC records for executable dependency code.

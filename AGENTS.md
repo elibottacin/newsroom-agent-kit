@@ -61,19 +61,20 @@ Added in Phase 8, revised in Phase 8B. These are durable and always apply.
   and let the human act. This holds even though the API can do it. In
   particular, `crisis-and-moderation` must not use hide, pin, like or delete
   automatically.
-- **Shared Node.js.** One Node.js LTS install serves both `@hyperframes/cli`
-  and `@zernio/cli`. Do not create a second runtime.
+- **Shared Node.js.** One Node.js LTS install serves both the `hyperframes` npm
+  package and `@zernio/cli`. Do not create a second runtime. Note that
+  `hyperframes-cli` is a **skill id**, not the npm package name.
 - **HyperFrames is the deterministic motion layer.** Render locally. Image and
   video generation models, hosted renderers and cloud rendering are not the
   default and stay unconfigured.
-- **Executable content in skills is allowlisted, not permitted.** The rule was
-  absolute from Phase 2 to Phase 11: zero executable files in any skill. The user
-  relaxed it on 2026-10-05 to an explicit allowlist, because five HyperFrames
-  skills ship scripts their own instructions require. A manifest entry opts in
-  with an `executableFiles` block declaring `approved` and a reviewed `count`.
-  Anything not opted in is still rejected, and a count mismatch is a failure, so
-  a new unvetted script cannot slip in. Never widen the allowlist without the
-  user deciding. See `Get-KitExecutableApproval` and SEC-15.
+- **Executable content in skills is permitted only through an explicit, reviewed
+  allowlist.** The rule was absolute from Phase 2 to Phase 11: zero executable
+  files in any skill. The user relaxed it on 2026-10-05, because five
+  HyperFrames skills ship scripts their own instructions require. A manifest entry
+  opts in with an `executableFiles` block declaring `approved` and a reviewed
+  `count`. Anything not opted in is still rejected, and a count mismatch is a
+  failure, so a new unvetted script cannot slip in. Never widen the allowlist
+  without the user deciding. See `Get-KitExecutableApproval` and SEC-15.
 - **A skill's code must be run only as that skill's own instructions say**, on
   local project files, never against the network or paths outside the project.
 - **Secrets and runtime data never enter Git.** No `.env`, tokens, API keys,

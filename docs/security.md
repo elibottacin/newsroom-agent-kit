@@ -388,7 +388,7 @@ From Figma's own documentation:
 No paid resource may be created without explicit approval, and no account may be connected during
 discovery.
 
-### SEC-15 — Executable skill content should not enter a global skill set
+### SEC-15 — Executable skill content should not enter a global skill set (SUPERSEDED in Phase 11 — see the revised SEC-15 below)
 
 **Severity: low to medium, depending on the skill.**
 
@@ -474,7 +474,7 @@ content hash per skill. No blanket-install command is ever invoked.
 
 ### SEC-22 - HyperFrames brings a Node CLI, a managed browser and an FFmpeg dependency
 
-Severity: **medium**. `@hyperframes/cli` declares `@puppeteer/browsers`, which
+Severity: **medium**. The `hyperframes` npm package declares `@puppeteer/browsers`, which
 downloads and executes a managed Chrome build on first render, plus `giget`
 (which fetches GitHub assets) and `esbuild`/`fontkit`. Rendering then shells
 out to FFmpeg. Node.js itself is a new machine-level dependency that did not
@@ -770,4 +770,4 @@ unless the user asks, so the default architecture stays local and cloud-free.
    anything, outside Git-tracked content.
 7. Log no secrets and no absolute user paths; redact to relative paths.
 8. No external account connection and no paid resource without explicit approval.
-9. Keep the core free of executable files; report code-file counts during verification.
+9. Keep the core free of executable files; report code-file counts during verification. SUPERSEDED in Phase 11: executable content is now permitted only through the explicit reviewed allowlist described in the revised SEC-15.
